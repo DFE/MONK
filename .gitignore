@@ -1,3 +1,5 @@
-build/conf/parallel.conf
-*~
-*.log
+# compiled python bytecode
+*.pyc
+
+# vim boo-boos
+*.swp
