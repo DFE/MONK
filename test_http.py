@@ -24,6 +24,11 @@ test_html = "<html><body><h1>It works!</h1></body></html>" #default from lighty
 
 class TestHTTP(devicetestcase.DeviceTestCase):
     """ Class to test HTTP. """
+
+    def __init__(self, *args, **kwargs):
+        """ The class instantiation.
+        """
+        super(TestHTTP, self).__init__("hidav", *args, **kwargs)
     
     def test_complex(self):
         """ Test HTTP.

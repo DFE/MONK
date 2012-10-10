@@ -28,6 +28,11 @@ test_content = "testtext"
 class TestWebDAV(devicetestcase.DeviceTestCase):
     """ Class to test WebDav. """
     
+    def __init__(self, *args, **kwargs):
+        """ The class instantiation.
+        """
+        super(TestWebDAV, self).__init__("hidav", *args, **kwargs)
+    
     def test_complex(self):
         """ Test WebDAV.
         

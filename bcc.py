@@ -21,6 +21,7 @@ import re
 import threading
 import time
 import atexit
+import logger
 
 class Bcc(object):
     """ The Board Controller class.
@@ -39,6 +40,7 @@ class Bcc(object):
 
             :raise: :py:exc:`OSError` if the drbcc binary was not found.
         """
+        self.logger = logger.init()
         self.__drbcc   = drbcc
         self.__port    = port
         self.__port_br = speed
@@ -94,7 +96,8 @@ class Bcc(object):
             This method will fake the ignition pin to 'ON', then set
             watchdog :py:meth:`heartbeat` to the maximum value. 
         """
-        self.cmd("debugset 16,010001")
+        self.logger.debug("poweron")
+        self.cmd("debugset 16,0100010001")
         self.heartbeat = 65535
         self.hddpower = True
 
@@ -105,7 +108,8 @@ class Bcc(object):
             This method will fake the ignition pin to 'OFF', then set 
             watchdog :py:meth:`heartbeat` to zero. 
         """
-        self.cmd("debugset 16,010000")
+        self.logger.debug("poweroff")
+        self.cmd("debugset 16,0100000001")
         self.heartbeat = 0
         self.hddpower = False
 
@@ -226,4 +230,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-    
+

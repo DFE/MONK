@@ -40,32 +40,32 @@ class DeviceTestCase(unittest.TestCase):
     
     
     @classmethod
-    def get_device(cls, nand_boot=True):
+    def get_device(cls, devicetype, nand_boot=True):
         """ Get the :py:class:`Device` singleton instance. A new instance will
             be created if none is available yet. 
         """
         if not cls.__dev:
             cls.__devsem.acquire()
             if not cls.__dev:
-                cls.__create_device(nand_boot)
+                cls.__create_device(devicetype, nand_boot)
             cls.__devsem.release()
         return cls.__dev
 
 
     @classmethod        
-    def __create_device(cls, nand_boot=True):
+    def __create_device(cls, devicetype, nand_boot=True):
         """ boot HidaV-device to NAND """
-        cls.__dev = device.Device( devtype = "hidav" )
+        cls.__dev = device.Device( devtype = devicetype )
         if nand_boot:
             logger.init().debug("Boot to NAND ...")
             cls.__dev.reboot(to_nand=True)
 
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, devicetype, *args, **kwargs):
         """ The class will create and add to self logger and dev objects upon
             instantiation.
         """
         super(DeviceTestCase, self).__init__(*args, **kwargs)
-        self.dev = DeviceTestCase.get_device()
+        self.dev = DeviceTestCase.get_device(devicetype)
         self.logger = logger.init()
         

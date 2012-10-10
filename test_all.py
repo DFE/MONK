@@ -194,7 +194,7 @@ def main():
 
         Starts all tests.
     """
-    dev = DeviceTestCase.get_device(nand_boot=False)
+    dev = DeviceTestCase.get_device(devicetype="hidav", nand_boot=False)
     testdev = TestDevice(dev)
     testdev.update_device()
     testdev.mount()

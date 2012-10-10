@@ -22,6 +22,11 @@ import unittest
 class TestIscsi(devicetestcase.DeviceTestCase):
     """ Class to test iSCSI. """
 
+    def __init__(self, *args, **kwargs):
+        """ The class instantiation.
+        """
+        super(TestIscsi, self).__init__("hidav", *args, **kwargs)
+    
     def test_complex(self):
         """ Test a iSCSI share.
         

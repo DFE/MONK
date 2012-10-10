@@ -29,6 +29,11 @@ import devicetestcase
 class TestNFS(devicetestcase.DeviceTestCase): # pylint: disable-msg=R0904
     """ Class to test NFS. """
 
+    def __init__(self, *args, **kwargs):
+        """ The class instantiation.
+        """
+        super(TestNFS, self).__init__("hidav", *args, **kwargs)
+    
     def test_exports(self):
         """ Test exported NFS shares.
             

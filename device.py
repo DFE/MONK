@@ -41,21 +41,23 @@ class Device(object):
 
     DEVICE_TYPES = {
         "hidav": {
+            "name"          : "HidaV",
             "network_setup" : (None, "eth1"),
             "login"         : ("root", ""),
             "boot_prompt"   : "HidaV boot on",
             "reset_cb"      : True,
             "serial_skip_pw": True },
         "hipox": {
+            "name"          : "Hipox",
             "network_setup" : (None, "eth1"),
             "login"         : ("root", "hydra01"),
             "boot_prompt"   : "$ ",
-            "hw_reset"      : False,
+            "reset_cb"      : False,
             "serial_skip_pw": False },
     }
 
 
-    def __init__(self, devtype = "hipox"):
+    def __init__(self, devtype):
         """ Initialize a device instance.
 
             :param devtype: Device type, either "hidav" or "hipox"
@@ -65,9 +67,8 @@ class Device(object):
         except KeyError:
             raise Exception("Unknown device type %s." % devtype)
 
-        #self.bcc = bcc.Bcc()
-        #rst = self.bcc.reset if self._setup["reset_cb"] == True else None
-        rst = None #FIXME work around!!!!!
+        self.bcc = bcc.Bcc()
+        rst = self.bcc.reset if self._setup["reset_cb"] == True else None
         atexit.register(self.__shutdown)
 
         self.conn = connection.Connection(
@@ -105,7 +106,8 @@ class Device(object):
             :param to_nand: reboot into currently active NAND partitions
             :return:        buffer containing all the messages from the reboot
         """
-        if to_nand:
+        if self._setup["name"] == "HidaV" and to_nand:
+            self._logger.debug("Benutze Hidav und nand true...")
             return self.conn._serial.boot_to_nand(sync=True )
 
         return self.conn._serial.reboot(sync=True)
@@ -147,6 +149,7 @@ class Device(object):
         del self._fw_version
 
 
+    # FIXME bootconfig property is HidaV specific and should be refactored into a devtype specific class
     @property
     def bootconfig(self):
         """ Bootconfig property. This is a dictionary representing the device's

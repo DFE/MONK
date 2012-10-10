@@ -25,6 +25,11 @@ import unittest
 class TestSamba(devicetestcase.DeviceTestCase):
     """ Class to test SAMBA. """
 
+    def __init__(self, *args, **kwargs):
+        """ The class instantiation.
+        """
+        super(TestSamba, self).__init__("hidav", *args, **kwargs)
+    
     def test_complex(self):
         """ Test a SAMBA share.
         

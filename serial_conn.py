@@ -82,8 +82,8 @@ class SerialConn(serial.Serial):
         while not target in buf:
             ret = self.read()
             if ret == "":
-                self._logger.debug("Triggering with [%s]" 
-                                        % urllib.quote( trigger_write ))
+                self._logger.debug("Triggering with [%s] target [%s]" 
+                                        % (urllib.quote( trigger_write ), target))
                 time.sleep(0.25)
                 self.write( trigger_write )
             else:
