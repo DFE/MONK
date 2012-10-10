@@ -1,5 +1,5 @@
 <table style="border-style:none;" ><tr style="border-style:none;" ><td style="border-style:none;">
-<img src="logo.gif" /> 
+<img src="https://raw.github.com/DFE/Gordon/master/logo.gif" /> 
 </td>
 <td style="border-style:none;">
 <h1>G*O*R*D*O*N</h1>
