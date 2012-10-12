@@ -72,7 +72,7 @@ class SerialConn(serial.Serial):
                 appeared, including :py:obj:`target`
         """
         self._logger.debug("reading 'til [%s], triggering output with [%s]" 
-                % (target, urllib.quote( trigger_write )) )
+                % (urllib.quote( target), urllib.quote( trigger_write )) )
         buf      = ""
         log_line = ""
         if timeout:
@@ -83,7 +83,7 @@ class SerialConn(serial.Serial):
             ret = self.read()
             if ret == "":
                 self._logger.debug("Triggering with [%s] target [%s]" 
-                                        % (urllib.quote( trigger_write ), target))
+                                        % (urllib.quote( trigger_write ), urllib.quote( target)))
                 time.sleep(0.25)
                 self.write( trigger_write )
             else:
@@ -93,7 +93,7 @@ class SerialConn(serial.Serial):
                     log_line = ""
                 else:
                     log_line += ret
-        self._logger.debug("Got it: [%s]" % target)
+        self._logger.debug("Got it: [%s]" % urllib.quote( target ))
         if timeout:
             self._timeout = old_to
         return buf
