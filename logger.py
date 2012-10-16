@@ -64,7 +64,7 @@ class Logger(logging.Logger):
         logger = logging.getLogger("Hidav-Integration")
         logger.setLevel(logging.DEBUG)
 
-        filename = "run-%s.log" % datetime.datetime.now()
+        filename = "run-%s.log" % datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
         handler = logging.FileHandler(filename, mode='w+')
         handler.setFormatter(logging.Formatter(
