@@ -61,13 +61,15 @@ class SerialConn(serial.Serial):
         self._reset_cb = reset_cb
 
 
-    def read_until (self, target, trigger_write="\n", timeout=None):
+    def read_until (self, target, trigger_write="\n", timeout=None,
+                    unasked_trigger=True):
         """ Read up to a trigger text, then stop.
 
             :param target: target string to match
             :param trigger_write: 
                 string to be sent via serial if a read timeout occurs
             :param timeout: custom timeout for :py:obj:`trigger_write`
+            :param unasked_trigger: send unasked a "\n"
             :return: all text read up to the point where :py:obj:`target` 
                 appeared, including :py:obj:`target`
         """
@@ -78,14 +80,16 @@ class SerialConn(serial.Serial):
         if timeout:
             old_to = self._timeout
             self._timeout = timeout
-        self.write("\n")
+        if unasked_trigger:
+            self.write("\n")
         while not target in buf:
             ret = self.read()
             if ret == "":
-                self._logger.debug("Triggering with [%s] target [%s]" 
-                                        % (urllib.quote( trigger_write ), target))
                 time.sleep(0.25)
-                self.write( trigger_write )
+                if trigger_write != "":
+                    self._logger.debug("Triggering with [%s] target [%s]" 
+                                    % (urllib.quote( trigger_write ), target))
+                    self.write( trigger_write )
             else:
                 buf += ret
                 if ret == '\n':
@@ -158,7 +162,7 @@ class SerialConn(serial.Serial):
             whether we're currently in the boot loader (in which case the 
             method will boot the device, then log in).
         """
-        state = self.__wait_for_known_boot_state(); print state,
+        state = self.__wait_for_known_boot_state()
 
         if state == "shell":
             self._logger.debug("Already logged in.")
@@ -254,6 +258,27 @@ class SerialConn(serial.Serial):
         return rcd, buf
 
 
+    def bootloader_cmd(self, cmd):
+        """ Execute a boot loader command on the remote system.
+            This method will execute a command on the remote system,
+            returning all the output which appeared on the serial console
+            while the command was executed.
+
+            .. warning:: 
+                The command to be run MUST be guaranteed to return; 
+                the boot loader prompt is the stop target
+
+            :param cmd: the command to run
+            :return:    command output
+        """
+        self._logger.info("Executing boot loader command [%s]" % cmd)
+        if (len(cmd) > 0) and (cmd[-1] != "\n"):
+            cmd = cmd + "\n"
+        self.write(cmd)
+        self.flushOutput()
+        return self.read_until(self._boot_prompt, "")
+
+
     def logout(self):
         """ Log out of the system. """
         if self.__boot_state == "shell":
@@ -306,8 +331,8 @@ class SerialConn(serial.Serial):
         return buf
 
 
-    def boot_to_nand(self, kernel_partition = None, rootfs_partition = None,
-                            sync = False):
+    def boot_to_nand(self, kernel_partition=None, rootfs_partition=None,
+                            sync=False):
         """ Reboot the device to NAND.
 
             :param kernel_partition: 

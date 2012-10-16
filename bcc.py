@@ -31,7 +31,8 @@ class Bcc(object):
         port / FTDI cable. 
     """
     
-    def __init__(self, port = "/dev/ttyUSB0", speed = 57600, drbcc = "drbcc"):
+    def __init__(self, port = "/dev/ttyUSB0", speed = 57600, drbcc = "drbcc",
+                 power=True):
         """ Create a new BCC instance.
 
             :param port:  serial port to use for communication
@@ -46,7 +47,8 @@ class Bcc(object):
         self.__port_br = speed
 
         atexit.register(self.__cleanup)
-        self.poweron()
+        if power == True:
+            self.poweron()
 
 
     def __cleanup(self):
@@ -90,16 +92,18 @@ class Bcc(object):
         self.poweron()
 
 
-    def poweron(self):
+    def poweron(self, hdpower=True):
         """ Power ON the system.
 
+            :hdpower: power-on hd
             This method will fake the ignition pin to 'ON', then set
             watchdog :py:meth:`heartbeat` to the maximum value. 
         """
-        self.logger.debug("poweron")
+        self.logger.debug("poweron, hd=%s" % ("on" if hdpower else "off"))
         self.cmd("debugset 16,0100010001")
         self.heartbeat = 65535
-        self.hddpower = True
+        if hdpower == True:
+            self.hddpower = True
 
 
     def poweroff(self):
