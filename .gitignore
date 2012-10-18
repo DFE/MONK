@@ -3,3 +3,9 @@
 
 # vim boo-boos
 *.swp
+
+# log output
+*.log
+
+# coverage output
+.coverage
