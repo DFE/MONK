@@ -21,8 +21,11 @@ sys.path.append(os.path.abspath(
 
 from Gordon import Bcc, logger
 
+#
+# MOCKING
+#
 
-# mocking area
+#  --- mocked functions ---
 MOCK_atexit_func = None
 def mock_atexit_register(func):
         global MOCK_atexit_func 
@@ -36,19 +39,29 @@ ML = MockLogger()
 def mock_logger_init():
     return ML
 
-
-MOCK_subp_retval = ""
-MOCK_subp_input = [ ]
-
 def mock_check_output(cmd, stderr = None):
     MOCK_subp_input.append([cmd, stderr])
+    if MOCK_subp_raise:
+        raise MOCK_subp_raise
     return MOCK_subp_retval
+
+# --- mock helper variables and functions ---
+MOCK_subp_retval = ""
+MOCK_subp_input = [ ]
+MOCK_subp_raise = None
+
+def mock_reset_values():
+    global MOCK_subp_input, MOCK_subp_retval, MOCK_subp_raise
+    MOCK_subp_input = [ ]
+    MOCK_subp_retval = ""
+    MOCK_subp_raise = None
 
 orig_log_init = logger.init
 orig_ate_register = atexit.register
 orig_subp_check_output = subprocess.check_output
 
 def mock_on():
+    mock_reset_values()
     logger.init             = mock_logger_init
     atexit.register         = mock_atexit_register
     subprocess.check_output = mock_check_output
@@ -57,13 +70,12 @@ def mock_off():
     logger.init             = orig_log_init
     atexit.register         = orig_ate_register
     subprocess.check_output = orig_subp_check_output
-    global MOCK_subp_input 
-    MOCK_subp_input = [ ]
-    global MOCK_subp_retval
-    MOCK_subp_retval = ""
-    
 
-# the actual tests
+# --- mocking ENDs ---
+    
+#
+# The actual tests
+#
 
 class BccTestCase(unittest2.TestCase):
     """ This class implements a number of default test cases
@@ -76,6 +88,7 @@ class BccTestCase(unittest2.TestCase):
     def tearDown(self):
         mock_off()
         pass
+
 
     def test_default_init_cleanup(self):
         """ Test the default initialization and cleanup.
@@ -109,6 +122,41 @@ class BccTestCase(unittest2.TestCase):
         self.assertEquals(len(MOCK_subp_input), 1)
         self.assertEquals(MOCK_subp_input[0], 
             [['drbcc', '--dev=/dev/ttyUSB0,57600', '--cmd=debugset 16,00'], subprocess.STDOUT])
+
+
+    def test_cmd(self):
+        """ Test the execution of an arbitrary command """
+
+        b = Bcc()
+        global MOCK_subp_input, MOCK_subp_retval
+        MOCK_subp_input = []
+        MOCK_subp_retval = "InDiesemStringDaSitztEinGeistUswUsf"
+
+        rc, text = b.cmd("hurz")
+
+        self.assertEquals(len(MOCK_subp_input), 1)
+        self.assertEquals(MOCK_subp_input[0][0][2],'--cmd=hurz')
+
+        self.assertEquals(text, MOCK_subp_retval)
+        self.assertEquals(rc, 0)
+
+
+    def test_cmd_fails(self):
+        """ Test the execution of an arbitrary command which fails """
+
+        b = Bcc()
+        global MOCK_subp_input, MOCK_subp_raise
+        MOCK_subp_input = []
+        MOCK_subp_raise = subprocess.CalledProcessError(9, "", "exception output")
+
+        rc, text = b.cmd("narf")
+
+        self.assertEquals(len(MOCK_subp_input), 1)
+        self.assertEquals(MOCK_subp_input[0][0][2],'--cmd=narf')
+
+        self.assertEquals(text, "exception output")
+        self.assertEquals(rc, 9)
+
 
 if __name__ == "__main__":
     unittest2.main()
