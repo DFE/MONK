@@ -158,7 +158,7 @@ class SerialConn(serial.Serial):
             whether we're currently in the boot loader (in which case the 
             method will boot the device, then log in).
         """
-        state = self.__wait_for_known_boot_state(); print state,
+        state = self.__wait_for_known_boot_state()
 
         if state == "shell":
             self._logger.debug("Already logged in.")
