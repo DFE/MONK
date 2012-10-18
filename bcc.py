@@ -73,9 +73,9 @@ class Bcc(object):
                  "--dev=%s,%d" % (self.__port, self.__port_br),
                  "--cmd=%s" % (cmd, )],
                 stderr = subprocess.STDOUT)
-        except subprocess.CalledProcessError:
-            rc = -1
-
+        except subprocess.CalledProcessError, e:
+            rc = e.returncode
+            text = e.output
         return rc, text
 
 
