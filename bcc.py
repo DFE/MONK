@@ -22,6 +22,7 @@ import threading
 import time
 import atexit
 import logger
+import os
 
 class Bcc(object):
     """ The Board Controller class.
@@ -31,10 +32,13 @@ class Bcc(object):
         port / FTDI cable. 
     """
     
-    def __init__(self, port = "/dev/ttyUSB0", speed = 57600, drbcc = "drbcc"):
+    def __init__(self, port = os.getenv("GORDON_BCTRL_PORT", "/dev/ttyUSB0"), speed = 57600, drbcc = "drbcc"):
         """ Create a new BCC instance.
 
-            :param port:  serial port to use for communication
+            :param port:  serial port to use for communication with the board
+                          controller, defaults to content of environment
+                          variable GORDON_BCTRL_PORT or "/dev/ttyUSB0" if the
+                          variable is not set
             :param speed: serial port speed
             :param drbcc: path to drbcc binary
 
