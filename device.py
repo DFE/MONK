@@ -57,21 +57,19 @@ class Device(object):
     }
 
 
-    def __init__(self, devtype, auto_power=True):
+    def __init__(self, devtype):
         """ Initialize a device instance.
 
             :param devtype: Device type, either "hidav" or "hipox"
-            :param auto_power: automatically switch power on and off
         """
         try:
             self._setup = Device.DEVICE_TYPES[devtype.lower()]
         except KeyError:
             raise Exception("Unknown device type %s." % devtype)
 
-        self.bcc = bcc.Bcc(power=auto_power)
+        self.bcc = bcc.Bcc()
         rst = self.bcc.reset if self._setup["reset_cb"] == True else None
-        if auto_power == True:
-            atexit.register(self.__shutdown)
+        atexit.register(self.__shutdown)
 
         self.conn = connection.Connection(
             network_setup = self._setup["network_setup"],
@@ -113,46 +111,6 @@ class Device(object):
             return self.conn._serial.boot_to_nand(sync=True )
 
         return self.conn._serial.reboot(sync=True)
-
-    def boot_to_bootloader(self):
-        """ Boot host processor and stop at boot loader.
-
-            :return: True
-            precondition: host processor is off
-            postcondition: host processor is in boot loader shell 
-        """
-        if self._setup["name"] == "HidaV":
-            self._logger.debug("Benutze Hidav ...")
-            self.conn._serial.flushInput()
-            self.conn._serial.flushOutput()
-            self.bcc.poweron(hdpower=False)
-            self.conn._serial.read_until("Hit any key to stop autoboot:", "", 0.01)
-            self.conn._serial.read_until("Hit any key to stop autoboot:", "", 0.01)
-            self.conn._serial.read_until(self._setup["boot_prompt"], ".", 0.01)
-            return True
-
-
-    def bootloader_cmd(self, cmd):
-        """ Execute a boot loader shell command
-
-            :return: cmd output
-            precondition: host processor is in boot loader shell 
-        """
-        return self.conn._serial.bootloader_cmd(cmd)
-
-
-    def boot_from_NAND(self):
-        """ Boot host processor form NAND flash. 
-
-            :return: True
-            precondition: host processor is in boot loader shell 
-            postcondition: host processor is in linux shell 
-        """
-        if self._setup["name"] == "HidaV":
-            self._logger.debug("boot from NAND")
-            self.conn._serial.write("run bootnand\n")
-            self.conn._serial.login()
-            return True
 
 
     def wait_for_network(self, max_wait=120):
