@@ -105,8 +105,8 @@ class Connection(object):
                         , ret).group("ip")
             except AttributeError:
                 raise Exception(
-                    "Unable to collect device's IP address via serial port %s"
-                    % self._serial.port)
+                    "Unable to collect device's IP address via serial port %s (got [%s])"
+                    % (self._serial.port, ret))
         return self._host
 
 
@@ -159,7 +159,7 @@ class Connection(object):
         return True
     
     
-def main():
+def main():   #pragma: no cover
     """ Standalone function; only defined if the class is run by itself. 
         This function uses some basic capabilities of the class. It is
         intended to be used for interactive testing during development,
@@ -191,6 +191,6 @@ def main():
     conn._serial.reboot()
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  #pragma: no cover
     main()
     
