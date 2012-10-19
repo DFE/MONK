@@ -96,11 +96,9 @@ class BccTestCase(unittest2.TestCase):
 
     def setUp(self):
         mock_on()
-        pass
 
     def tearDown(self):
         mock_off()
-        pass
 
 
     def test_default_init_cleanup(self):
