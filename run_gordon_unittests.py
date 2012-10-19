@@ -28,7 +28,8 @@ def run():
     import sys, os, inspect
 
     runner = CoverageTestRunner()
-    runner.add_pair("bcc.py", "tests/test_bcc.py")
+    for item in ("bcc", "connection", "device", "devicetestcase", "logger", "serial_conn", "ssh_conn"):
+        runner.add_pair( item + ".py", "tests/test_" + item + ".py")
     runner.run()
 
 if __name__ == "__main__":
