@@ -61,7 +61,7 @@ class DeviceTestCase(unittest.TestCase):
             cls.__dev.reboot(to_nand=True)
 
 
-    def __init__(self, devicetype, *args, **kwargs):
+    def __init__(self, devicetype, *args, **kwargs): # pragma: no cover
         """ The class will create and add to self logger and dev objects upon
             instantiation.
         """

@@ -44,7 +44,7 @@ clean:
 
 undocumented:
 	@cd .. &&																\
-		pylint `ls -1 | grep -Ev '(uuid)|(webdav)'` 2>&1 					\
+		pylint `ls -1 | grep -Ev '(uuid)|(webdav)|(^tests)'` 2>&1 					\
 		| awk  '/^\*\*\*\*/ 		{ mod=$$3 } 							\
 				/Missing docstring/ {										\
 					if (old_mod != mod) { 									\

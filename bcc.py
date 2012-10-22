@@ -77,9 +77,9 @@ class Bcc(object):
                  "--dev=%s,%d" % (self.__port, self.__port_br),
                  "--cmd=%s" % (cmd, )],
                 stderr = subprocess.STDOUT)
-        except subprocess.CalledProcessError:
-            rc = -1
-
+        except subprocess.CalledProcessError, e:
+            rc = e.returncode
+            text = e.output
         return rc, text
 
 
@@ -195,7 +195,7 @@ class Bcc(object):
         self.cmd("heartbeat %s" % seconds)
 
 
-def main():
+def main(): #pragma: no cover
     """ Standalone function; only defined if the class is run by itself. 
         This function uses some basic capabilities of the class. It is
         intended to be used for interactive testing during development,
@@ -232,6 +232,6 @@ def main():
         time.sleep(1)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': #pragma: no cover
     main()
 
