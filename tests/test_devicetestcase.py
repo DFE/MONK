@@ -1,7 +1,8 @@
 #!/usr/bin/python -tt
 # -*- coding: utf-8 -*-
 #
-# HidaV automated test framework connectino class unit tests
+# HidaV automated test framework - unit tests for the devicetestcase class
+# ( so these are the devicetestcase test cases )
 #
 # Copyright (C) 2012 DResearch Fahrzeugelektronik GmbH
 # Written and maintained by Thilo Fromm <fromm@dresearch-fe.de>
@@ -70,7 +71,7 @@ def mock_off():
 
 class DeviceTestCaseTestCase(unittest2.TestCase):
     """ This class implements a number of default test cases
-        for the connection class."""
+        for the devicetestcase class."""
     def setUp(self):
         mock_on()
 
