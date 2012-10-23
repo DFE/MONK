@@ -4,6 +4,9 @@
 # vim boo-boos
 *.swp
 
+# emacs boo-boos
+*~
+
 # log output
 *.log
 
