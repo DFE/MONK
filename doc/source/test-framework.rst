@@ -60,3 +60,11 @@ Logger
    :special-members: __new__
    :private-members: __create_instance
 
+Environment Variables
+=====================
+
+================= ============ =================================================
+Variable          Default      Description
+================= ============ =================================================
+GORDON_BCTRL_PORT /dev/ttyUSB0 serial port, the board controller is connected to
+================= ============ =================================================
