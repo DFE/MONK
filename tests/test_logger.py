@@ -21,10 +21,31 @@ sys.path.append(os.path.abspath(
 
 from Gordon import logger
 
+import logging
+
+class MockFileHandler(logging.FileHandler):
+    def __init__(self, *args, **kwargs):
+        pass
+    def addHandler(self, *args, **kwargs):
+        pass
+
+orig_filehandler = logging.FileHandler = MockFileHandler
+
+def mock_on():
+    logging.FileHandler = MockFileHandler
+    
+def mock_off():
+    logging.FileHandler = orig_filehandler 
 
 class LoggerTestCase(unittest2.TestCase):
     """ This class implements a number of default test cases
         for the logger tool class."""
+
+    def setUp(self):
+        mock_on()
+
+    def tearDown(self):
+        mock_off()
 
     def test_singleton(self):
         """ Test the singleton property of our logger. """
