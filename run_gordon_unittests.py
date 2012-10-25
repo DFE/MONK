@@ -24,6 +24,10 @@
 # * the coverage test runner (python-coverage-test-runner)
 
 def run():
+    import sys, os, inspect
+    sys.path.append(os.path.abspath(
+        os.path.dirname(inspect.getfile(inspect.currentframe()))+"/.."))
+
     from CoverageTestRunner import CoverageTestRunner
     import sys, os, inspect
 
