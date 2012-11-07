@@ -19,7 +19,7 @@ import sys, os, inspect
 sys.path.append(os.path.abspath(
     os.path.dirname(inspect.getfile(inspect.currentframe()))+"/.."))
 
-from Gordon import Bcc, logger
+from Gordon import Bcc
 
 #
 # MOCKING
@@ -31,13 +31,6 @@ def mock_atexit_register(func):
         global MOCK_atexit_func 
         MOCK_atexit_func = func
 
-class MockLogger(object):
-    def debug(*args, **kwargs):
-        pass
-ML = MockLogger()
-
-def mock_logger_init():
-    return ML
 
 def mock_check_output(cmd, stderr = None):
     MOCK_subp_input.append([cmd, stderr])
@@ -69,18 +62,15 @@ def mock_reset_values():
     MOCK_subp_retval = ""
     MOCK_subp_raise = None
 
-orig_log_init = logger.init
 orig_ate_register = atexit.register
 orig_subp_check_output = subprocess.check_output
 
 def mock_on():
     mock_reset_values()
-    logger.init             = mock_logger_init
     atexit.register         = mock_atexit_register
     subprocess.check_output = mock_check_output
     
 def mock_off():
-    logger.init             = orig_log_init
     atexit.register         = orig_ate_register
     subprocess.check_output = orig_subp_check_output
 
@@ -114,7 +104,6 @@ class BccTestCase(unittest2.TestCase):
         self.assertEquals(b._Bcc__drbcc,   "drbcc")
         self.assertEquals(b._Bcc__port,    "/dev/ttyUSB0")
         self.assertEquals(b._Bcc__port_br,  57600)
-        self.assertEquals(b.logger,         ML)
 
         # check function registered with atexit
         self.assertEquals(b._Bcc__cleanup, MOCK_atexit_func)

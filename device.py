@@ -17,9 +17,9 @@
 import time
 import atexit
 import sys
+import logging
 
 import connection
-import logger
 import bcc
 
 
@@ -76,7 +76,7 @@ class Device(object):
             login = self._setup["login"],
             serial_skip_pw = self._setup["serial_skip_pw"],
             reset_cb = rst)
-        self._logger = logger.init()
+        self._logger = logging.getLogger(__name__)
 
 
     def __shutdown(self):

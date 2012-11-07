@@ -20,25 +20,13 @@ import sys, os, inspect
 sys.path.append(os.path.abspath(
     os.path.dirname(inspect.getfile(inspect.currentframe()))+"/.."))
 
-from Gordon import logger, device, DeviceTestCase
+from Gordon import device, DeviceTestCase
 
 #
 # MOCKING
 #
 
 #  --- mocked functions ---
-
-class MockLogger(object):
-    def debug(*args, **kwargs):
-        pass
-    def info(*args, **kwargs):
-        pass
-    def exception(*args, **kwargs):
-        pass
-ML = MockLogger()
-
-def mock_logger_init():
-    return ML
 
 class MockDevice(object):
     def __init__(self, devtype):
@@ -49,18 +37,15 @@ class MockDevice(object):
 # --- mock helper variables and functions ---
 
 orig_device      = device.Device
-orig_log_init    = logger.init
 
 
 def mock_reset_values():
     pass
 
 def mock_on():
-    logger.init   = mock_logger_init
     device.Device = MockDevice
 
 def mock_off():
-    logger.init   = orig_log_init
     device.Device = orig_device
 
 # --- mocking ENDs ---

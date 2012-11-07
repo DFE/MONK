@@ -19,8 +19,8 @@ import re
 import urllib
 import time
 import sys
+import logging
 
-import logger
 import bcc
 
 LAST_LINE_UPON_SHUTDOWN = "Detaching DM devices" 
@@ -29,18 +29,15 @@ class SerialConn(serial.Serial):
     """Serial connection to a device.
        The serial class implements device access via the serial port.
 
-       Beispielaufruf für Hipox: c = sc.SerialConn(logger.Logger(),login=('root','hydra01'),args=['/dev/ttyUSB1',115200],kwargs={'timeout':3})
-
        FIXME: *args nach benannten Parametern funktioniert nicht. Lösung bereits unsauber implementiert.
        FIXME: bei Problemen im Login kann es sein, dass die while Loop in __wait_for_known_boot_state() nicht aufhört!
     """
     
-    def __init__(self, logger, login = ("root", ""), 
+    def __init__(self, login = ("root", ""), 
                  skip_pass = True, boot_prompt="HidaV boot on", 
                  reset_cb = None, args=None, kwargs=None):
         """Initialize a new instance of the serial communication class.
 
-           :param logger:      log object to be used by this class
            :param login:       tuple of (username, pass)
            :type login:        set of two members
            :param skip_pass:   True if the login does not prompt for a password
@@ -48,7 +45,7 @@ class SerialConn(serial.Serial):
            :param reset_cb:    custom RESET callback to run when the device
                                is rebooted
         """
-        self._logger = logger
+        self._logger = logging.getLogger(__name__)
         self.__args = args if args is not None else []
         self.__kwargs = kwargs if kwargs is not None else {}
         try:    
