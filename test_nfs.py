@@ -22,7 +22,6 @@ import subprocess
 import time
 
 import device
-import logger
 import devicetestcase
 
                                   # TestCase has too many public methods.

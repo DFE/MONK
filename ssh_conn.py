@@ -19,8 +19,8 @@ import sys
 import libssh2
 import os
 import tempfile
+import logging
 
-import logger
 
 class SshConn(object):
     """ The SSH connection class abstracts an SSH connection to a device. 
@@ -28,14 +28,13 @@ class SshConn(object):
         of files, and also can display the contents of a remote file.
     """
     
-    def __init__(self, logger, host, login = ("root", "")):
+    def __init__(self, host, login = ("root", "")):
         """ Create a new instance of the SSH connection class. 
 
-            :param logger:  log instance to be used in this class
             :param host:    host name or IP address of the remote host
             :param login:   tuple of (username, pass)
         """
-        self._logger = logger
+        self._logger = logging.getLogger(__name__)
         self._host = host
         self._login = login
 

@@ -22,24 +22,13 @@ import sys, os, inspect
 sys.path.append(os.path.abspath(
     os.path.dirname(inspect.getfile(inspect.currentframe()))+"/.."))
 
-from Gordon import Connection, logger, serial_conn, ssh_conn
+from Gordon import Connection, serial_conn, ssh_conn
 
 #
 # MOCKING
 #
 
 #  --- mocked functions ---
-class MockLogger(object):
-    def debug(*args, **kwargs):
-        pass
-    def info(*args, **kwargs):
-        pass
-    def exception(*args, **kwargs):
-        pass
-ML = MockLogger()
-
-def mock_logger_init():
-    return ML
 
 class MockSerialConn(object):
     instance = None
@@ -48,9 +37,9 @@ class MockSerialConn(object):
                     "cmd"   : []  }
     called = {}
 
-    def __init__(self, logger, login, skip_pass, boot_prompt, reset_cb):
+    def __init__(self, login, skip_pass, boot_prompt, reset_cb):
         MockSerialConn.called["__init__"].append(
-            (logger, login, skip_pass, boot_prompt, reset_cb) )
+            (login, skip_pass, boot_prompt, reset_cb) )
         MockSerialConn.instance = self
 
     def open(self):
@@ -71,8 +60,8 @@ class MockSshConn(object):
                  "cmd"      : []  }
     called = {}
 
-    def __init__(self, logger, host, login):
-        MockSshConn.called["__init__"].append((logger, host, login))
+    def __init__(self, host, login):
+        MockSshConn.called["__init__"].append((host, login))
         MockSshConn.instance = self
 
     def cmd(self, cmd):
@@ -99,18 +88,15 @@ def mock_reset_values():
     MockSerialConn.called   = deepcopy(MockSerialConn._MockSerialConn__called)
     MockSerialConn.instance = None
 
-orig_log_init    = logger.init
 orig_serial_conn = serial_conn.SerialConn
 orig_ssh_conn    = ssh_conn.SshConn
 
 def mock_on():
     mock_reset_values()
-    logger.init             = mock_logger_init
     serial_conn.SerialConn  = MockSerialConn
     ssh_conn.SshConn        = MockSshConn
 
 def mock_off():
-    logger.init             = orig_log_init
     serial_conn.SerialConn  = orig_serial_conn
     ssh_conn.SshConn        = orig_ssh_conn
 
@@ -137,7 +123,6 @@ class ConnectionTestCase(unittest2.TestCase):
         c = Connection(network_setup = ("hurz", "bla-if0"))
 
         # check instance vars
-        self.assertEquals(c._logger, ML)
         self.assertEquals(c._login, ("root", ""))
         self.assertEquals(c._target_if, "bla-if0")
         self.assertEquals(c._serial, MockSerialConn.instance)
@@ -146,7 +131,7 @@ class ConnectionTestCase(unittest2.TestCase):
         # check initialisation of serial_conn class
         self.assertEquals(len(MockSerialConn.called["__init__"]), 1)
         self.assertEquals(MockSerialConn.called["__init__"][0], 
-                            (ML, c._login, True, "HidaV boot on", None))
+                            (c._login, True, "HidaV boot on", None))
         self.assertEquals(len(MockSerialConn.called["open"]), 1)
         self.assertEquals(MockSerialConn.called["open"][0], True)
 
@@ -154,7 +139,7 @@ class ConnectionTestCase(unittest2.TestCase):
     def __ssh_test(self, c):
         s = c._ssh
         self.assertEquals(len(MockSshConn.called["__init__"]), 1)
-        self.assertEquals(MockSshConn.called["__init__"][0], (ML, c.host, c._login))
+        self.assertEquals(MockSshConn.called["__init__"][0], (c.host, c._login))
 
     def test_ssh(self):
         """ Test for the ssh property. """

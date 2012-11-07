@@ -21,7 +21,7 @@ import re
 import threading
 import time
 import atexit
-import logger
+import logging
 import os
 
 class Bcc(object):
@@ -44,7 +44,7 @@ class Bcc(object):
 
             :raise: :py:exc:`OSError` if the drbcc binary was not found.
         """
-        self.logger = logger.init()
+        self.logger = logging.getLogger(__name__)
         self.__drbcc   = drbcc
         self.__port    = port
         self.__port_br = speed

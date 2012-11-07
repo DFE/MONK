@@ -15,7 +15,8 @@
 """ Package for the connection class """
 
 import os
-import logger, serial_conn, ssh_conn, re
+import logging
+import serial_conn, ssh_conn, re
 
 class Connection(object):
     """ Connection to a device.
@@ -40,7 +41,7 @@ class Connection(object):
                 for a password
             :param reset_cb: callback to run when resetting the device
         """
-        self._logger = logger.init()
+        self._logger = logging.getLogger(__name__)
         self._login = login
         self._target_if = network_setup[1]
         self._serial = self._serial_setup(*serial_setup, 
@@ -58,7 +59,7 @@ class Connection(object):
             return self.__ssh
         except AttributeError:
             self.__ssh = ssh_conn.SshConn( # pylint: disable-msg=W0201
-                    self._logger, self.host, self._login ) 
+                    self.host, self._login ) 
         return self.__ssh
     
     
@@ -72,7 +73,7 @@ class Connection(object):
                       skip_pass, boot_prompt, reset_cb):
         """ Set up the serial communication back-end. """
         self._logger.debug("(re)opening serial port %s" % port)
-        ser = serial_conn.SerialConn(self._logger, 
+        ser = serial_conn.SerialConn(
                         login = self._login, skip_pass = skip_pass, 
                         boot_prompt = boot_prompt,
                         reset_cb = reset_cb)

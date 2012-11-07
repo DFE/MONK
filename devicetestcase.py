@@ -5,11 +5,12 @@ Package for HidaV integration test case generic test classes
 """
 
 import unittest
+import datetime
 import device
 import threading
-
-import logger
-
+import logging
+import logging.config
+import yaml
 
 class DeviceTestCase(unittest.TestCase):
     """ This class is the base class for all HidaV integration tests. It takes
@@ -55,9 +56,13 @@ class DeviceTestCase(unittest.TestCase):
     @classmethod        
     def __create_device(cls, devicetype, nand_boot=True):
         """ boot HidaV-device to NAND """
+        filename = "run-%s.log" % datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        dictionary = yaml.load(open('logging.conf', 'r'))
+        dictionary['handlers']['file']['filename'] = filename
+        logging.config.dictConfig(dictionary)
         cls.__dev = device.Device( devtype = devicetype )
         if nand_boot:
-            logger.init().debug("Boot to NAND ...")
+            logging.getLogger(__name__).debug("Boot to NAND ...")
             cls.__dev.reboot(to_nand=True)
 
 
@@ -67,5 +72,5 @@ class DeviceTestCase(unittest.TestCase):
         """
         super(DeviceTestCase, self).__init__(*args, **kwargs)
         self.dev = DeviceTestCase.get_device(devicetype)
-        self.logger = logger.init()
+        self.logger = logging.getLogger(__name__)
         

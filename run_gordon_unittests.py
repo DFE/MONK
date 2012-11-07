@@ -32,7 +32,7 @@ def run():
     import sys, os, inspect
 
     runner = CoverageTestRunner()
-    for item in ("bcc", "connection", "device", "devicetestcase", "logger", "serial_conn", "ssh_conn"):
+    for item in ("bcc", "connection", "device", "devicetestcase", "serial_conn", "ssh_conn"):
         runner.add_pair( item + ".py", "tests/test_" + item + ".py")
     runner.run()
 

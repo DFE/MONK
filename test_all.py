@@ -18,7 +18,7 @@
 
 import sys
 import unittest
-import logger
+import logging
 
 from test_samba import TestSamba
 from test_webdav import TestWebDAV
@@ -37,7 +37,7 @@ class TestDevice(object):
             :param dev: handle of DeviceTestCase.get_device()
         """
         self.dev = dev
-        self.logger = logger.init()
+        self.logger = logging.getLogger(__name__)
     
     
     def update_device(self):
