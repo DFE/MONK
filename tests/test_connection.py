@@ -14,7 +14,7 @@
 
 
 import subprocess, atexit
-import unittest2
+import unittest
 
 from copy import deepcopy
 
@@ -22,7 +22,9 @@ import sys, os, inspect
 sys.path.append(os.path.abspath(
     os.path.dirname(inspect.getfile(inspect.currentframe()))+"/.."))
 
-from Gordon import Connection, serial_conn, ssh_conn
+from connection import Connection
+import serial_conn
+import ssh_conn
 
 #
 # MOCKING
@@ -106,7 +108,7 @@ def mock_off():
 # The actual tests
 #
 
-class ConnectionTestCase(unittest2.TestCase):
+class TestConnection(unittest.TestCase):
     """ This class implements a number of default test cases
         for the connection class."""
 
@@ -211,5 +213,5 @@ class ConnectionTestCase(unittest2.TestCase):
 
 
 if __name__ == "__main__":
-    unittest2.main()
+    unittest.main()
 

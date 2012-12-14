@@ -12,31 +12,25 @@
 # 2 of the License, or (at your option) any later version.
 #
 
-# This file will run all of G.O.R.D.O.N.s unit tests (i.e. the 
-# tests testing the framework) using a test runner which checks
-# for coverage as well as for actual test results.
-
-# REQUIREMENTS
-# ------------
-# In order to run the tests you will need (ubuntu package):
-# * the unittest2 module (python-unittest2)
-# * coverage.py (python-coverage)
-# * the coverage test runner (python-coverage-test-runner)
-
-def run():
-    import sys, os, inspect
-    sys.path.append(os.path.abspath(
+import sys, os, inspect
+sys.path.append(os.path.abspath(
         os.path.dirname(inspect.getfile(inspect.currentframe()))+"/.."))
 
-    from CoverageTestRunner import CoverageTestRunner
-    import sys, os, inspect
+import unittest
 
-    runner = CoverageTestRunner()
-    for item in ("bcc", "connection", "device", "devicetestcase", "serial_conn", "ssh_conn"):
-        runner.add_pair( item + ".py", "tests/test_" + item + ".py")
-    runner.run()
+from test_bcc import TestBcc
+from test_connection import TestConnection
+from test_devicetestcase import TestDevicetestcase
+
+
+class TestAll(unittest.TestSuite):
+    
+    def __init__(self):
+        self.addTest(TestBcc())
+        self.addTest(TestConnection())
+        self.addTest(TestDeviceTestcase())
+
+
 
 if __name__ == "__main__":
-    run()
-
-
+    unittest.main()

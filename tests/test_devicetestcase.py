@@ -14,13 +14,14 @@
 #
 
 
-import unittest2
+import unittest
 
 import sys, os, inspect
 sys.path.append(os.path.abspath(
     os.path.dirname(inspect.getfile(inspect.currentframe()))+"/.."))
 
-from Gordon import device, DeviceTestCase
+import device
+from devicetestcase import DeviceTestCase
 
 #
 # MOCKING
@@ -54,7 +55,7 @@ def mock_off():
 # The actual tests
 #
 
-class DeviceTestCaseTestCase(unittest2.TestCase):
+class TestDevicetestcase(unittest.TestCase):
     """ This class implements a number of default test cases
         for the devicetestcase class."""
     def setUp(self):
@@ -69,3 +70,5 @@ class DeviceTestCaseTestCase(unittest2.TestCase):
 
 
 
+if __name__ == '__main__':
+    unittest.main()
