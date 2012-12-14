@@ -13,13 +13,13 @@
 #
 
 import subprocess, atexit
-import unittest2
+import unittest
 
 import sys, os, inspect
 sys.path.append(os.path.abspath(
     os.path.dirname(inspect.getfile(inspect.currentframe()))+"/.."))
 
-from Gordon import Bcc
+from bcc import Bcc
 
 #
 # MOCKING
@@ -80,7 +80,7 @@ def mock_off():
 # The actual tests
 #
 
-class BccTestCase(unittest2.TestCase):
+class TestBcc(unittest.TestCase):
     """ This class implements a number of default test cases
         for the board controller class."""
 
@@ -258,5 +258,4 @@ class BccTestCase(unittest2.TestCase):
 
 
 if __name__ == "__main__":
-    unittest2.main()
-
+    unittest.main()
