@@ -20,7 +20,10 @@ import unittest
 
 from test_bcc import TestBcc
 from test_connection import TestConnection
+from test_device import TestDevice
 from test_devicetestcase import TestDevicetestcase
+from test_serial_conn import TestSerialConn
+from test_ssh_conn import TestSshConn
 
 
 class TestAll(unittest.TestSuite):
@@ -28,7 +31,10 @@ class TestAll(unittest.TestSuite):
     def __init__(self):
         self.addTest(TestBcc())
         self.addTest(TestConnection())
+        self.addTest(TestDevice())
         self.addTest(TestDeviceTestcase())
+        self.addTest(TestSerialConn())
+        self.addTest(TestSshConn())
 
 
 
