@@ -1,7 +1,7 @@
 #!/usr/bin/python -tt
 # -*- coding: utf-8 -*-
 #
-# HidaV automated test framework ssh connection handling
+# MONK automated test framework ssh connection handling
 #
 # Copyright (C) 2012 DResearch Fahrzeugelektronik GmbH
 # Written and maintained by Thilo Fromm <fromm@dresearch-fe.de>
@@ -166,4 +166,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    

@@ -1,7 +1,7 @@
 #!/usr/bin/python -tt
 # -*- coding: utf-8 -*-
 """
-Package for HidaV integration test case generic test classes
+Package for MONK integration test case generic test classes
 """
 
 import unittest
@@ -13,7 +13,7 @@ import logging.config
 import yaml
 
 class DeviceTestCase(unittest.TestCase):
-    """ This class is the base class for all HidaV integration tests. It takes
+    """ This class is the base class for all MONK tests. It takes
         care of basic device initialization and guarantees that there's only
         one instance of :py:class:`Device` active at any time. 
         

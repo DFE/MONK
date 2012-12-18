@@ -1,9 +1,6 @@
-<table style="border-style:none;" ><tr style="border-style:none;" ><td style="border-style:none;">
-<img src="https://raw.github.com/DFE/Gordon/master/logo.gif" /> 
-</td>
-<td style="border-style:none;">
-<h1>G*O*R*D*O*N</h1>
-<hr/>
-</td></tr></table>
+# MONK Framework
 
-G*O*R*D*O*N is an automated integration and system test framework for DFE's HidaV/Hipox devices.
+A framework for abstracting DFE embedded systems to simplify Unit- and
+Integrationtests.
+
+For details, have a look at [our Wiki](https://github.com/DFE/MONK/wiki).
