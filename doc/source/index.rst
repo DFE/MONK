@@ -39,6 +39,4 @@ Complete Table of Contents
 .. toctree::
    :maxdepth: 2
 
-   tests.rst
-   nas-tests.rst
    test-framework.rst
