@@ -9,8 +9,21 @@ import datetime
 import device
 import threading
 import logging
-import logging.config
-import yaml
+
+def config_logging():
+    """ Configure the root logger """
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+
+    filename = "run-%s.log" % datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    handler = logging.FileHandler(filename, mode='w+')
+    handler.setFormatter(logging.Formatter(
+        "%(asctime)s %(levelname)s %(filename)s::%(funcName)s(): "
+        + "%(message)s"))
+        
+    logger.addHandler(handler)
+
 
 class DeviceTestCase(unittest.TestCase):
     """ This class is the base class for all MONK tests. It takes
@@ -56,10 +69,7 @@ class DeviceTestCase(unittest.TestCase):
     @classmethod        
     def __create_device(cls, devicetype, nand_boot=True):
         """ boot HidaV-device to NAND """
-        filename = "run-%s.log" % datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        dictionary = yaml.load(open('logging.conf', 'r'))
-        dictionary['handlers']['file']['filename'] = filename
-        logging.config.dictConfig(dictionary)
+        config_logging()
         cls.__dev = device.Device( devtype = devicetype )
         if nand_boot:
             logging.getLogger(__name__).debug("Boot to NAND ...")
