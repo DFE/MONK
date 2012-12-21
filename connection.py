@@ -25,7 +25,7 @@ class Connection(object):
         It implements device command processing in a request/response manner.
     """
 
-    def __init__(self, serial_setup = (os.getenv("GORDON_CONSOLE_PORT", "/dev/ttyUSB1"), 115200, 8, 'N', 1, 1), 
+    def __init__(self, serial_setup = (os.getenv("MONK_CONSOLE_PORT", "/dev/ttyUSB1"), 115200, 8, 'N', 1, 1), 
                  network_setup = ( None, "eth0" ), login = ( "root", "" ),
                  boot_prompt = "HidaV boot on", serial_skip_pw = True,
                  reset_cb = None):
