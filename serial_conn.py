@@ -176,7 +176,8 @@ class SerialConn(serial.Serial):
         self.flushInput()
         self.flushOutput()
 
-        self.read_until("login:", "exit\n", timeout=20)
+        # use ^D aka \003 as write_trigger for login prompt
+        self.read_until("login:", "\003", timeout=20)
         self.write(self._login[0] + "\n")
 
         if not self._skip_pass:
