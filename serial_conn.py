@@ -75,7 +75,6 @@ class SerialConn(serial.Serial):
         if timeout:
             old_to = self._timeout
             self._timeout = timeout
-        self.write("\n")
         while not target in buf:
             ret = self.read()
             if ret == "":
