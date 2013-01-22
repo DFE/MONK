@@ -1,0 +1,2 @@
+pylibssh2==1.0.1
+pyserial==2.5
