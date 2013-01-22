@@ -13,7 +13,7 @@
 
 import sys, os, inspect
 sys.path.append(os.path.abspath(
-        os.path.dirname(inspect.getfile(inspect.currentframe()))+"/.."))
+    os.path.dirname(inspect.getfile(inspect.currentframe()))+"/../src/monk_tf"))
 
 import unittest
 
