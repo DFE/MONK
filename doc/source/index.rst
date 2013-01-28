@@ -13,7 +13,7 @@ Integration Test Implementations
 
 Main page: :ref:`integration-test-impl`
 
-This suite implements a number of automated integration tests for the HidaV
+ add a TODO file, make a change to the ‘simplegit.rb’ file, and then make a commit with both changeshis suite implements a number of automated integration tests for the HidaV
 platform. 
 
 
@@ -26,6 +26,10 @@ In order to run the tests this suite provides a basic framework to
 completely remote-control a device. This framework is applied by all the
 integration tests to actually perform the tests.
 
+Configuration Test Environment
+==============================
+
+In order to run tests you need a serial connection to the device. The srial ports for the connection have to be configured in some environment variables. The existing environment variables you find in :ref:`environment-variables`
 
 Indices and tables
 ==================
