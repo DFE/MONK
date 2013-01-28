@@ -13,7 +13,7 @@ Integration Test Implementations
 
 Main page: :ref:`integration-test-impl`
 
- add a TODO file, make a change to the ‘simplegit.rb’ file, and then make a commit with both changeshis suite implements a number of automated integration tests for the HidaV
+This suite implements a number of automated integration tests for the HidaV
 platform. 
 
 
