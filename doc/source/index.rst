@@ -26,6 +26,14 @@ In order to run the tests this suite provides a basic framework to
 completely remote-control a device. This framework is applied by all the
 integration tests to actually perform the tests.
 
+Configuration Test Environment
+==============================
+
+In order to run tests you need two serial connections to the device. One
+connection to have access to a console and another to communicate with the
+board controller. The serial ports for the connection have to be configured
+in some environment variables. You can find the existing environment variables
+in :ref:`environment-variables`
 
 Indices and tables
 ==================
