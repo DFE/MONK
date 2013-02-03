@@ -18,7 +18,7 @@ src_path = 'src'
 
 setup(
     name=project,
-    version='second-test',
+    version='v0.1',
     description = 'a test framework for embedded systems',
     author = 'DResearch Fahrzeugelektronik GmbH',
     author_email = 'project-monk@dresearch-fe.de',
