@@ -1,7 +1,7 @@
-#!/usr/bin/python -tt
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Package for HidaV integration test case generic test classes
+Package for MONK integration test case generic test classes
 """
 
 import unittest
@@ -9,11 +9,24 @@ import datetime
 import device
 import threading
 import logging
-import logging.config
-import yaml
+
+def config_logging():
+    """ Configure the root logger """
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+
+    filename = "run-%s.log" % datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    handler = logging.FileHandler(filename, mode='w+')
+    handler.setFormatter(logging.Formatter(
+        "%(asctime)s %(levelname)s %(filename)s::%(funcName)s(): "
+        + "%(message)s"))
+        
+    logger.addHandler(handler)
+
 
 class DeviceTestCase(unittest.TestCase):
-    """ This class is the base class for all HidaV integration tests. It takes
+    """ This class is the base class for all MONK tests. It takes
         care of basic device initialization and guarantees that there's only
         one instance of :py:class:`Device` active at any time. 
         
@@ -41,25 +54,23 @@ class DeviceTestCase(unittest.TestCase):
     
     
     @classmethod
-    def get_device(cls, devicetype, nand_boot=True):
+    def get_device(cls, devicetype, nand_boot=True, init_logging=True):
         """ Get the :py:class:`Device` singleton instance. A new instance will
             be created if none is available yet. 
         """
         if not cls.__dev:
             cls.__devsem.acquire()
             if not cls.__dev:
-                cls.__create_device(devicetype, nand_boot)
+                cls.__create_device(devicetype, nand_boot, init_logging=init_logging)
             cls.__devsem.release()
         return cls.__dev
 
 
     @classmethod        
-    def __create_device(cls, devicetype, nand_boot=True):
+    def __create_device(cls, devicetype, nand_boot=True, init_logging=True):
         """ boot HidaV-device to NAND """
-        filename = "run-%s.log" % datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        dictionary = yaml.load(open('logging.conf', 'r'))
-        dictionary['handlers']['file']['filename'] = filename
-        logging.config.dictConfig(dictionary)
+        if init_logging:
+            config_logging()
         cls.__dev = device.Device( devtype = devicetype )
         if nand_boot:
             logging.getLogger(__name__).debug("Boot to NAND ...")
@@ -70,7 +81,11 @@ class DeviceTestCase(unittest.TestCase):
         """ The class will create and add to self logger and dev objects upon
             instantiation.
         """
+        init_logging = True
+        if 'init_logging' in kwargs:
+            init_logging = kwargs["init_logging"]
+            del kwargs["init_logging"]
         super(DeviceTestCase, self).__init__(*args, **kwargs)
-        self.dev = DeviceTestCase.get_device(devicetype)
+        self.dev = DeviceTestCase.get_device(devicetype, init_logging=init_logging)
         self.logger = logging.getLogger(__name__)
         

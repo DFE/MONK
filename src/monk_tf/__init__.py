@@ -1,7 +1,7 @@
 #!/usr/bin/python -tt
 # -*- coding: utf-8 -*-
 #
-# HidaV automated test framework module API
+# MONK automated test framework module API
 #
 # Copyright (C) 2012 DResearch Fahrzeugelektronik GmbH
 # Written and maintained by Thilo Fromm <fromm@dresearch-fe.de>
@@ -14,7 +14,7 @@
 
 
 
-# G.O.R.D.O.N. automated integration test framework public API
+# MONK automated integration test framework public API
 
 from devicetestcase import DeviceTestCase
 from device         import Device
@@ -22,4 +22,3 @@ from connection     import Connection
 from ssh_conn       import SshConn
 from serial_conn    import SerialConn
 from bcc            import Bcc
-

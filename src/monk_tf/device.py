@@ -1,7 +1,7 @@
-#!/usr/bin/python -tt
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# HidaV automated test framework high-level device functions
+# MONK automated test framework high-level device functions
 #
 # Copyright (C) 2012 DResearch Fahrzeugelektronik GmbH
 # Written and maintained by Thilo Fromm <fromm@dresearch-fe.de>

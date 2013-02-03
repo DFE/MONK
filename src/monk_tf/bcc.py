@@ -1,7 +1,7 @@
-#!/usr/bin/python -tt
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# HidaV automated test framework board controller handling
+# MONK automated test framework board controller handling
 #
 # Copyright (C) 2012 DResearch Fahrzeugelektronik GmbH
 # Written and maintained by Thilo Fromm <fromm@dresearch-fe.de>
@@ -32,12 +32,12 @@ class Bcc(object):
         port / FTDI cable. 
     """
     
-    def __init__(self, port = os.getenv("GORDON_BCTRL_PORT", "/dev/ttyUSB0"), speed = 57600, drbcc = "drbcc"):
+    def __init__(self, port = os.getenv("MONK_BCTRL_PORT", "/dev/ttyUSB0"), speed = 57600, drbcc = "drbcc"):
         """ Create a new BCC instance.
 
             :param port:  serial port to use for communication with the board
                           controller, defaults to content of environment
-                          variable GORDON_BCTRL_PORT or "/dev/ttyUSB0" if the
+                          variable MONK_BCTRL_PORT or "/dev/ttyUSB0" if the
                           variable is not set
             :param speed: serial port speed
             :param drbcc: path to drbcc binary

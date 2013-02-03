@@ -66,6 +66,6 @@ Environment Variables
 =================== ============ =================================================
 Variable            Default      Description
 =================== ============ =================================================
-GORDON_BCTRL_PORT   /dev/ttyUSB0 serial port, the board controller is connected to
-GORDON_CONSOLE_PORT /dev/ttyUSB1 serial port, device console is connected to
+MONK_BCTRL_PORT     /dev/ttyUSB0 serial port, the board controller is connected to
+MONK_CONSOLE_PORT   /dev/ttyUSB1 serial port, device console is connected to
 =================== ============ =================================================

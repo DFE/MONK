@@ -1,7 +1,7 @@
-#!/usr/bin/python -tt
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# HidaV automated test framework abstract connection 
+# MONK automated test framework abstract connection 
 #
 # Copyright (C) 2012 DResearch Fahrzeugelektronik GmbH
 # Written and maintained by Thilo Fromm <fromm@dresearch-fe.de>
@@ -25,7 +25,7 @@ class Connection(object):
         It implements device command processing in a request/response manner.
     """
 
-    def __init__(self, serial_setup = (os.getenv("GORDON_CONSOLE_PORT", "/dev/ttyUSB1"), 115200, 8, 'N', 1, 1), 
+    def __init__(self, serial_setup = (os.getenv("MONK_CONSOLE_PORT", "/dev/ttyUSB1"), 115200, 8, 'N', 1, 1), 
                  network_setup = ( None, "eth0" ), login = ( "root", "" ),
                  boot_prompt = "HidaV boot on", serial_skip_pw = True,
                  reset_cb = None):
@@ -195,4 +195,3 @@ def main():   #pragma: no cover
 
 if __name__ == '__main__':  #pragma: no cover
     main()
-    

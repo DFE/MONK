@@ -1,7 +1,7 @@
-#!/usr/bin/python -tt
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# HidaV automated test framework serial connection handling
+# MONK automated test framework serial connection handling
 #
 # Copyright (C) 2012 DResearch Fahrzeugelektronik GmbH
 # Written and maintained by Thilo Fromm <fromm@dresearch-fe.de>
@@ -75,7 +75,6 @@ class SerialConn(serial.Serial):
         if timeout:
             old_to = self._timeout
             self._timeout = timeout
-        self.write("\n")
         while not target in buf:
             ret = self.read()
             if ret == "":
@@ -176,7 +175,7 @@ class SerialConn(serial.Serial):
         self.flushInput()
         self.flushOutput()
 
-        self.read_until("login:", "exit\n", timeout=20)
+        self.read_until("login:", "\n", timeout=20)
         self.write(self._login[0] + "\n")
 
         if not self._skip_pass:
@@ -415,4 +414,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    
