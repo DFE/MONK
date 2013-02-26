@@ -17,18 +17,22 @@ Getting Started
 Installation
 ************
 
-To install MONK you need ``pip``, which you can get via your system's
-package manager, e.g.::
+..  "a tool for installing and managing Python packages" is quoted from
+    https://pypi.python.org/pypi/pip
+    
+To install MONK you need ``pip``, a tool for installing and managing Python
+packages, which you can get via your system's package manager, e.g.::
 
     $ sudo apt-get install python-pip
 
-If you have it already installed, then you can do the following step::
+Afterwards (or if it was present to begin with), you can use it to install
+MONK::
 
     $ pip install monk_tf
 
-This step might require ``sudo`` rights or should likely be executed in a
-``virtualenv``. You can check that the installation worked in the following
-way::
+This step might require ``sudo`` rights. You might also consider setting up
+MONK in a ``virtualenv``. You can check that the installation worked the
+following way::
 
     $ python
     Python 2.7.3 (default, Aug  1 2012, 05:14:39) 
@@ -38,70 +42,73 @@ way::
     >>> monk_tf.device.Device
     <class 'monk_tf.device.Device'>
 
-If you also want to run the unittests for MONK you might want to follow the
+If you also want to run unit tests for MONK you might want to read the
 :doc:`developer instructions <contributing>`.
 
 *****
 Usage
 *****
 
-At this point the usage mostly relies on your ability to interact with the
-:doc:`API <api-docs>` and the :doc:`development process <contributing>`.
+At this point of MONK's development usage mostly relies on your ability to
+interact with the :doc:`API <api-docs>` and the
+:doc:`development process <contributing>`.
 
-In general when writing tests it is expected, that you structure your software
-tests in these two packages:
+When writing software tests, it is strongly recommended to structure them in
+two parts:
 
- #. **the Testframework**: which contains all the code for your tests.
+ #. **the Test Framework**: which contains the code necessary to execute
+ your tests.
 
- #. **The Testcases**: the actual test code.
+ #. **the Test Cases**: the actual test code.
 
 
-This structure stays the same, when you use MONK. MONK is not a replacement for
-the :term:`testframework`, it's merely an addition that simplifies both
-packages.
+This structure stays the same, when using MONK. MONK is not a replacement for
+the :term:`test framework`, it's merely an addition that simplifies both
+parts.
 
-In general when writing tests with MONK, you want to use the
+When writing tests with MONK, you will usually want to use the
 :py:class:`monk_tf.devicetestcase.DeviceTestcase` instead of the
-:py:class:`unittest.TestCase`. An empty testcase might look like that:
+:py:class:`unittest.TestCase`. An empty testcase might look like this:
 
 .. literalinclude:: template_testcase.py
     :linenos:
 
-Using the :py:class:`~monk_tf.devicetestcase.DeviceTestcase` enables already
-some of the features currently implemented in MONK. This will for example
-reboot and update your :term:`target device`. Some things are already prepared
-for you. Have a look at the source code of :py:mod:`~monk_tf.devicetestcase`.
+Using the :py:class:`~monk_tf.devicetestcase.DeviceTestcase` automatically
+enables some of the features currently implemented in MONK. For example, your
+:term:`target device` will be rebooted and updated. Have a look at the source
+code of :py:mod:`~monk_tf.devicetestcase` if you are interested in more
+details.
 
 *********************
-Locally Patching MONK
+Patching MONK Locally 
 *********************
 
-Because all users of MONK have to be experienced software developers for the
-foreseeable future, there might arise a lot of situations, where you
+As all users of MONK will have to be experienced software developers for the
+foreseeable future, there might arise a lot of situations, where you might
 want to apply local changes to MONK that the developers of MONK might not want
 to add to the official repository or which will simply not be added fast
-enough. Since Python itself works directly on it's source code, you have many
-options to patch your code locally. But keep in mind that there is one
-recommended way to do things and although you are free to use other options as
-well, you won't get any support for them.
+enough. Since Python itself works directly on its source code, you have many
+options to patch your code locally. However, keep in mind that there is one
+recommended way to do this and although you are, of course, free to use other
+options as well, you will not get any support for them.
 
-1. Import and extend (recommended)
+1. Import and Extend (Recommended)
 ==================================
 
 The best way to change existing modules is extending their classes and using
-your individual classes instead. As an example let's say you want to make the
-``conn`` attribute in :py:class:`~monk_tf.device.Device` optional, that you can
-add an individual connection later on, if you want to. To do that, you will
-first go to the folder of your own test framework and add another class
-``DeviceOptionalConn``, which inherits
-from :py:class:`monk_tf.device.Device`::
+your individual classes instead. As an example, let us assume you want to make
+the ``conn`` attribute in :py:class:`~monk_tf.device.Device` optional, in
+order to be able to add an individual connection later on, if needed. To do
+this, you should add another class (say ``DeviceOptionalConn``) to the
+directory of your test framework, which inherits from
+:py:class:`monk_tf.device.Device`::
 
     import monk_tf as monk
 
     class DeviceOptionalConn(monk.device.Device):
         pass
 
-Then you go ahead to apply your changes as desired::
+You may then go ahead to apply your changes as desired::
 
     import monk_tf as monk
 
@@ -126,19 +133,23 @@ Then you go ahead to apply your changes as desired::
                 )
             self._logger = logging.getLogger(__name__)
 
-Then instead of using :py:mod:`monk_tf.device.Device` you will use
+Instead of using :py:mod:`monk_tf.device.Device` you may then use
 :py:mod:`testframework.DeviceOptionalConn` in your tests.
 
 
-2. Patch The Install Folder
+2. Patch the Install Folder
 ============================
 
-Another way would be to find the folder at which MONK is installed and
-overwrite the code directly. Because MONK is always delivered as source
-distribution, there should be no problem with that. It is unclear though what
-happens with your changes once you patch the standard MONK.
+Another way would be to navigate to the directory containing MONK and
+directly overwrite the code. As MONK is an open source distribution,
+this should be straightforward. It is, however, impossible to foresee
+what will happen to your changes once you use ``pip`` to, for example,
+update MONK. This method is thus not recommended.
 
-3. Follow the MONK developer process
+
+3. Follow the MONK Developer Process
 ====================================
 
-See :doc:`contributing` for further details about this point.
+This is what you need to do if you want to have your changes applied
+to the MONK project globally. See :doc:`contributing` for further
+details about this point.

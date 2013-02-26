@@ -13,102 +13,113 @@ Contributing
 .. toctree::
     :maxdepth: 2
 
-As an open source project we are happy to work together with other enthusiastic
-people in creating a better testing experience for all of us. In this chapter
-you will learn everything you need to know to get involved in MONK development.
+As an open source project we are happy to work together with other
+enthusiastic people in creating a better testing experience for all of us.
+In this chapter you will learn everything you need to know to get involved in
+MONK development.
 
 
 .. include:: undocumented.inc
 
 *********************************
-Communicating with the developers
+Communicating with the Developers
 *********************************
 
 You can communicate with other MONK developers in one of the following ways:
 
- #. **The mailinglist**: You can ask questions at `project monk`_. You can also
-     have a look at `the archives`_ to see old conversations.
+ #. **the Mailing List**: You can ask questions at `project monk`_. You can
+     also have a look at `the archives`_ to see old conversations.
 
- #. **The bug tracker**: If you have already a specific problem you want to
-     work on, then you can create an Issue `here`_. It's also possible ot work
-     with Github Pull Requests.
+ #. **the Bug Tracker**: If you have encountered a specific problem you want
+     to work on, you can create an Issue `here`_. It is also possible to
+     work with Github Pull Requests.
 
- #. **The Stammtisch Meeting**: If you happen to be in Berlin on a monday
-     afternoon at 4.30pm, you might want to come to join our regular meeting
-     with all topics around MONK:
+ #. **the Stammtisch Meeting**: If you happen to be in Berlin on any Monday
+     afternoon at 4:30 pm, you are welcome to join our regular meeting on all
+     topics concerning MONK at:
 
-    DResearch Fahrzeugelektronik GmbH
-    Otto-Schmirgal-Str. 3, D-10319 Berlin, Germany
+    | DResearch Fahrzeugelektronik GmbH
+    | Otto-Schmirgal-Str. 3
+    | D-10319 Berlin
+    | Germany
 
+    
 ****************
 Getting the Code
 ****************
 
-MONK is hosted on `Github`_. You can `fork the repository`_ and then get your
+MONK is hosted on `GitHub`_. You can `fork the repository`_ and then get your
 results into the main repository with a pull request.
 
-You can also simply clone it and do with it what you want::
+You can also simply clone and do whatever you want with it::
 
     $ git clone https://github.com/DFE/MONK
 
+    
 ***********************
 The Development Process
 ***********************
 
-If you want to make a change to MONK, the best way is to communicate your ideas
-first with the other MONK developers. If others agree that the change makes
-sense, only then should you start to put work into the solution. Otherwise you
-might see, that your work will be done for nothing.
+If you want to see your changes applied to MONK, the best way is to first
+communicate your ideas with the other MONK developers. You should only start
+development, if they agree the change makes sense. Otherwise, your work might
+turn out to be a waste of time.
 
-In case you don't work on a fork, which should only happen if you are a regular
-member of the DFE group, then you can ignore the following steps that talk
-about pull requests. In that case it is better to create an Issue from the
-beginning and track your changes there in a feature branch. If you are only
-able to work with pull requests, then remember that such a feature branch will
-be automatically generated for your pull request.
+If you have write access to the repository (which is only supposed to happen
+if you are a regular member of `the DFE group`_), you should simply fork, create
+an Issue and track your changes in a feature branch.
 
- #. **start from the dev branch**: No matter how you want to start, you always
-     need to make sure that your commits can work without problem from the
-     current HEAD of the ``dev`` branch.
+If you do not have write access, you will have to use pull requests. Remember
+that a feature branch will automatically be generated for your pull
+request.
 
- #. **Create meaningful commits**: Commits should fulfill the requirements that
-     are described in a later chapter. An important part is, that they should
-     always contain only one meaningful change.
+Step-by-step guide:
 
- #. **Create a Pull Request**: Follow the Github `Pull Request Guide`_.
+ #. **Start from the dev branch**: You always need to ensure your commits
+     can be applied without problem on the current HEAD of the ``dev``
+     branch.
 
- #. **Recieve Acknowledgements**: That a maintainer can accept your changes,
-     you need to find 2 DFE developers first, who will acknowledge your
-     changes. These 2 people should be mentioned in your commit message, as
+ #. **Create meaningful commits**: Commits should adhere to the
+     requirements described in `Commit Policy`_. An important point is,
+     that they should always contain only one meaningful change.
+
+ #. **Create a pull request**: Follow `Pull Request Guide`_ on GitHub.
+
+ #. **Receive acknowledgements**: Before a maintainer may accept your
+     changes, you will need to find two DFE developers to acknowledge them.
+     These two people should be mentioned within your commit message, as
      described later.
 
  #. **Get it merged**: If you have a pull request or Issue containing your
-     problem, your solution, the commits and two Acked-Bys
+     problem, your solution, and the commits containing the two Acked-Bys,
+     get one of the maintainers to merge it.
 
-If you need to change anything on your commits, e.g. add some ``Acked-by``
-lines, then it is okay to ``rebase -i`` or ``commit --amend`` 
-your changes on your feature branch or pull request, because nobody else should
-work on the same feature branch anyway.
+If you need to change anything on your commits, e.g. to add some ``Acked-by``
+lines, it is okay to ``rebase -i`` or ``commit --amend`` your changes on
+your feature branch or pull request as nobody else is supposed to work on
+the same feature branch anyway.
+
 
 ***************
 Branching Model
 ***************
 
-The MONK repository has different kinds of Branches:
+There are four different kinds of branches in MONK:
 
- #. **The master branch**: Is the stable branch. It should only contain those
-     project states that can be shipped to users.
+ #. **the Master Branch** is the stable branch. It should only contain
+     project states that may be distributed to users.
 
- #. **The dev branch**: Contains the currently accepted features. Changes here
-     might be more unstable and deviate from the documentation. Using MONK from
-     here might break your code, but as a MONK developer you always need to
-     start from the HEAD of this branch with your features and bug fixes.
+ #. **the Dev Branch** contains all currently accepted features. Changes here
+     might be more unstable than in the Master Branch and might not be
+     properly documented. Using this branch might sometimes break your code,
+     but as a MONK developer you will always need to start implementing your
+     features and bug fixes from the HEAD of this branch.
 
- #. **Feature Branches**: Feature Branches are used by Members of
-     `the DFE group`_ to work on bug fixes and new features.
+ #. **Feature Branches** are used by members of `the DFE group`_ to work on
+     bug fixes and new features.
 
- #. **Pull Requests**: Pull Requests are used by external MONK developers who
-     want to get their changes merged into MONK.
+ #. **Pull Requests** are used by external MONK developers who want to get
+     their changes merged into MONK.
 
 
 **************************************
@@ -116,14 +127,14 @@ Acceptance Criteria for the Dev Branch
 **************************************
 
 ``dev`` contains the latest changes that are considered to be working by their
-creators and at least 2 reviewers. To continually ensure good quality of the
+creators and at least two reviewers. To continually ensure good quality of the
 code, some requirements must be met for a commit to be allowed into ``dev``:
 
- * All commits belong to a Github Issue
+ * All commits refer to an Issue on `GitHub`_.
  * The Issue contains an understandable description of the problem that enables
-   reproduction if necessesary
+   reproduction, if necessesary.
  * The Issue contains an understandable and assessable description of the
-   solution
+   solution.
  * All code changes are well documented, formatted according to the (not yet
    publicly available) coding standards and follow high quality standards even
    in areas that are not specifically mentioned here.
@@ -131,8 +142,8 @@ code, some requirements must be met for a commit to be allowed into ``dev``:
    involved.
  * If necessary and possible: integration tests and documentation adapted
    accordingly.
- * 2 DFE team members acknowledged the solution's successful and complete
-   implementation.
+ * Two DFE team members have acknowledged the solution's successful and
+   complete implementation.
 
 These requirements can be overruled only by 100% acceptance of all developers,
 reviewers and both maintainers for a single Issue, if considered necessary.
@@ -151,46 +162,52 @@ Stammtisch decides that MONK's current state warrants doing so.
 Commit Policy
 *************
 
+All commits are are expected to adhere to the following requirements:
+    
  * **KISS principle**: Commits should contain one meaningful change and
-   that one change only. That doesn't mean you should only put changes in one
-   file or one deletion/insertion into one commit, but all the changes should
-   belong together to do one meaningful thing.
+   that one change only. This does not mean you should only put changes in one
+   file or one deletion/insertion into one commit, but that all of the changes
+   should belong together to do one meaningful thing.
 
- * **All English**: As this documentation all relevant texts in MONK are
-   written in English that non German mothertounge speakers can use it as well
-   as we can.
+ * **All English**: All relevant texts in MONK (like this documentation) are
+   written in English so that non German speakers may use it. This, of course,
+   applies to commits as well.
 
- * **Summary Upfront**: The first line is for a short summary with not more
-   then 50 characters. This line must be followed by an empty line
+ * **Summary Upfront**: The first line contains a short summary with no more
+   than 50 characters. This line must be followed by an empty line.
 
- * **Descriptive Content**: The following paragraphs are considered the long
-   description of the problem as well as it's solution.
+ * **Descriptive Content**: The following paragraphs contain the long
+   description of the problem as well as its solution.
 
- * **72 chars per line**: Comment messages shouldn't exceed 72 characters,
-   except longer URLs, cited text or otherwise unintelligible messages when
-   split
+ * **72 characters per line**: Comment messages should not exceed 72
+   characters per line, except for longer URLs, quotations or messages that
+   would be unintelligible in some other way when split.
+
+ * **Refer to an Issue on GitHub**: If you have not done so already within
+   the description, this would be a good place to specify which Issue on
+   GitHub your commit belongs to.
 
  * **Signed-off-bys**: After the long description all developers involved in
-   creating this commit should be mentioned with a seperated line beginning
-   with ``Signed-off-by:``. these lines should include their name and email
-   adress.
+   creating this commit should on seperate lines beginning with
+   ``Signed-off-by:``. These lines should include their names and email
+   addresses.
 
- * **Acked-bys**: Afterwards all people who checked the quality and spelling of
-   the commits should be mentioned in the same fashion with ``Acked-by:``
+ * **Acked-bys**: Afterwards all people who checked the quality of the
+   commits should be mentioned in the same fashion with ``Acked-by:``
    lines.
 
 
-And finally a complete example that does everything correct::
+Finally, a complete example doing everything right::
 
     some_file: limit checks debugged
 
-    There was a problem with the limits in this line. They excluded 0, which is
-    still an acceptable value, which led to unexpected error messages in the
-    GUI.
+    There was a problem with the limits in this line. They excluded 0,
+    which is still an acceptable value. This led to unexpected error
+    messages in the GUI.
 
-    The bug was fixed with changing the `>0` to `>=0`.
+    The bug was fixed by changing `>0` to `>=0`.
 
-    For more details see Github Issue #312.
+    For more details see GitHub Issue #312.
 
     Signed-off-by: Peter Parker <parker@dresearch-fe.de>
     Acked-by: Bruce Wayne <wayne@dresearch-fe.de>
@@ -198,26 +215,26 @@ And finally a complete example that does everything correct::
 
 
 ********************************
-Working with the MONK repository
+Working with the MONK Repository
 ********************************
 
-There are some things to consider, when working in the MONK repositories. This
-shall be covered in this section.
+There are some things to consider, when working with the MONK repository. These
+will be covered in this section.
 
 Configuring the Environment
 ===========================
 
-In it's current state a :py:mod:`~monk_tf.devicetestcase.DeviceTestCase`
+In its current state a :py:mod:`~monk_tf.devicetestcase.DeviceTestCase`
 requires you to configure two serial connections for your device. One
-connection to have access to a console and another to communicate with the
-board controller. The serial ports for these connections have to be configured
-in some environment variables, which you can find
-:doc:`at the bottom of this page <api-docs>`.
+connection provides access to a console, the other enables communication with
+the board controller. The serial ports for these connections have to be
+configured in environment variables, which are documented at the bottom of
+the :doc:`API documentation<api-docs>`.
 
 Building and Installing from Source
 ===================================
 
-Installing from source is quite simple. Just replace the ``<variabl>e`` parts
+Installing from source is quite simple. Just replace the ``<variable>`` parts
 in the following commands and execute them::
 
     $ cd <your_monk_folder>
@@ -229,7 +246,7 @@ in the following commands and execute them::
 Running the Tests
 =================
 
-MONK itself comes with a unittest suite, which checks if everything is working.
+MONK includes a unit test suite, which checks if everything is working.
 You can execute it like this::
 
     $ python tests/test_all.py
@@ -240,7 +257,7 @@ You can execute it like this::
 .. _project monk: project-monk@dresearch-fe.de
 .. _the archives: https://groups.google.com/a/dresearch-fe.de/forum/?fromgroups#!forum/project-monk
 .. _here: https://github.com/DFE/MONK/issues
-.. _Github: https://github.com/DFE/MONK
+.. _GitHub: https://github.com/DFE/MONK
 .. _fork the repository: https://help.github.com/articles/fork-a-repo
 .. _Pull Request Guide: https://help.github.com/articles/using-pull-requests
 .. _the DFE group: https://github.com/DFE
