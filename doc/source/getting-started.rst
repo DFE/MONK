@@ -56,8 +56,7 @@ interact with the :doc:`API <api-docs>` and the
 When writing software tests, it is strongly recommended to structure them in
 two parts:
 
- #. **the Test Framework**: which contains the code necessary to execute
- your tests.
+ #. **the Test Framework**: which contains the code necessary to execute your tests.
 
  #. **the Test Cases**: the actual test code.
 
@@ -143,7 +142,7 @@ Instead of using :py:mod:`monk_tf.device.Device` you may then use
 Another way would be to navigate to the directory containing MONK and
 directly overwrite the code. As MONK is an open source distribution,
 this should be straightforward. It is, however, impossible to foresee
-what will happen to your changes once you use ``pip`` to, for example,
+what will happen to your changes once you use ``pip``,e.g. to
 update MONK. This method is thus not recommended.
 
 
