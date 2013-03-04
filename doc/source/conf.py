@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
-# MONK Testframework documentation build configuration file, created by
-# sphinx-quickstart on Thu Aug  9 11:10:24 2012.
+# MONK documentation build configuration file, created by
+# sphinx-quickstart on Tue Feb 26 17:08:48 2013.
 #
 # This file is execfile()d with the current directory set to its containing dir.
 #
@@ -16,7 +16,7 @@ import sys, os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(1, os.path.abspath(os.path.join('..','..','src','monk_tf')))
+sys.path.insert(1, os.path.abspath(os.path.join('..','..','src')))
 
 # -- General configuration -----------------------------------------------------
 
@@ -25,16 +25,16 @@ sys.path.insert(1, os.path.abspath(os.path.join('..','..','src','monk_tf')))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions =[   'sphinx.ext.autodoc', 
-                'sphinx.ext.intersphinx', 
-                'sphinx.ext.todo', 
-                'sphinx.ext.coverage', 
-                'sphinx.ext.pngmath', 
-                'sphinx.ext.mathjax', 
-                'sphinx.ext.ifconfig', 
-                'sphinx.ext.viewcode',
-                'sphinx.ext.inheritance_diagram',
-                'sphinx.ext.graphviz']
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
+    'sphinx.ext.coverage',
+    'sphinx.ext.pngmath',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.ifconfig',
+    'sphinx.ext.viewcode'
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -49,8 +49,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'MONK Testframework'
-copyright = u'(C) 2013, DResearch Fahrzeugelektronik GmbH'
+project = u'MONK'
+copyright = u'2013, DResearch Fahrzeugelektronik GmbH'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -73,7 +73,7 @@ release = '0.1.1'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['MANIFEST','setup']
+exclude_patterns = []
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
@@ -119,7 +119,7 @@ html_theme = 'default'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = "logo.gif"
+html_logo = '_static/logo.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -183,7 +183,7 @@ latex_elements = {
 'papersize': 'a4paper',
 
 # The font size ('10pt', '11pt' or '12pt').
-#'pointsize': '10pt',
+'pointsize': '12pt',
 
 # Additional stuff for the LaTeX preamble.
 #'preamble': '',
@@ -192,23 +192,23 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'MONK.tex', u'MONK Testframework',
-   u'MONK Maintainers, project-monk@dresearch-fe.de', 'manual'),
+  ('index', 'MONK.tex', u'MONK Documentation',
+   u'DResearch Fahrzeugelektronik GmbH', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-#latex_logo = "logo.gif"
+latex_logo = '_static/logo.png'
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
-#latex_use_parts = False
+latex_use_parts = True
 
 # If true, show page references after internal links.
 latex_show_pagerefs = True
 
 # If true, show URL addresses after external links.
-latex_show_urls = True
+#latex_show_urls = False
 
 # Documents to append as an appendix to all manuals.
 #latex_appendices = []
@@ -222,12 +222,12 @@ latex_show_urls = True
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'MONKtestframework', u'MONK Testframework',
-     [u'MONK Maintainers, project-monk@dresearch-fe.de'], 1)
+    ('index', 'monk', u'MONK Documentation',
+     [u'DResearch Fahrzeugelektronik GmbH'], 1)
 ]
 
 # If true, show URL addresses after external links.
-man_show_urls = True
+#man_show_urls = False
 
 
 # -- Options for Texinfo output ------------------------------------------------
@@ -236,10 +236,9 @@ man_show_urls = True
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'MONKtestframework', u'MONK Testframework',
-   u'MONK Maintainers, project-monk@dresearch-fe.de', 'MONKTestframework',
-   'Simplify your embedded system tests.',
-   'Softwartesting'),
+  ('index', 'MONK', u'MONK Documentation',
+   u'DResearch Fahrzeugelektronik GmbH', 'MONK', 'One line description of project.',
+   'Miscellaneous'),
 ]
 
 # Documents to append as an appendix to all manuals.
@@ -255,10 +254,10 @@ texinfo_documents = [
 # -- Options for Epub output ---------------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = u'MONK Testframework'
-epub_author = u'MONK Maintainers, project-monk@dresearch-fe.de'
-epub_publisher = u'MONK Maintainers, project-monk@dresearch-fe.de'
-epub_copyright = u'(C) 2013, DResearch Fahrzeugelektronik GmbH'
+epub_title = u'MONK'
+epub_author = u'DResearch Fahrzeugelektronik GmbH'
+epub_publisher = u'DResearch Fahrzeugelektronik GmbH'
+epub_copyright = u'2013, DResearch Fahrzeugelektronik GmbH'
 
 # The language of the text. It defaults to the language option
 # or en if the language is not set.
@@ -294,19 +293,20 @@ epub_copyright = u'(C) 2013, DResearch Fahrzeugelektronik GmbH'
 # Allow duplicate toc entries.
 #epub_tocdup = True
 
-# -- Options for doc coverage -------------------------------------------------
-coverage_ignore_modules = ['MANIFEST','setup']
-coverage_ignore_functions = [ ]
-coverage_ignore_classes = [ ]
+# -- Options for doc coverage--------------------------------------------------
+coverage_ignore_modules = []
+coverage_ignore_functions = []
+coverage_ignore_classes = []
 coverage_write_headline = True
 coverage_skip_undoc_in_source = False
-
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'http://docs.python.org/': None}
 
 # -- Options for autodoc ------------------------------------------------------
 autoclass_content = "both"
 
 # -- Options for extensions ---------------------------------------------------
 [extensions]
-todo_include_todos=True
+todo_include_todos = True
+
+
+# Example configuration for intersphinx: refer to the Python standard library.
+intersphinx_mapping = {'http://docs.python.org/': None}

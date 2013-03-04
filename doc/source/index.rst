@@ -25,7 +25,7 @@ help of MONK.
 **What a cross-compiler is for your production code,
 MONK is for your test scripts, and in some regards even more!**
 
-.. figure:: cross-testing.jpg
+.. figure:: _static/cross-testing.jpg
 
     Figure 1: Cross-testing with MONK
 
@@ -36,7 +36,7 @@ Vision
 
 Here is how MONK was envisioned by its developers:
 
-.. figure:: MONK-vision.jpg
+.. figure:: _static/MONK-vision.jpg
 
     Figure 2: The vision of testing with MONK
 
@@ -55,9 +55,9 @@ developers might be tempted to forget about automated tests at all.
 MONK was created to make impossible software tests for embedded systems
 possible, and even enjoyable, when they would be frustrating otherwise.
 
-***********************************
+************************************
 What Using MONK Might Look Like Soon
-***********************************
+************************************
 
 MONK still is a project in early development, and you will definitely find
 it harder to use than in the following example. Still, it is always important
@@ -130,6 +130,6 @@ Further Reading
 
    getting-started
    contributing
-   api-docs
+   modules
    glossary
 

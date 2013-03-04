@@ -29,7 +29,7 @@ class SerialConn(serial.Serial):
     """Serial connection to a device.
        The serial class implements device access via the serial port.
 
-       FIXME: *args nach benannten Parametern funktioniert nicht. Lösung bereits unsauber implementiert.
+       FIXME: ``*args`` nach benannten Parametern funktioniert nicht. Lösung bereits unsauber implementiert.
        FIXME: bei Problemen im Login kann es sein, dass die while Loop in __wait_for_known_boot_state() nicht aufhört!
     """
     

@@ -19,8 +19,6 @@ In this chapter you will learn everything you need to know to get involved in
 MONK development.
 
 
-.. include:: undocumented.inc
-
 *********************************
 Communicating with the Developers
 *********************************
@@ -229,7 +227,7 @@ requires you to configure two serial connections for your device. One
 connection provides access to a console, the other enables communication with
 the board controller. The serial ports for these connections have to be
 configured in environment variables, which are documented at the bottom of
-the :doc:`API documentation<api-docs>`.
+the :doc:`API documentation<modules>`.
 
 Building and Installing from Source
 ===================================

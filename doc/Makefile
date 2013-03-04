@@ -6,6 +6,9 @@ SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
 BUILDDIR      = build
+SOURCEDIR     = source
+PROJECT       = monk_tf
+CODEDIR       = ../src/$(PROJECT)
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
@@ -14,7 +17,9 @@ ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) sou
 # the i18n builder cannot share the environment and doctrees with the others
 I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
 
-.PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest gettext
+all: html latexpdf
+
+.PHONY: help clean clean-html clean-latex clean-apidoc html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest gettext apidoc
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -38,9 +43,19 @@ help:
 	@echo "  changes    to make an overview of all changed/added/deprecated items"
 	@echo "  linkcheck  to check all external links for integrity"
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
+	@echo "  apidoc     to create the api documentation automatically from source"
 
-clean:
-	-rm -rf $(BUILDDIR)/*
+clean: clean-html clean-latex clean-apidoc
+
+clean-html:
+	-rm -rf $(BUILDDIR)/html/*
+
+clean-latex:
+	-rm -rf $(BUILDDIR)/latex/*
+
+clean-apidoc:
+	-rm -rf $(SOURCEDIR)/$(PROJECT).rst
+	-rm -rf $(SOURCEDIR)/modules.rst
 
 undocumented:
 	@cd .. &&																\
@@ -71,7 +86,7 @@ undocumented:
 				}' 															\
 		| tee doc/source/undocumented.inc
 
-html: undocumented
+html: clean-html apidoc
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
@@ -107,17 +122,17 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/HidavIntegrationTestTooling.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/MONKCross-TestingFramework.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/HidavIntegrationTestTooling.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/MONKCross-TestingFramework.qhc"
 
 devhelp:
 	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) $(BUILDDIR)/devhelp
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/HidavIntegrationTestTooling"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/HidavIntegrationTestTooling"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/MONKCross-TestingFramework"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/MONKCross-TestingFramework"
 	@echo "# devhelp"
 
 epub:
@@ -132,7 +147,7 @@ latex:
 	@echo "Run \`make' in that directory to run these through (pdf)latex" \
 	      "(use \`make latexpdf' here to do that automatically)."
 
-latexpdf:
+latexpdf: clean-latex apidoc
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
 	@echo "Running LaTeX files through pdflatex..."
 	$(MAKE) -C $(BUILDDIR)/latex all-pdf
@@ -181,3 +196,6 @@ doctest:
 	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) $(BUILDDIR)/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in $(BUILDDIR)/doctest/output.txt."
+
+apidoc: clean-apidoc
+	sphinx-apidoc -o $(SOURCEDIR) $(CODEDIR)

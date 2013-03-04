@@ -50,7 +50,7 @@ Usage
 *****
 
 At this point of MONK's development usage mostly relies on your ability to
-interact with the :doc:`API <api-docs>` and the
+interact with the :doc:`API <modules>` and the
 :doc:`development process <contributing>`.
 
 When writing software tests, it is strongly recommended to structure them in
@@ -74,9 +74,9 @@ When writing tests with MONK, you will usually want to use the
 
 Using the :py:class:`~monk_tf.devicetestcase.DeviceTestcase` automatically
 enables some of the features currently implemented in MONK. For example, your
-:term:`target device` will be rebooted and updated. Have a look at the source
-code of :py:mod:`~monk_tf.devicetestcase` if you are interested in more
-details.
+:term:`target device <target vs development system>` will be rebooted and
+updated. Have a look at the source code of :py:mod:`~monk_tf.devicetestcase`
+if you are interested in more details.
 
 *********************
 Patching MONK Locally 
