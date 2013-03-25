@@ -25,9 +25,11 @@ help of MONK.
 **What a cross-compiler is for your production code,
 MONK is for your test scripts, and in some regards even more!**
 
-.. figure:: _static/cross-testing.jpg
+.. figure:: _static/cross-testing.png
+    :scale: 30%
+    :align: center
 
-    Figure 1: Cross-testing with MONK
+    Cross-testing with MONK
 
 
 ******
@@ -36,9 +38,11 @@ Vision
 
 Here is how MONK was envisioned by its developers:
 
-.. figure:: _static/MONK-vision.jpg
+.. figure:: _static/MONK-vision.png
+    :scale: 30%
+    :align: center
 
-    Figure 2: The vision of testing with MONK
+    The vision of testing with MONK
 
 The first approach shows the way most people consider writing software tests
 after first learning about the concept. With more experience and some
