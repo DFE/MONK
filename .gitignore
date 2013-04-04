@@ -12,3 +12,8 @@
 
 # coverage output
 .coverage
+
+.project
+.pydevproject
+
+.settings/*
