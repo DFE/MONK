@@ -139,6 +139,8 @@ class SerialConn(serial.Serial):
         self._logger.debug("Waiting for a known system state...")
 
         state = "UNKNOWN"
+        self.close()
+        self.open()
         while state == "UNKNOWN":
             state = self.__boot_state
 
