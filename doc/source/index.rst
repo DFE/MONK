@@ -134,6 +134,7 @@ Further Reading
 
    getting-started
    contributing
+   codingstyle
    modules
    glossary
 
