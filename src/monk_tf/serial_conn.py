@@ -15,6 +15,7 @@
 """ Package for the Serial Connection class """
 
 import serial
+import inspect
 import re
 import urllib
 import time
@@ -57,6 +58,23 @@ class SerialConn(serial.Serial):
         self._boot_prompt = boot_prompt
         self._reset_cb = reset_cb
 
+    def write(self, data):
+        super(SerialConn, self).write(data)
+        time.sleep(1)
+
+    def get_running_test(selt):
+        file = "No Test"
+        index = 0
+        line = 0
+        frmlist = inspect.stack()
+        while frmlist != None and index < len(frmlist):
+            frm = frmlist[index]
+            index = index + 1
+            file = frm[1]
+            line = frm[2]
+            if not file == None and "test_" in file:
+                break
+        return str(file) + " " + str(line)
 
     def read_until (self, target, trigger_write="\n", timeout=None):
         """ Read up to a trigger text, then stop.
@@ -78,8 +96,12 @@ class SerialConn(serial.Serial):
         while not target in buf:
             ret = self.read()
             if ret == "":
-                self._logger.debug("Triggering with [%s] target [%s]" 
-                                        % (urllib.quote(trigger_write), urllib.quote(target)))
+                if not len(log_line) > 0:
+                    self._logger.debug("[%s]"  % log_line.strip())
+                    log_line = ""
+                test = self.get_running_test()
+                self._logger.debug(test + "\nTriggering with [%s] target [%s]" \
+                                   % (urllib.quote(trigger_write), urllib.quote(target)))
                 time.sleep(0.25)
                 self.write( trigger_write )
             else:

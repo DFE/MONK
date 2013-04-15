@@ -83,6 +83,9 @@ class Connection(object):
         ser.parity   = parity
         ser.stopbits = stop
         ser.timeout  = timeout_sec
+        ser.rtscts   = 0
+        ser.dsrdtr   = 0
+        ser.xonxoff  = 0
         ser.open()
         self._logger.debug("%s is now open." % port)
         return ser
