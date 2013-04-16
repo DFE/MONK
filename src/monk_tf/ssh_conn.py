@@ -149,7 +149,7 @@ def main():
     if len(sys.argv) != 4:
         print "Usage: %s <host> <username> <password>" % sys.argv[0]
         sys.exit()
-    ssh = SshConn(logger.init(), sys.argv[1], (sys.argv[2], sys.argv[3]))
+    ssh = SshConn(sys.argv[1], (sys.argv[2], sys.argv[3]))
     print ssh.cmd("echo $PATH")[1]
     print ssh.cmd("ls /")[1]
     print ssh.cmd("uptime")[1]
