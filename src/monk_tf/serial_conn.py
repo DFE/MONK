@@ -64,7 +64,7 @@ class SerialConn(serial.Serial):
             :param target: target string to match
             :param trigger_write: 
                 string to be sent via serial if a read timeout occurs
-            :param timeout: custom timeout for :py:obj:`trigger_write`
+            :param timeout: custom timeout for :py:obj:`read` and :py:obj:`write`
             :return: all text read up to the point where :py:obj:`target` 
                 appeared, including :py:obj:`target`
         """
@@ -73,7 +73,9 @@ class SerialConn(serial.Serial):
         buf      = ""
         log_line = ""
         if timeout:
+            old_wto = self._writeTimeout 
             old_to = self._timeout
+            self._writeTimeout = timeout
             self._timeout = timeout
         while not target in buf:
             ret = self.read()
@@ -92,6 +94,7 @@ class SerialConn(serial.Serial):
         self._logger.debug("Got it: [%s]" % urllib.quote(target))
         if timeout:
             self._timeout = old_to
+            self._writeTimeout = old_wto
         return buf
 
 
