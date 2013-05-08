@@ -73,28 +73,28 @@ class SerialConn(serial.Serial):
         buf      = ""
         log_line = ""
         if timeout:
-            old_wto = self._writeTimeout 
-            old_to = self._timeout
-            self._writeTimeout = timeout
-            self._timeout = timeout
+            old_wto = self.writeTimeout 
+            old_rto = self.timeout
+            self.writeTimeout = timeout
+            self.timeout = timeout
         while not target in buf:
             ret = self.read()
-            if ret == "":
-                self._logger.debug("Triggering with [%s] target [%s]" 
-                                        % (urllib.quote(trigger_write), urllib.quote(target)))
-                time.sleep(0.25)
-                self.write( trigger_write )
-            else:
+            if ret:
                 buf += ret
                 if ret == '\n':
                     self._logger.debug("[%s]"  % log_line.strip())
                     log_line = ""
                 else:
                     log_line += ret
+            else:
+                self._logger.debug("Triggering with [%s] target [%s]" 
+                                        % (urllib.quote(trigger_write), urllib.quote(target)))
+                time.sleep(0.25)
+                self.write( trigger_write )
         self._logger.debug("Got it: [%s]" % urllib.quote(target))
         if timeout:
-            self._timeout = old_to
-            self._writeTimeout = old_wto
+            self.timeout = old_rto
+            self.writeTimeout = old_wto
         return buf
 
 
