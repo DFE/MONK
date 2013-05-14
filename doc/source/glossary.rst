@@ -15,6 +15,20 @@ Glossary
         A computer highly adapted to a specific usecase, often used inside
         cars, trains, airplane and the likes.
 
+    reST
+        reST is the short form of *restructuredText*, which is a markup format
+        for text files. Much like `Wiki markup`_ or `Markdown`_ it is a
+        language with 2 goals: easily readable and writeable source code, as
+        well as a logical structure understandable by a compiler program.
+        Writing reST source files is often not too different from simply
+        writing a text into a normal txt file. But with the logical structure
+        together it can be compiled to formatted HTML or PDF. Writing in those
+        markup languages is also considered easier then writing HTML directly.
+        reST itself was created for documenting the Python core libraries.
+        Today it developed to the quasi standard for documenting all kinds of
+        Python projects and some projects in other languages use it as well.
+        See the `reST website`_ for more details.
+
     target vs development system
         Embedded systems are highly specialised for one task and that task
         alone. Because these tasks are unrelated to software development most
@@ -39,3 +53,10 @@ Glossary
         activities with the framework. Every time you use MONK, you will also
         apply a Usecase, if you know about it or not. The most important and
         simplest Usecase is the :py:mod:`monk_tf.SingleUsecase`.
+
+
+.. Links
+
+.. _Wiki markup: http://en.wikipedia.org/wiki/Help:Wiki_markup
+.. _Markdown: http://daringfireball.net/projects/markdown/
+.. _reST website: http://docutils.sourceforge.net/rst.html
