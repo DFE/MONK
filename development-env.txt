@@ -1,0 +1,9 @@
+Jinja2==2.6
+Pygments==1.6
+Sphinx==1.2b1
+argparse==1.2.1
+distribute==0.6.34
+docutils==0.10
+pylibssh2==1.0.1
+pyserial==2.5
+wsgiref==0.1.2
