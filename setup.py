@@ -11,25 +11,27 @@
 # 2 of the License, or (at your option) any later version.
 #
 
-from distutils.core import setup
+from setuptools import setup
 
-project = 'monk_tf'
-src_path = 'src'
-version = '0.1.1'
+project = "monk_tf"
+version = "0.1.1"
 
 setup(
     name=project,
     version=version,
-    description = 'a test framework for embedded systems',
-    author = 'DResearch Fahrzeugelektronik GmbH',
-    author_email = 'project-monk@dresearch-fe.de',
-    url='https://github.com/DFE/MONK',
+    description = "a test framework for embedded systems",
+    author = "DResearch Fahrzeugelektronik GmbH",
+    author_email = "project-monk@dresearch-fe.de",
+    url="https://github.com/DFE/MONK",
     packages=[project],
-    package_dir = { '' : src_path },
+    setup_requires = [
+        "nose >= 1.0"
+    ],
     install_requires = [
-        'pyserial ==2.5',
-        'pylibssh2 ==1.0.1'
+        "pyserial >=2.5",
+        "pylibssh2 >=1.0.1"
     ],provides = [
-        '{} ({})'.format(project, version)
-    ]
+        "{} ({})".format(project, version)
+    ],
+    test_suite = "nose.collector"
 )
