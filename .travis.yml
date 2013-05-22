@@ -16,11 +16,12 @@ python:
  - "2.7"
 
 install:
- - "pip install -r test-env.txt"
+ - "pip install -r requirements-test.txt"
  - "python setup.py develop"
 
 script:
  - "python setup.py nosetests"
+ - "python setup.py lint || [ \"$?\" -ne 32 ]"
 
 before_install:
  - "sudo apt-get install python2.7-dev libssh2-1-dev"

@@ -24,9 +24,6 @@ setup(
     author_email = "project-monk@dresearch-fe.de",
     url="https://github.com/DFE/MONK",
     packages=[project],
-    setup_requires = [
-        "nose >= 1.0"
-    ],
     install_requires = [
         "pyserial >=2.5",
         "pylibssh2 >=1.0.1"
