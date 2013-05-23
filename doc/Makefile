@@ -8,7 +8,7 @@ PAPER         =
 BUILDDIR      = build
 SOURCEDIR     = source
 PROJECT       = monk_tf
-CODEDIR       = ../src/$(PROJECT)
+CODEDIR       = ../$(PROJECT)
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
