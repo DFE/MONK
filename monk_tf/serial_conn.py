@@ -29,7 +29,7 @@ class SerialConn(serial.Serial):
     """Serial connection to a device.
        The serial class implements device access via the serial port.
 
-       FIXME: *args nach benannten Parametern funktioniert nicht. Lösung bereits unsauber implementiert.
+       FIXME: ``*args`` nach benannten Parametern funktioniert nicht. Lösung bereits unsauber implementiert.
        FIXME: bei Problemen im Login kann es sein, dass die while Loop in __wait_for_known_boot_state() nicht aufhört!
     """
     
@@ -64,7 +64,7 @@ class SerialConn(serial.Serial):
             :param target: target string to match
             :param trigger_write: 
                 string to be sent via serial if a read timeout occurs
-            :param timeout: custom timeout for :py:obj:`trigger_write`
+            :param timeout: custom timeout for :py:obj:`read` and :py:obj:`write`
             :return: all text read up to the point where :py:obj:`target` 
                 appeared, including :py:obj:`target`
         """
@@ -73,25 +73,28 @@ class SerialConn(serial.Serial):
         buf      = ""
         log_line = ""
         if timeout:
-            old_to = self._timeout
-            self._timeout = timeout
+            old_wto = self.writeTimeout 
+            old_rto = self.timeout
+            self.writeTimeout = timeout
+            self.timeout = timeout
         while not target in buf:
             ret = self.read()
-            if ret == "":
-                self._logger.debug("Triggering with [%s] target [%s]" 
-                                        % (urllib.quote(trigger_write), urllib.quote(target)))
-                time.sleep(0.25)
-                self.write( trigger_write )
-            else:
+            if ret:
                 buf += ret
                 if ret == '\n':
                     self._logger.debug("[%s]"  % log_line.strip())
                     log_line = ""
                 else:
                     log_line += ret
+            else:
+                self._logger.debug("Triggering with [%s] target [%s]" 
+                                        % (urllib.quote(trigger_write), urllib.quote(target)))
+                time.sleep(0.25)
+                self.write( trigger_write )
         self._logger.debug("Got it: [%s]" % urllib.quote(target))
         if timeout:
-            self._timeout = old_to
+            self.timeout = old_rto
+            self.writeTimeout = old_wto
         return buf
 
 

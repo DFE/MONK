@@ -9,6 +9,7 @@ import datetime
 import device
 import threading
 import logging
+import os
 
 def config_logging():
     """ Configure the root logger """
@@ -72,7 +73,9 @@ class DeviceTestCase(unittest.TestCase):
         if init_logging:
             config_logging()
         cls.__dev = device.Device( devtype = devicetype )
-        if nand_boot:
+        # checking the environment variable before reboot
+        need_reboot = os.getenv("MONK_NEED_START_REBOOT", 1)
+        if nand_boot and need_reboot == 0:
             logging.getLogger(__name__).debug("Boot to NAND ...")
             cls.__dev.reboot(to_nand=True)
 

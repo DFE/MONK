@@ -18,6 +18,7 @@ import time
 import atexit
 import sys
 import logging
+import os
 
 import connection
 import bcc
@@ -69,7 +70,10 @@ class Device(object):
 
         self.bcc = bcc.Bcc()
         rst = self.bcc.reset if self._setup["reset_cb"] == True else None
-        atexit.register(self.__shutdown)
+        # checking the environment variable before reboot
+        need_reboot = os.getenv("MONK_NEED_END_REBOOT", 1)
+        if need_reboot == 0:
+            atexit.register(self.__shutdown)
 
         self.conn = connection.Connection(
             network_setup = self._setup["network_setup"],
