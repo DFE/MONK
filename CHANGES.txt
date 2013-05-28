@@ -1,0 +1,15 @@
+Release 0.1.1
+=============
+
+ * rewrote documentation
+ * style guide
+ * configured for pip, setuptools, virtualenv
+ * restarted unit test suite with nosetests
+ * added development and test requirements
+
+
+
+Release 0.1
+===========
+
+The initial Release.
