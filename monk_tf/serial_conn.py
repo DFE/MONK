@@ -12,14 +12,22 @@
 # 2 of the License, or (at your option) any later version.
 #
 
+
+# disabling pylint messages:
+# =========================
+# Disabling message "Too many public methods": pylint: disable-msg=R0904
+# Disabling message "Invalid name" (CamelCase) pylint: disable-msg=C0103
+
 """ Package for the Serial Connection class """
 
 import serial
+import serial_thread
 import re
 import urllib
 import time
 import sys
 import logging
+import threading
 
 import bcc
 
@@ -45,6 +53,7 @@ class SerialConn(serial.Serial):
            :param reset_cb:    custom RESET callback to run when the device
                                is rebooted
         """
+
         self._logger = logging.getLogger(__name__)
         self.__args = args if args is not None else []
         self.__kwargs = kwargs if kwargs is not None else {}
@@ -56,7 +65,50 @@ class SerialConn(serial.Serial):
         self._skip_pass = skip_pass
         self._boot_prompt = boot_prompt
         self._reset_cb = reset_cb
+        self.serial_read_handler = None
 
+    def init_conn_handler(self):
+        """ init handler only once up in a time
+        """
+        if not self.serial_read_handler:
+            self.serial_read_handler = serial_thread.Thread_serial_read(
+                                                    threading.current_thread(),
+                                                    self)
+            self.serial_read_handler.start()
+        
+        return 
+    
+    @property
+    def readbuffer(self):
+        """returns the read buffer of the serial read handling
+        """
+        if self.port in self.serial_read_handler.readbuffer:
+            return self.serial_read_handler.readbuffer
+        else:
+            return None        
+
+    def open(self):
+        """open the serial interface and handling
+        
+        In this Function the serial port is opened and the threads for 
+        serial handling are started.
+        """
+        self.init_conn_handler()     
+        ret = super(SerialConn, self).open()
+        return ret
+
+    def write(self, data):
+        """function calls write function from superclass
+        """
+        #FIXME: logging
+        logging.info(str("write" + str(self.serial_read_handler.count) + "<" + 
+                         str(data) + ">"))
+        ret = serial.Serial.write(self, data)
+        return ret
+
+
+    def read(self, size=1):        
+        return self.serial_read_handler.read(size)
 
     def read_until (self, target, trigger_write="\n", timeout=None):
         """ Read up to a trigger text, then stop.
@@ -68,10 +120,14 @@ class SerialConn(serial.Serial):
             :return: all text read up to the point where :py:obj:`target` 
                 appeared, including :py:obj:`target`
         """
-        self._logger.debug("reading 'til [%s], triggering output with [%s]" 
-                % (urllib.quote(target), urllib.quote(trigger_write)))
+        self._logger.debug("reading 'til [%s]" 
+                                % (urllib.quote(target)))
+        if trigger_write:
+            self._logger.debug("triggering output with [%s]" 
+                                    %  urllib.quote(trigger_write))
+        readcount = 0
         buf      = ""
-        log_line = ""
+        log_line = ""        
         if timeout:
             old_wto = self.writeTimeout 
             old_rto = self.timeout
@@ -81,16 +137,25 @@ class SerialConn(serial.Serial):
             ret = self.read()
             if ret:
                 buf += ret
+                readcount = readcount + 1
                 if ret == '\n':
                     self._logger.debug("[%s]"  % log_line.strip())
                     log_line = ""
                 else:
                     log_line += ret
             else:
-                self._logger.debug("Triggering with [%s] target [%s]" 
-                                        % (urllib.quote(trigger_write), urllib.quote(target)))
-                time.sleep(0.25)
-                self.write( trigger_write )
+                if readcount == 0:
+                    time.sleep(2)
+                    readcount = 1
+                else:
+                    
+                    time.sleep(0.25)
+                    readcount = 0
+                    if trigger_write:
+                        self._logger.debug("Triggering with [%s] target [%s]" 
+                                            % (urllib.quote(trigger_write), 
+                                               urllib.quote(target)))
+                        self.write( trigger_write )
         self._logger.debug("Got it: [%s]" % urllib.quote(target))
         if timeout:
             self.timeout = old_rto
@@ -127,7 +192,6 @@ class SerialConn(serial.Serial):
             :return: string "bootloader", "login", "shell", or "UNKNOWN"
         """
         buf = self.read_until("\n", timeout=3)
-
         ret = "shell"  if self._login[0] + "@" in buf \
                         else "login" if "login:" in buf \
                         else "bootloader" if self._boot_prompt in buf \
@@ -139,8 +203,8 @@ class SerialConn(serial.Serial):
 
     def __wait_for_known_boot_state(self):
         """ Wait for a KNOWN boot state. """
-        self._logger.debug("Waiting for a known system state...")
-
+        self._logger.debug("FLUSH. Waiting for a known system state...")
+        self.serial_read_handler.flush()
         state = "UNKNOWN"
         while state == "UNKNOWN":
             state = self.__boot_state
@@ -157,8 +221,9 @@ class SerialConn(serial.Serial):
             whether we're currently in the boot loader (in which case the 
             method will boot the device, then log in).
         """
-        state = self.__wait_for_known_boot_state();
-
+        state = self.__wait_for_known_boot_state()
+        
+          
         if state == "shell":
             self._logger.debug("Already logged in.")
             return
@@ -174,17 +239,19 @@ class SerialConn(serial.Serial):
             self.write("\nboot\n")
             self.flush()
 
-        self._logger.info("Login for user %s." % self._login[0])
-        self.flushInput()
-        self.flushOutput()
-
+        self._logger.info("flush. Login for user %s." % self._login[0])
+#        self.flushInput()
+#        self.flushOutput()
+        self.serial_read_handler.flush()
+        
         self.read_until("login:", "\n", timeout=20)
+        
         self.write(self._login[0] + "\n")
 
         if not self._skip_pass:
             self._logger.debug("Sending password for user %s." 
                                     % self._login[0])
-            self.read_until("Password:")
+            self.read_until("Password:", trigger_write=None)
             self.write(self._login[1] + "\n")
 
         self.read_until(self._login[0] + "@")
@@ -202,8 +269,8 @@ class SerialConn(serial.Serial):
             :param cmd: command to execute
             :return:    string buffer containing command output
         """
-        self.flushInput()
-        self.flushOutput()
+#        self.flushInput()
+#        self.flushOutput()
 
         self.read_until("\n", timeout=30)
         
@@ -329,8 +396,8 @@ class SerialConn(serial.Serial):
 
         buf += self.reboot(sync=True, stop_at_bootloader=True)
 
-        self.flushInput()
-        self.flushOutput()
+#        self.flushInput()
+#        self.flushOutput()
         self.flush()
         time.sleep(1)
 
@@ -367,12 +434,12 @@ def main():
         intended to be used for interactive testing during development,
         and as a showcase on how to use the class. 
     """
-    b = bcc.Bcc()
+    bcc_instance = bcc.Bcc()
     if len(sys.argv) < 3:
         print "Usage: %s <username> <password> [<command>]" % sys.argv[0]
         sys.exit()
-    scn = SerialConn(logger.init(), (sys.argv[1], sys.argv[2]),
-            reset_cb=b.reset)
+    scn = SerialConn((sys.argv[1], sys.argv[2]),
+            reset_cb=bcc_instance.reset)
     scn.port     = "/dev/ttyUSB1"
     scn.baudrate = 115200
     scn.bytesize = 8
