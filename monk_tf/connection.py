@@ -24,6 +24,8 @@ class Connection(object):
         The connection class abstracts a device connection via serial and/or IP.
         It implements device command processing in a request/response manner.
     """
+    
+    serials = {}
 
     def __init__(self, serial_setup = (os.getenv("MONK_CONSOLE_PORT", "/dev/ttyUSB1"), 115200, 8, 'N', 1, 1), 
                  network_setup = ( None, "eth0" ), login = ( "root", "" ),
@@ -72,20 +74,28 @@ class Connection(object):
     def _serial_setup(self, port, baud, byte, parity, stop, timeout_sec, 
                       skip_pass, boot_prompt, reset_cb):
         """ Set up the serial communication back-end. """
-        self._logger.debug("(re)opening serial port %s" % port)
-        ser = serial_conn.SerialConn(
-                        login = self._login, skip_pass = skip_pass, 
-                        boot_prompt = boot_prompt,
-                        reset_cb = reset_cb)
-        ser.port     = port
-        ser.baudrate = baud
-        ser.bytesize = byte
-        ser.parity   = parity
-        ser.stopbits = stop
-        ser.timeout  = timeout_sec
-        ser.open()
-        self._logger.debug("%s is now open." % port)
-        return ser
+        if Connection.serials.has_key(port):
+            self._logger.warn("%s was already opened." % port)
+            return Connection.serials.get(port)
+        else:
+            self._logger.debug("(re)opening serial port %s" % port)
+            ser = serial_conn.SerialConn(
+                            login = self._login, skip_pass = skip_pass, 
+                            boot_prompt = boot_prompt,
+                            reset_cb = reset_cb)
+            ser.port     = port
+            ser.baudrate = baud
+            ser.bytesize = byte
+            ser.parity   = parity
+            ser.stopbits = stop
+            ser.timeout  = timeout_sec
+            ser.rtscts   = 0
+            ser.dsrdtr   = 0
+            ser.xonxoff  = 0
+            ser.open()
+            Connection.serials[port] = ser
+            self._logger.debug("%s is now open." % port)
+        return Connection.serials[port]
  
 
     @property
