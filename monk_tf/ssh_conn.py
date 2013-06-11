@@ -78,7 +78,12 @@ class SshConn(object):
                 if ret == "" or ret is None:
                     break
                 buf += ret
-            chan.close()
+            try: 
+                rc = chan.close()
+                self._logger.info("close returned %d" % rc)
+            except:    
+                self._logger.info("close ssh channel failed, call wait_closed")
+                chan.wait_closed()
             rcd = chan.exit_status()
             self._logger.info("Command [%s] ret: #%d" % (cmd, rcd))
             self._logger.debug("Command [%s] output:\n[%s]" % (cmd, buf))
