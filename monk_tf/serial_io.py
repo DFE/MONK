@@ -27,6 +27,9 @@ class SerialConsole(serial.Serial):
 
     _DEFAULT_PROMPT=">>> "
 
+    class ReadState:
+        LEFT_OVER=1
+        FOUND_START=2
 
     def __init__(self, *args, **kwargs):
         """
@@ -55,6 +58,9 @@ class SerialConsole(serial.Serial):
 
         We try to just grab the ``<command output>`` and return it.
 
+        .. note:: The results from the last output can be optained with the
+        attributes ``last_cmd``, ``last_confidence`` and ``last_output``.
+
         :param msg: the shell command you want to execute over the serial line.
 
         :param prompt: the prompt that signals that a command is treated and
@@ -73,13 +79,45 @@ class SerialConsole(serial.Serial):
 
         :param return: the command output.
         """
-        class State:
-            LEFT_OVER=1
-            CMD_OUTPUT=2
         # prepare
         cmd = msg.strip() + linesep
         self.write(cmd)
-        state = State.LEFT_OVER
+        self.__last_cmd = cmd
+        self.__last_confidence, self.__last_output =  self.read_until(
+                cmd,prompt, sleep_length, timeout)
+        return self.last_output
+
+
+    def read_until(self, end_strip, start_strip=None, sleep_length=.1, timeout=5):
+        """ read until end strip found
+
+        This function reads everything available in the buffer, then waits
+        ``sleep_length`` seconds and then starts again, either until it finds
+        ``end_strip`` in the buffered text or the ``timeout`` runs out.
+        Everything will be deleted, beginning from the ``end_strip``, because
+        that is expected to be knowledge the user already has.
+        
+        The same way as ``end_strip`` works on the end, you can also define a
+        ``start_strip``, which will delete everything in the buffer until the
+        start_strip is found.
+
+        :param end_strip: The text which terminates the search. A string as
+        excepted by :py:func:`str.find`.
+
+        :param start_strip: The text which starts the search. A string as
+        expected by :py:func:`str.find`.
+
+        :param sleep_length: defines how long the process should sleep until
+                             the next iteration of the loop is started.
+
+        :param timeout: defines in seconds how long this method should take at
+                        most.
+
+        :return: (boolean, string) - The first param is True as long as the
+                 timeout didn't deplete. The second param contains the output
+                 as far as it was received.
+        """
+        state = ReadState.LEFT_OVER if start_strip else ReadState.FOUND_START
         out = ""
         start_time = time.time()
         while True:
@@ -90,21 +128,19 @@ class SerialConsole(serial.Serial):
                 return out
             time.sleep(sleep_length)
             out += self.read(self.inWaiting())
-            if state == State.LEFT_OVER:
-                pos = out.find(cmd)
+            if state == ReadState.LEFT_OVER:
+                pos = out.find(start_strip)
                 if pos >= 0:
-                    # forget everything until including the command
-                    out = out[pos+len(cmd):]
-                    state = State.CMD_OUTPUT
-            elif state == State.CMD_OUTPUT:
-                pos = out.find(prompt)
+                    # forget everything up to including the start_strip
+                    out = out[pos+len(start_strip):]
+                    state = ReadState.FOUND_START
+            elif state == ReadState.FOUND_START:
+                pos = out.find(end_strip)
                 if pos >= 0:
-                    # strip the prompt and everything afterwards
+                    # strip the end_strip and everything afterwards
                     out = out[:pos]
-                    self.__last_confidence = True
-                    self.__last_cmd = cmd
-                    self.__last_output = out
-                    return out
+                    return True, out
+
 
 
     @property
