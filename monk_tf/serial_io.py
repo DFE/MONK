@@ -91,7 +91,7 @@ class SerialIO(serial.Serial):
                 sleep_time,
                 timeout
         )
-        return self.last_output
+        return self.last_confidence, self.last_output
 
 
     def read_until(self, end_strip, start_strip=None, sleep_time=.1, timeout=5):
