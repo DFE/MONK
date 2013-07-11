@@ -7,9 +7,8 @@ def test_helloworld():
     # set up
     uc = tf.SingleDeviceUsecase("hipox.cfg")
     # exec
-    out = uc.dev.cmd()
+    out = uc.dev.cmd("")
     # assert
-    nt._ok(out, "expected some kind of output, likea new prompt")
+    nt._ok(out, "expected some kind of output, like a new prompt")
     # teardown
     uc.test_finished()
-
