@@ -30,6 +30,7 @@ class SerialIO(serial.Serial):
         """
         :param prompt: set a prompt for the communication
         """
+        print "wrong init :("
         self._logger = logging.getLogger(__name__)
         if "linesep" in args:
             self.linesep = args["linesep"]

@@ -10,127 +10,65 @@
 # 3 of the License, or (at you option) any later version.
 #
 
-import logging
-
 from nose import tools as nt
 
 from monk_tf import serial_io as sio
 
 
 def test_simple():
-    """serial_io: check wether creating a SerialIO object works
+    """ serial_io: create a SerialIO Object without problems
     """
-    #nothing to prepare
-    #
-    #execute
+    # set up
+    # exec
     sut = sio.SerialIO()
-    #assert
-    nt.ok_(sut, "should contain a monk_tf.serial_io.SerialIO object, but instead contains this: '{}'".format(sut))
+    # assert
+    nt.ok_(isinstance(sut,sio.SerialIO),
+        "should have type SerialIO, but has {}".format(type(sut)))
 
 
-def test_cmd_set_attribs():
-    """serial_io: check wether cmd automatically updates the attributes
+def test_cmd_hello_world():
+    """ serial_io: cmd("hello") returns "world"
     """
-    # prepare
-    send_cmd = "qwer"
-    expected_calls = ['write', 'read_until']
-    expected_cmd = send_cmd + "\n"
-    expected_confidence = True
-    expected_output = 'abcd'
-    sut = MockSerialIOCmd((True, expected_output))
-    # execute
-    sut.cmd(send_cmd)
-    # evaluate
+    # set up
+    any_txt = "hello"
+    expected_out = "world"
+    expected_calls = ["write('{}\n')".format(any_txt), "readall()"]
+    sut = MockSerial()
+    sut.out = "hello\n{}\n<prompt>$ ".format(expected_out)
+    # exec
+    out = sut.cmd(any_txt)
+    # assert
+    nt.eq_(expected_out, out)
     nt.eq_(expected_calls, sut.calls)
-    nt.eq_(expected_cmd, sut.last_cmd)
-    nt.eq_(expected_confidence, sut.last_confidence)
-    nt.eq_(expected_output, sut.last_output)
-    # clean up
-    # not needed
 
 
-def test_read_until_strips_end():
-    """serial_io: check wether reading really strips end_strip
+def test_cmd_with_windows_newlines():
+    """ serial_io: make sure that windows newlines get replaced
     """
-    # prepare
-    expected_calls = ["read"]
-    expected_out = "trewq\n"
-    expected_confidence = True
-    in_strip = "abcd"
-    in_sleep = 0.0
-    in_mock_output = expected_out + in_strip
-    sut = MockSerialIORead(in_mock_output)
-    # execute
-    out_confidence, output = sut.read_until(in_strip, sleep_time=in_sleep)
-    # evalute
+    # set up
+    any_txt = "hello"
+    expected_out = "world"
+    expected_calls = ["write('{}\n')".format(any_txt), "readall()"]
+    sut = MockSerial()
+    sut._linesep = "\n"
+    sut.out = "hello\n\r{}\n\r<prompt>$ ".format(expected_out)
+    # exec
+    out = sut.cmd(any_txt)
+    # assert
+    nt.eq_(expected_out, out)
     nt.eq_(expected_calls, sut.calls)
-    nt.eq_(expected_confidence, out_confidence)
-    nt.eq_(expected_out, output)
-    # clean up
-    # not needed
 
 
-def test_read_until_strips_start():
-    """serial_io: check wether reading really strips start_strip
-    """
-    # prepare
-    expected_calls = ["read", "read"]
-    expected_out = "trewq\n"
-    expected_confidence = True
-    in_start_strip = "abcd\n"
-    in_stop_strip = "dcba"
-    in_sleep = 0.0
-    in_mock_output = in_start_strip + expected_out + in_stop_strip
-    sut = MockSerialIORead(in_mock_output)
-    # execute
-    out_confidence, output = sut.read_until(
-            in_stop_strip,
-            start_strip=in_start_strip,
-            sleep_time=in_sleep
-    )
-    # evalute
-    nt.eq_(expected_calls, sut.calls)
-    nt.eq_(expected_confidence, out_confidence)
-    nt.eq_(expected_out, output)
-    # clean up
-    # not needed
+class MockSerial(sio.SerialIO):
 
 
-class MockSerialIOCmd(sio. SerialIO):
-    """ mocks specifically for testing the cmd() method
-    """
-
-    def __init__(self, readout=None):
+    def __init__(self):
         self.calls = []
-        self.readout = readout
-        super(MockSerialIOCmd, self).__init__()
 
 
-    def write(self,cmd=None):
-        self.calls.append("write")
+    def readall(self):
+        self.calls.append("readall()")
+        return self.out
 
-
-    def read_until(self, cmd=None, prompt=None, sleep_time=None, timeout=None,
-            start_strip=None):
-        self.calls.append("read_until")
-        return self.readout
-
-
-class MockSerialIORead(sio.SerialIO):
-
-    def __init__(self, readout=None):
-        self.calls = []
-        self.readout = readout
-        super(MockSerialIORead, self).__init__()
-
-
-    def write(self,cmd=None):
-        self.calls.append("write")
-
-
-    def read(self, number=None):
-        self.calls.append("read")
-        return self.readout
-
-    def inWaiting(self):
-        return 0
+    def write(self,msg):
+        self.calls.append("write('{}')".format(msg))
