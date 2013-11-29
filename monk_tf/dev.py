@@ -11,6 +11,12 @@
 # 3 of the License, or (at your option) any later version.
 #
 
+""" Device Layer
+
+This layer abstracts a complete :term:`target device` in a single object, which
+can be interacted without worries about how the actual communication is done.
+"""
+
 import logging
 
 import conn
@@ -23,8 +29,7 @@ class DeviceException(Exception):
     pass
 
 class CantHandleException(DeviceException):
-    """ is raised, when a request can't be handled by the connections of a
-    :py:class:`~monk_tf.dev.Device`.
+    """ a request can't be handled by the connections of a :py:class:`~monk_tf.dev.Device`.
     """
     pass
 
@@ -49,16 +54,16 @@ class Device(object):
         :param msg: the :term:`shell command`.
         :return: the standard output of the :term:`shell command`.
         """
-        for c in self.conns:
+        for connection in self.conns:
             try:
-                c.connect()
-                c.login()
-                return c.cmd(msg)
-            except conn.ConnectionException as e:
+                connection.connect()
+                connection.login()
+                return connection.cmd(msg)
+            except conn.ConnectionException as excpt:
                 logger.exception("{}:{}:{}".format(
                     self.name,
-                    c.name,
-                    e
+                    connection.name,
+                    excpt
                 ))
         # no connection was able to get to the return statement
         raise CantHandleException("dev:'{}',conns:'{}':couldn't send cmd '{}'".format(
@@ -69,8 +74,8 @@ class Device(object):
 
     def __del__(self):
         # make sure all connections get closed on delete
-        for c in self.conns:
+        for connection in self.conns:
             try:
-                c.close()
-            except Exception as e:
-                logger.exception(e)
+                connection.close()
+            except Exception as excpt:
+                logger.exception(excpt)

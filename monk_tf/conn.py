@@ -71,11 +71,11 @@ class AState(object):
     called Singleton.
     """
 
-    CONNECT = "CONNECT"
-    LOGIN = "LOGIN"
-    CMD = "CMD"
-    DISCONNECT= "DISCONNECT"
-    LOGGED_OUT = "LOGGED_OUT"
+    _CONNECT = "CONNECT"
+    _LOGIN = "LOGIN"
+    _CMD = "CMD"
+    _DISCONNECT= "DISCONNECT"
+    _LOGGED_OUT = "LOGGED_OUT"
 
     def __new__(cls, *args, **kwargs):
         try:
@@ -98,7 +98,7 @@ class Disconnected(AState):
     """
 
     def connect(self, connection):
-        self.event = self.CONNECT
+        self.event = self._CONNECT
         connection._connect()
 
     def login(self, connection):
@@ -112,7 +112,7 @@ class Disconnected(AState):
                 .format(connection.name))
 
     def next_state(self, connection):
-        if self.event == self.CONNECT:
+        if self.event == self._CONNECT:
             return Connected()
         else:
             return self
@@ -123,11 +123,11 @@ class Connected(AState):
     """
 
     def connect(self, connection):
-        self.event = self.CONNECT
+        self.event = self._CONNECT
         connection._logger.warning("tried to connect but is already connected")
 
     def login(self, connection):
-        self.event = self.LOGIN
+        self.event = self._LOGIN
         if hasattr(connection, "credentials"):
             connection._logger.debug("authenticate with credentials '{}'"
                     .format(connection.credentials))
@@ -139,33 +139,33 @@ class Connected(AState):
             try:
                 out = connection._login()
             except ConnectionException as e:
-                self.event = self.LOGGED_OUT
+                self.event = self._LOGGED_OUT
                 raise type(e), type(e)(e.message), sys.exc_info()[2]
         else:
             connection._logger.warning("no creds -> no login")
             return True
 
     def cmd(self, connection, msg):
-        self.event = self.CMD
+        self.event = self._CMD
         connection._prompt()
         out = connection._cmd(msg)
         if connection.last_prompt.endswith(connection.pw_prompt):
-            self.event = self.LOGGED_OUT
+            self.event = self._LOGGED_OUT
             raise AuthenticationRequiredException()
 
     def disconnect(self, connection):
-        self.event = self.DISCONNECT
+        self.event = self._DISCONNECT
         connection._logger.info("disconnecting")
         return connection._disconnect()
 
     def next_state(self, connection):
-        if self.event == self.DISCONNECT:
+        if self.event == self._DISCONNECT:
             return Disconnected()
-        elif self.event == self.LOGGED_OUT:
+        elif self.event == self._LOGGED_OUT:
             return self
-        elif self.event == self.CMD:
+        elif self.event == self._CMD:
             return Authenticated()
-        elif self.event == self.LOGIN:
+        elif self.event == self._LOGIN:
             return Authenticated()
         else:
             return self
@@ -176,31 +176,31 @@ class Authenticated(AState):
     """
 
     def connect(self, connection):
-        self.event = self.CMD
+        self.event = self._CMD
         connection._logger.warning("already connected")
 
     def login(self, connection):
-        self.event = self.LOGGED_OUT
+        self.event = self._LOGGED_OUT
         connection._logger.warning("already logged in")
 
     def cmd(self, connection, msg):
-        self.event = self.CMD
+        self.event = self._CMD
         out = connection._cmd(msg)
         if connection.last_prompt.endswith(connection.pw_prompt):
-            self.event = self.LOGGED_OUT
+            self.event = self._LOGGED_OUT
             raise AuthenticationRequiredException()
         return out
 
     def disconnect(self, connection):
-        self.event = self.DISCONNECT
+        self.event = self._DISCONNECT
         return connection._disconnect()
 
     def next_state(self, connection):
-        if self.event == self.DISCONNECT:
+        if self.event == self._DISCONNECT:
             return Disconnected()
-        elif self.event == self.LOGGED_OUT:
+        elif self.event == self._LOGGED_OUT:
             return Connected()
-        elif self.event == self.CMD:
+        elif self.event == self._CMD:
             # explicit > implicit
             return self
         else:
