@@ -51,12 +51,15 @@ def test_fsm():
     # execute
     sut.connect()
     sut.login()
+    after_login = sut.current_state
     out = sut.cmd(txt_in)
     sut.disconnect()
     # here no exceptions is already a good sign that fsm works
     # assert
     nt.eq_(sut.current_state, conn.Disconnected(),
             "after complete transition end state should be disconnected")
+    nt.eq_(after_login, conn.Authenticated(),
+            "after login, state should be authenticated")
     nt.eq_(out, expected, "cmd should return same message as was put in")
 
 
