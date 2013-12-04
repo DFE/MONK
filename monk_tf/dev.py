@@ -89,7 +89,8 @@ class Device(object):
         ))
 
     def __del__(self):
-        # make sure all connections get closed on delete
+        """ make sure all connections get closed on delete
+        """
         for connection in self.conns:
             try:
                 connection.close()

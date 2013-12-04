@@ -341,7 +341,7 @@ class SerialConnection(AConnection):
 #########################################################
 
 class AState(object):
-    """ the base class for all connection related states.
+    """ the abstract base class for all connection related states to extend.
 
     An AState is a representation of a set of reactions in a specific state.
     Therefore it does not make sense to keep a lot of stateful information in a
@@ -358,6 +358,8 @@ class AState(object):
     _LOGGED_OUT = "LOGGED_OUT"
 
     def __new__(cls, *args, **kwargs):
+        """ implement Singleton as default object creation of this class.
+        """
         try:
             return cls._instance
         except AttributeError:
@@ -365,11 +367,15 @@ class AState(object):
             return cls._instance
 
     def next_state(self, connection):
+        """ state transition table. Must be overwritten by child classes
+        """
         logger.warning("{}: class does not overwrite next_state() method".format(
             self.__class__.__name__))
         return self
 
     def __str__(self):
+        """ represent a state by its class name
+        """
         return self.__class__.__name__
 
 
@@ -378,16 +384,29 @@ class Disconnected(AState):
     """
 
     def connect(self, connection):
+        """ initiate connection with :term:`target device`
+
+        :param connection: the connection that uses this state
+        :return: depends on what the connection's protected :py:meth:`_connect`
+                 method returns. Could be None.
+        """
         self.event = self._CONNECT
         return connection._connect()
 
     def login(self, connection):
+        """ should not be called, because not connected
+        """
         raise NotConnectedException()
 
     def cmd(self, connection, msg):
+        """ should not be called, because not connected
+        """
         raise NotConnectedException()
 
     def disconnect(self, connection):
+        """ does not do anything, because already disconnected
+        """
+        self.event = self._DISCONNECT
         logger.warning("{}: tried to disconnect but is already disconnected"
                 .format(connection.name))
 
@@ -403,10 +422,19 @@ class Connected(AState):
     """
 
     def connect(self, connection):
+        """ does nothing, because already connected
+        """
         self.event = self._CONNECT
         connection._logger.warning("tried to connect but is already connected")
 
     def login(self, connection):
+        """ authenticates at connection, if object has credentials
+
+        :param connection: the connection that uses this state.
+        :return: the result of the login. Might be None. If False then the
+                 connection object has no credentials that could be used. This
+                 can mean that no login is necessary, though.
+        """
         self.event = self._LOGIN
         if hasattr(connection, "credentials"):
             connection._logger.debug("authenticate with credentials '{}'"
@@ -426,6 +454,12 @@ class Connected(AState):
             return False
 
     def cmd(self, connection, msg):
+        """ sends a command if login not necessary, otherwise raises Exception
+
+        :param connection: the connection that uses this state.
+        :param msg: the shell command that should be sent via the connection.
+        :return: the standard output of the shell command.
+        """
         self.event = self._CMD
         connection._prompt()
         out = connection._cmd(msg)
@@ -434,6 +468,11 @@ class Connected(AState):
             raise AuthenticationRequiredException()
 
     def disconnect(self, connection):
+        """ deactivates the connection.
+
+        :param connection: the connection that uses this state.
+        :return: the disconnection result. Might be None.
+        """
         self.event = self._DISCONNECT
         connection._logger.info("disconnecting")
         return connection._disconnect()
@@ -456,14 +495,28 @@ class Authenticated(AState):
     """
 
     def connect(self, connection):
+        """ does nothing, because already connected.
+
+        :param connection: the connection that uses this state.
+        """
         self.event = self._CMD
         connection._logger.warning("already connected")
 
     def login(self, connection):
+        """ does nothing, because already logged in.
+
+        :param connection: the connection that uses this state.
+        """
         self.event = self._LOGGED_OUT
         connection._logger.warning("already logged in")
 
     def cmd(self, connection, msg):
+        """ send a shell command to :term:`target device`
+
+        :param connection: the connection that uses this state.
+        :param msg: the shell command that should be transmitted.
+        :return: the standard output of the sehll command.
+        """
         self.event = self._CMD
         out = connection._cmd(msg)
         if connection.last_prompt.endswith(connection.pw_prompt):
@@ -472,6 +525,11 @@ class Authenticated(AState):
         return out
 
     def disconnect(self, connection):
+        """ closes the connection.
+
+        :param connection: the connection that uses this state.
+        :return: the disconnection result. Might be None.
+        """
         self.event = self._DISCONNECT
         return connection._disconnect()
 
