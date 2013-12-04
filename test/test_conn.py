@@ -62,6 +62,15 @@ def test_fsm():
             "after login, state should be authenticated")
     nt.eq_(out, expected, "cmd should return same message as was put in")
 
+@nt.raises(conn.NotConnectedException)
+def test_wrong_state():
+    """ conn: raise Exception when sending cmd unconnected
+    """
+    # prepare
+    sut = conn.EchoConnection()
+    # execute
+    sut.cmd("")
+    # finished, because cmd should raise exception
 
 class MockState(conn.AState):
     calls = []
