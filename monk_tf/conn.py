@@ -379,7 +379,7 @@ class Disconnected(AState):
 
     def connect(self, connection):
         self.event = self._CONNECT
-        connection._connect()
+        return connection._connect()
 
     def login(self, connection):
         raise NotConnectedException()
