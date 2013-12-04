@@ -423,7 +423,7 @@ class Connected(AState):
                 raise type(e), type(e)(e.message), sys.exc_info()[2]
         else:
             connection._logger.warning("no creds -> no login")
-            return True
+            return False
 
     def cmd(self, connection, msg):
         self.event = self._CMD
