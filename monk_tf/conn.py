@@ -13,7 +13,26 @@
 
 """ Connection Layer
 
-the lowest layer of interaction with a :term:`target device`.
+Implements the lowest layer of interaction with a :term:`target device`. This
+means that you can use this module to create connections, interact with them
+and manipulate their internal states.
+
+States are implemented with the State design pattern. Connection objects hold a
+current_state attribute. Everytime a public method of a connection is called,
+the object will forward that message to its current_state and the state will
+then execute the method depending on what the task of the state is.
+
+The code is split into the following parts:
+    1. *Exceptions* - all exceptions that are used in this module
+    2. *AConnection* - the abstract Connection class which all other
+       connections are based on.
+    3. *Test Connections* - a list of connections that do not really connect to
+       a :term:`target device` but instead are used for debugging purposes of
+       your test cases.
+    4. *Real Connections* - the real connections that connect MONK to a
+       :term:`target device`.
+    4. *AState* - the abstract State class which all other states are based on.
+    5. *State Classes* - the implementation of the state machine.
 """
 
 import os
@@ -23,6 +42,12 @@ import logging
 import serial
 
 logger = logging.getLogger(__name__)
+
+############
+#
+# Exceptions
+#
+############
 
 class ConnectionException(Exception):
     """ baseclass for exceptions of this package
@@ -59,6 +84,261 @@ class EmptyResponseException(ConnectionException):
     """
     pass
 
+
+##########################################
+#
+# Connections - Connect to a target device
+#
+#########################################
+
+class AConnection(object):
+    """ abstract base class for other connections to extend.
+
+    This class preimplements the interaction between a
+    :py:class:`~monk_tf.conn.AConnection` and its
+    :py:class:`~monk_tf.conn.AState`.
+    """
+
+    def __init__(self,
+            start_state=None,
+            name=None,
+            user_prompt="login: ",
+            pw_prompt="Password: ",
+            credentials=None,
+            linesep=None,
+            *args, **kwargs):
+        """
+        :param start_state: the state the connection should start in
+        :param name: a name to differentiate the connecton from others
+        :param user_prompt: the prompt that requests the login username.
+        :param pw_prompt: the prompt that requests the login password.
+        :param credentials: login credentials as needed by the corresponding
+                            connection
+        :param linesep: the line separator used in shell commands.
+        """
+        self.current_state = start_state if start_state else Disconnected()
+        self.name = name if name else self.__class__.__name__
+        self.user_prompt = user_prompt
+        self.pw_prompt = pw_prompt
+        self.credentials = credentials
+        self.linesep = linesep if linesep else os.linesep
+        # store the remaining args for later usage
+        self._args = args
+        self._kwargs = kwargs
+        self._logger = logging.getLogger("{}:{}".format(__name__, self.name))
+        self._logger.debug("initialized with start_state '{}'".format(
+            str(self.current_state),
+        ))
+        self.last_prompt = ""
+        self.last_out = ""
+        self.last_cmd = ""
+
+    def connect(self):
+        """ initiate connection with :term:`target device`
+
+        :return: whatever the current state might return. Might be None.
+        """
+        self._logger.info("connecting...")
+        try:
+            out = self.current_state.connect(self)
+        except Exception as e:
+            raise type(e), type(e)(e.message), sys.exc_info()[2]
+        finally:
+            self.current_state = self.current_state.next_state(self)
+            self._logger.debug("new state '{}'".format(self.current_state))
+        return out
+
+    def login(self):
+        """ authenticate to :term:`target device`
+
+        It uses a tupel of ``(user, password)`` that is hopefully stored in an
+        attribute ``credentials``.
+
+        :return: whatever the current state might return. Might be None.
+        """
+        self._logger.info("authenticating...")
+        try:
+            out = self.current_state.login(self)
+        except Exception as e:
+            raise type(e), type(e)(e.message), sys.exc_info()[2]
+        finally:
+            self.current_state = self.current_state.next_state(self)
+            self._logger.debug("new state '{}'".format(self.current_state))
+        return out
+
+    def cmd(self, msg):
+        """ send :term:`shell command` to :term:`target device`
+
+        :param msg: the :term:`shell command`
+        :return: the standard output of the :term:`shell command`.
+        """
+        self._logger.info("sending cmd '{}'".format(msg))
+        try:
+            out = self.current_state.cmd(self, msg)
+        except Exception as e:
+            raise type(e), type(e)(e.message), sys.exc_info()[2]
+        finally:
+            self.current_state = self.current_state.next_state(self)
+            self._logger.debug("new state '{}'".format(self.current_state))
+        return out
+
+    def disconnect(self):
+        """ deactivate the connection to :term:`target device`
+
+        :return: whatever the current state might return. Might be None.
+        """
+        self._logger.info("logging out...")
+        try:
+            out = self.current_state.disconnect(self)
+        except Exception as e:
+            raise type(e), type(e)(e.message), sys.exc_info()[2]
+        finally:
+            self.current_state = self.current_state.next_state(self)
+            self._logger.debug("new state '{}'".format(self.current_state))
+        return out
+
+    def _prompt(self):
+        """ request a prompt.
+
+        This is like hitting the Return button in a shell session
+        :return: the new prompt and whatever the :term:`target system` wants to
+                 respond.
+        """
+        self._logger.info("requesting new prompt")
+        return self._cmd("",returncode=False) + os.linesep + self.last_prompt
+
+
+###################################################
+#
+# Test Connections - Fake Connections for Debugging
+#
+###################################################
+
+class EchoConnection(AConnection):
+    """ return everything sent to this connection; for debugging
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.logged_in = kwargs.pop("logged_in", False)
+        super(EchoConnection, self).__init__(*args, **kwargs)
+
+    def _connect(self):
+        pass
+
+    def _login(self):
+        self.logged_in = True
+
+    def _cmd(self, msg):
+        return msg
+
+    def _disconnect(self):
+        pass
+
+
+class DefectiveConnection(AConnection):
+    """ raise a MockConnectionException on each call
+    """
+
+    def _connect(self):
+        raise MockConnectionException()
+
+    def _login(self):
+        raise MockConnectionException()
+
+    def _cmd(self, msg):
+        raise MockConnectionException()
+
+    def _disconnect(self):
+        raise MockConnectionException()
+
+
+###############################################
+#
+# Real Connections - Connect to a target device
+#
+###############################################
+
+class SerialConnection(AConnection):
+    """ connect to :term:`target device` via serial interface
+    """
+
+    def __init__(self,
+            serial_class=None,
+            *args, **kwargs):
+        """
+        :param serial_class: the class that provides the serial interace.
+        """
+        self.serial_class = serial_class if serial_class else serial.Serial
+        super(SerialConnection, self).__init__(*args, **kwargs)
+
+    def _connect(self):
+        self._serial = self.serial_class(*self._args, **self._kwargs)
+
+    def _login(self):
+        self._cmd(self.credentials[0], returncode=False)
+        if not self.last_prompt.endswith(self.pw_prompt):
+            raise UnexpectedPromptException(
+                "'{}'.endswith('{}')".format(self.last_prompt, self.pw_prompt))
+        self._cmd(self.credentials[1], returncode=False)
+        if any(self.last_prompt.endswith(p) for p in (
+                self.pw_prompt,
+                self.user_prompt,)):
+            raise UnexpectedPromptException(
+                "login should be finished but prompt is '{}'".format(
+                    self.last_prompt))
+
+    def _cmd(self,msg, returncode=True, expected_output=True):
+        """ unsafe, direct command interface.
+
+        Also updates :py:attr:`last_cmd`, :py:attr:`last_prompt` and
+        :py:attr:`last_out`.
+
+        :param msg: the :term:`shell command` that should be executed remotely.
+        :param returncode: if a returncode should be checked or not
+        :param expected_output: is an output expected?
+        :return: the standardoutput from the command execution
+        """
+        stripped = msg.strip()
+        msg_rcd = stripped + ("; echo \"$?\"" if stripped and returncode else "")
+        # command will only be executed, if it ends in a linebreak
+        msg_sepd = msg_rcd + self.linesep
+        self._serial.write(msg_sepd)
+        # read all that comes back
+        out = self._serial.readall()
+        if not out:
+            # try again
+            out = self._serial.readall()
+            if not out and expected_output:
+                raise EmptyResponseException()
+        out_repl = out.replace("\r","")
+        # return without msg and prompt
+        lines = out.split("\n")
+        self.last_cmd = msg
+        self.last_prompt = lines[-1]
+        # if there is no returncode line, it doesn't need to be removed
+        remove = -2 if returncode and len(lines) >= 2 else -1
+        self.last_out = os.linesep.join(lines[1:remove])
+        try:
+            self.last_returncode = int(lines[remove])
+        except ValueError:
+            # returncode couldn't be retrieved
+            # happens if e.g. returncode=False or login is necessary
+            self.last_returncode = 0
+        return self.last_out
+
+    def _disconnect(self):
+        try:
+            self._serial.close()
+            del self._serial
+        except AttributeError:
+            pass
+
+
+#########################################################
+#
+# State Classes - A State Machine as State Design Pattern
+#
+#########################################################
 
 class AState(object):
     """ the base class for all connection related states.
@@ -172,7 +452,7 @@ class Connected(AState):
 
 
 class Authenticated(AState):
-    """ Defines interaction if unauthenticated connection is established.
+    """ Defines interaction if connection is authenticated.
     """
 
     def connect(self, connection):
@@ -205,246 +485,3 @@ class Authenticated(AState):
             return self
         else:
             return self
-
-
-class AConnection(object):
-    """ abstract connection class
-
-    This class preimplements the interaction between a
-    :py:class:`~monk_tf.conn.Connection` and its
-    :py:class:`~monk_tf.conn.AState`.
-    """
-
-    def __init__(self,
-            start_state=None,
-            name=None,
-            user_prompt="login: ",
-            pw_prompt="Password: ",
-            credentials=None,
-            linesep=None,
-            *args, **kwargs):
-        """
-        :param start_state: the state the connection should start in
-        :param name: a name to differentiate the connecton from others
-        :param user_prompt: the prompt that requests the login username.
-        :param pw_prompt: the prompt that requests the login password.
-        :param credentials: login credentials as needed by the corresponding
-                            connection
-        :param linesep: the line separator used in shell commands.
-        """
-        self.current_state = start_state if start_state else Disconnected()
-        self.name = name if name else self.__class__.__name__
-        self.user_prompt = user_prompt
-        self.pw_prompt = pw_prompt
-        self.credentials = credentials
-        self.linesep = linesep if linesep else os.linesep
-        # store the remaining args for later usage
-        self._args = args
-        self._kwargs = kwargs
-        self._logger = logging.getLogger("{}:{}".format(__name__, self.name))
-        self._logger.debug("initialized with start_state '{}'".format(
-            str(self.current_state),
-        ))
-        self.last_prompt = ""
-        self.last_out = ""
-        self.last_cmd = ""
-
-    def connect(self):
-        """ initiate connection with :term:`target device`
-
-        :return: whatever the current state might return. Might be None.
-        """
-        self._logger.info("connecting...")
-        try:
-            out = self.current_state.connect(self)
-        except Exception as e:
-            raise type(e), type(e)(e.message), sys.exc_info()[2]
-        finally:
-            self.current_state = self.current_state.next_state(self)
-            self._logger.debug("new state '{}'".format(self.current_state))
-        return out
-
-    def login(self):
-        """ authenticate to :term:`target device`
-
-        It uses a tupel of ``(user, password)`` that is hopefully stored in an
-        attribute ``credentials``.
-
-        :return: whatever the current state might return. Might be None.
-        """
-        self._logger.info("authenticating...")
-        try:
-            out = self.current_state.login(self)
-        except Exception as e:
-            raise type(e), type(e)(e.message), sys.exc_info()[2]
-        finally:
-            self.current_state = self.current_state.next_state(self)
-            self._logger.debug("new state '{}'".format(self.current_state))
-        return out
-
-    def cmd(self, msg):
-        """ send :term:`shell command` to :term:`target device`
-
-        :param msg: the :term:`shell command`
-        :return: the standard output of the :term:`shell command`.
-        """
-        self._logger.info("sending cmd '{}'".format(msg))
-        try:
-            out = self.current_state.cmd(self, msg)
-        except Exception as e:
-            raise type(e), type(e)(e.message), sys.exc_info()[2]
-        finally:
-            self.current_state = self.current_state.next_state(self)
-            self._logger.debug("new state '{}'".format(self.current_state))
-        return out
-
-    def disconnect(self):
-        """ deactivate the connection to :term:`target device`
-
-        :return: whatever the current state might return. Might be None.
-        """
-        self._logger.info("logging out...")
-        try:
-            out = self.current_state.disconnect(self)
-        except Exception as e:
-            raise type(e), type(e)(e.message), sys.exc_info()[2]
-        finally:
-            self.current_state = self.current_state.next_state(self)
-            self._logger.debug("new state '{}'".format(self.current_state))
-        return out
-
-    def _prompt(self):
-        """ request a prompt.
-
-        This is like hitting the Return button in a shell session
-        :return: the new prompt and whatever the :term:`target system` wants to
-                 respond.
-        """
-        self._logger.info("requesting new prompt")
-        return self._cmd("",returncode=False) + os.linesep + self.last_prompt
-
-
-################################
-#
-# Test Connections
-#
-################################
-
-class EchoConnection(AConnection):
-    """ return everything sent to this connection; for debugging
-    """
-
-    def __init__(self, *args, **kwargs):
-        self.logged_in = kwargs.pop("logged_in", False)
-        super(EchoConnection, self).__init__(*args, **kwargs)
-
-    def _connect(self):
-        pass
-
-    def _login(self):
-        self.logged_in = True
-
-    def _cmd(self, msg):
-        return msg
-
-    def _disconnect(self):
-        pass
-
-
-class DefectiveConnection(AConnection):
-    """ raise a MockConnectionException on each call
-    """
-
-    def _connect(self):
-        raise MockConnectionException()
-
-    def _login(self):
-        raise MockConnectionException()
-
-    def _cmd(self, msg):
-        raise MockConnectionException()
-
-    def _disconnect(self):
-        raise MockConnectionException()
-
-
-################################
-#
-# Real Connections
-#
-################################
-
-class SerialConnection(AConnection):
-    """ connect to :term:`target device` via serial interface
-    """
-
-    def __init__(self,
-            serial_class=None,
-            *args, **kwargs):
-        """
-        :param serial_class: the class that provides the serial interace.
-        """
-        self.serial_class = serial_class if serial_class else serial.Serial
-        super(SerialConnection, self).__init__(*args, **kwargs)
-
-    def _connect(self):
-        self._serial = self.serial_class(*self._args, **self._kwargs)
-
-    def _login(self):
-        self._cmd(self.credentials[0], returncode=False)
-        if not self.last_prompt.endswith(self.pw_prompt):
-            raise UnexpectedPromptException(
-                "'{}'.endswith('{}')".format(self.last_prompt, self.pw_prompt))
-        self._cmd(self.credentials[1], returncode=False)
-        if any(self.last_prompt.endswith(p) for p in (
-                self.pw_prompt,
-                self.user_prompt,)):
-            raise UnexpectedPromptException(
-                "login should be finished but prompt is '{}'".format(
-                    self.last_prompt))
-
-    def _cmd(self,msg, returncode=True, expected_output=True):
-        """ unsafe, direct command interface.
-
-        Also updates :py:attr:`last_cmd`, :py:attr:`last_prompt` and
-        :py:attr:`last_out`.
-
-        :param msg: the :term:`shell command` that should be executed remotely.
-        :param returncode: if a returncode should be checked or not
-        :param expected_output: is an output expected?
-        :return: the standardoutput from the command execution
-        """
-        stripped = msg.strip()
-        msg_rcd = stripped + ("; echo \"$?\"" if stripped and returncode else "")
-        # command will only be executed, if it ends in a linebreak
-        msg_sepd = msg_rcd + self.linesep
-        self._serial.write(msg_sepd)
-        # read all that comes back
-        out = self._serial.readall()
-        if not out:
-            # try again
-            out = self._serial.readall()
-            if not out and expected_output:
-                raise EmptyResponseException()
-        out_repl = out.replace("\r","")
-        # return without msg and prompt
-        lines = out.split("\n")
-        self.last_cmd = msg
-        self.last_prompt = lines[-1]
-        # if there is no returncode line, it doesn't need to be removed
-        remove = -2 if returncode and len(lines) >= 2 else -1
-        self.last_out = os.linesep.join(lines[1:remove])
-        try:
-            self.last_returncode = int(lines[remove])
-        except ValueError:
-            # returncode couldn't be retrieved
-            # happens if e.g. returncode=False or login is necessary
-            self.last_returncode = 0
-        return self.last_out
-
-    def _disconnect(self):
-        try:
-            self._serial.close()
-            del self._serial
-        except AttributeError:
-            pass

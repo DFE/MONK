@@ -15,6 +15,10 @@
 
 This layer abstracts a complete :term:`target device` in a single object, which
 can be interacted without worries about how the actual communication is done.
+
+To use this module create a :py:class:`~monk_tf.dev.Device` class.
+
+The package is separated into module exceptions and the device classes.
 """
 
 import logging
@@ -22,6 +26,12 @@ import logging
 import conn
 
 logger = logging.getLogger(__name__)
+
+############
+#
+# Exceptions
+#
+############
 
 class DeviceException(Exception):
     """ base class for Exceptions of the device layer
@@ -33,6 +43,12 @@ class CantHandleException(DeviceException):
     """
     pass
 
+
+##############################
+#
+# Devices - currently just one
+#
+##############################
 
 class Device(object):
     """ a :term:`target device` abstraction
