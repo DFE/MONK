@@ -391,22 +391,40 @@ class Disconnected(AState):
                  method returns. Could be None.
         """
         self.event = self._CONNECT
+        connection._logger.debug("execute event '{}' in state '{}'".format(
+            self.event,
+            str(self),
+        ))
         return connection._connect()
 
     def login(self, connection):
         """ should not be called, because not connected
         """
+        self.event = self._LOGIN
+        connection._logger.debug("execute event '{}' in state '{}'".format(
+            self.event,
+            str(self),
+        ))
         raise NotConnectedException()
 
     def cmd(self, connection, msg):
         """ should not be called, because not connected
         """
+        self.event = self._CMD
+        connection._logger.debug("execute event '{}' in state '{}'".format(
+            self.event,
+            str(self),
+        ))
         raise NotConnectedException()
 
     def disconnect(self, connection):
         """ does not do anything, because already disconnected
         """
         self.event = self._DISCONNECT
+        connection._logger.debug("execute event '{}' in state '{}'".format(
+            self.event,
+            str(self),
+        ))
         logger.warning("{}: tried to disconnect but is already disconnected"
                 .format(connection.name))
 
@@ -425,6 +443,10 @@ class Connected(AState):
         """ does nothing, because already connected
         """
         self.event = self._CONNECT
+        connection._logger.debug("execute event '{}' in state '{}'".format(
+            self.event,
+            str(self),
+        ))
         connection._logger.warning("tried to connect but is already connected")
 
     def login(self, connection):
@@ -436,6 +458,10 @@ class Connected(AState):
                  can mean that no login is necessary, though.
         """
         self.event = self._LOGIN
+        connection._logger.debug("execute event '{}' in state '{}'".format(
+            self.event,
+            str(self),
+        ))
         if hasattr(connection, "credentials"):
             connection._logger.debug("authenticate with credentials '{}'"
                     .format(connection.credentials))
@@ -461,6 +487,10 @@ class Connected(AState):
         :return: the standard output of the shell command.
         """
         self.event = self._CMD
+        connection._logger.debug("execute event '{}' in state '{}'".format(
+            self.event,
+            str(self),
+        ))
         connection._prompt()
         out = connection._cmd(msg)
         if connection.last_prompt.endswith(connection.pw_prompt):
@@ -474,6 +504,10 @@ class Connected(AState):
         :return: the disconnection result. Might be None.
         """
         self.event = self._DISCONNECT
+        connection._logger.debug("execute event '{}' in state '{}'".format(
+            self.event,
+            str(self),
+        ))
         connection._logger.info("disconnecting")
         return connection._disconnect()
 
@@ -500,6 +534,10 @@ class Authenticated(AState):
         :param connection: the connection that uses this state.
         """
         self.event = self._CMD
+        connection._logger.debug("execute event '{}' in state '{}'".format(
+            self.event,
+            str(self),
+        ))
         connection._logger.warning("already connected")
 
     def login(self, connection):
@@ -508,6 +546,10 @@ class Authenticated(AState):
         :param connection: the connection that uses this state.
         """
         self.event = self._LOGGED_OUT
+        connection._logger.debug("execute event '{}' in state '{}'".format(
+            self.event,
+            str(self),
+        ))
         connection._logger.warning("already logged in")
 
     def cmd(self, connection, msg):
@@ -518,6 +560,10 @@ class Authenticated(AState):
         :return: the standard output of the sehll command.
         """
         self.event = self._CMD
+        connection._logger.debug("execute event '{}' in state '{}'".format(
+            self.event,
+            str(self),
+        ))
         out = connection._cmd(msg)
         if connection.last_prompt.endswith(connection.pw_prompt):
             self.event = self._LOGGED_OUT
@@ -531,6 +577,10 @@ class Authenticated(AState):
         :return: the disconnection result. Might be None.
         """
         self.event = self._DISCONNECT
+        connection._logger.debug("execute event '{}' in state '{}'".format(
+            self.event,
+            str(self),
+        ))
         return connection._disconnect()
 
     def next_state(self, connection):
