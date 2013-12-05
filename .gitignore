@@ -12,3 +12,7 @@
 
 # coverage output
 .coverage
+
+# generated
+*.egg-info*
+*.xml
