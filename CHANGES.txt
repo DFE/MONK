@@ -1,3 +1,16 @@
+Release 0.1.3
+=============
+
+ * complete reimplementation finished
+ * documentation not up to date yet
+ * Features are:
+   * create independent connections with the connection layer
+   * example implementation with SerialConnection
+   * create complete device abstraction with the dev layer
+   * basic device class in layer
+   * separate test cases and connection data for reusage with harness layer
+   * example parser for extendend INI implemented in harness layer
+
 Release 0.1.2
 =============
 

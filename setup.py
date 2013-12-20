@@ -14,7 +14,7 @@
 from setuptools import setup
 
 project = "monk_tf"
-version = "0.2a1"
+version = "0.1.3"
 
 setup(
     name=project,
