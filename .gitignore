@@ -16,3 +16,8 @@
 # generated
 *.egg-info*
 *.xml
+
+# generated documentation files
+doc/build/
+doc/source/modules.rst
+doc/source/monk_tf.rst

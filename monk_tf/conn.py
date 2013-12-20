@@ -207,6 +207,14 @@ class AConnection(object):
         self._logger.info("requesting new prompt")
         return self._cmd("",returncode=False) + os.linesep + self.last_prompt
 
+    def __str__(self):
+        return "{}:({})".format(self.__class__.__name__, str({
+            '_args':[str(a) for a in self._args],
+            '_kwargs': self._kwargs,
+            'current_state' : str(self.current_state),
+            'name' : self.name,
+        }))
+
 
 ###################################################
 #
