@@ -26,7 +26,8 @@ setup(
     packages=[project],
     install_requires = [
         "pyserial >=2.5",
-        "pylibssh2 >=1.0.1"
+        "pylibssh2 >=1.0.1",
+        "configobj >=4.7.2",
     ],provides = [
         "{} ({})".format(project, version)
     ],
