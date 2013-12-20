@@ -145,7 +145,7 @@ class AConnection(object):
             raise type(e), type(e)(e.message), sys.exc_info()[2]
         finally:
             self.current_state = self.current_state.next_state(self)
-            self._logger.debug("new state '{}'".format(self.current_state))
+            self._logger.debug("current state '{}'".format(self.current_state))
         return out
 
     def login(self):
@@ -163,7 +163,7 @@ class AConnection(object):
             raise type(e), type(e)(e.message), sys.exc_info()[2]
         finally:
             self.current_state = self.current_state.next_state(self)
-            self._logger.debug("new state '{}'".format(self.current_state))
+            self._logger.debug("current state '{}'".format(self.current_state))
         return out
 
     def cmd(self, msg):
@@ -179,7 +179,7 @@ class AConnection(object):
             raise type(e), type(e)(e.message), sys.exc_info()[2]
         finally:
             self.current_state = self.current_state.next_state(self)
-            self._logger.debug("new state '{}'".format(self.current_state))
+            self._logger.debug("current state '{}'".format(self.current_state))
         return out
 
     def disconnect(self):
@@ -194,7 +194,7 @@ class AConnection(object):
             raise type(e), type(e)(e.message), sys.exc_info()[2]
         finally:
             self.current_state = self.current_state.next_state(self)
-            self._logger.debug("new state '{}'".format(self.current_state))
+            self._logger.debug("current state '{}'".format(self.current_state))
         return out
 
     def _prompt(self):
