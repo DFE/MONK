@@ -17,14 +17,3 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-
-
-
-# MONK automated integration test framework public API
-
-from devicetestcase import DeviceTestCase
-from device         import Device
-from connection     import Connection
-from ssh_conn       import SshConn
-from serial_conn    import SerialConn
-from bcc            import Bcc
