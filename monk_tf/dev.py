@@ -64,6 +64,10 @@ class Device(object):
         """
         self.conns = kwargs.pop("conns", list(args))
         self.name = kwargs.pop("name", self.__class__.__name__)
+        self._logger = logging.getLogger("{}:{}".format(
+            __name__,
+            self.name
+        ))
 
     def cmd(self, msg):
         """ send a :term:`shell command` to the :term:`target device`
@@ -93,6 +97,13 @@ class Device(object):
         """
         for connection in self.conns:
             try:
-                connection.close()
+                connection.disconnect()
             except Exception as excpt:
                 logger.exception(excpt)
+
+    def __str__(self):
+        return "{}({}):conns={}".format(
+                self.__class__.__name__,
+                self.name,
+                [str(c) for c in self.conns],
+        )
