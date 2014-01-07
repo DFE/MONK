@@ -3,5 +3,5 @@
 A framework for abstracting DFE embedded systems to simplify Unit- and
 Integrationtests.
 
-For details, have a look at [our Wiki](https://github.com/DFE/MONK/wiki).
+For details, have a look in [the documentation](http://dfe.github.io/MONK/).
 Changes will be tested and built in [Travis-CI](https://travis-ci.org/DFE/MONK).
