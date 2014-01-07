@@ -15,6 +15,15 @@ Glossary
         A computer highly adapted to a specific usecase, often used inside
         cars, trains, airplane and the likes.
 
+    extended INI
+        A text format based on the :term:`INI` format, that also allows
+        nesting.
+
+    INI
+        A traditional text file format consisting of sections that contain
+        key-value pairs of data. Used often for configuration files and
+        description of relational data.
+
     reST
         reST is the short form of *restructuredText*, which is a markup format
         for text files. Much like `Wiki markup`_ or `Markdown`_ it is a

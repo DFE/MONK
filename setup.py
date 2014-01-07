@@ -14,7 +14,7 @@
 from setuptools import setup
 
 project = "monk_tf"
-version = "0.1.2"
+version = "0.1.3"
 
 setup(
     name=project,
@@ -26,7 +26,8 @@ setup(
     packages=[project],
     install_requires = [
         "pyserial >=2.5",
-        "pylibssh2 >=1.0.1"
+        "pylibssh2 >=1.0.1",
+        "configobj >=4.7.2",
     ],provides = [
         "{} ({})".format(project, version)
     ],
