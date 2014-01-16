@@ -207,6 +207,10 @@ class AConnection(object):
         return out
 
     def can_login(self):
+        """ checks wether the prompt is one of the login prompts
+
+        :return: True if a login prompt or False otherwise
+        """
         return any(self.last_prompt.endswith(p) for p in (
                         self.pw_prompt,
                         self.user_prompt,))
