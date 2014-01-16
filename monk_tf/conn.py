@@ -498,7 +498,10 @@ class Connected(AState):
             if connection.can_login():
                 connection._prompt()
             try:
-                out = connection._login()
+                # here check again and only login if not already logged in!
+                # same check as before
+                if connection.can_login():
+                    out = connection._login()
             except ConnectionException as e:
                 self.event = self._LOGGED_OUT
                 raise type(e), type(e)(e.message), sys.exc_info()[2]
