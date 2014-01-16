@@ -254,7 +254,7 @@ class EchoConnection(AConnection):
     def _login(self):
         self.logged_in = True
 
-    def _cmd(self, msg):
+    def _cmd(self, msg, *args, **kwargs):
         return msg
 
     def _disconnect(self):
@@ -271,7 +271,7 @@ class DefectiveConnection(AConnection):
     def _login(self):
         raise MockConnectionException()
 
-    def _cmd(self, msg):
+    def _cmd(self, msg, *args, **kwargs):
         raise MockConnectionException()
 
     def _disconnect(self):

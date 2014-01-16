@@ -5,8 +5,7 @@
 # Copyright (C) 2013 DResearch Fahrzeugelektronik GmbH
 # Written and maintained by MONK Developers <project-monk@dresearch-fe.de>
 #
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
+# This program is free software; you can redistribute it and/or # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version
 # 3 of the License, or (at your option) any later version.
 #
@@ -71,6 +70,19 @@ def test_wrong_state():
     # execute
     sut.cmd("")
     # finished, because cmd should raise exception
+
+def test_cmd_returncode():
+    """ conn: test connections can handle additional parameters
+    """
+    # set up
+    sut = conn.EchoConnection()
+    sut2 = conn.DefectiveConnection()
+    # execute + assert (raises Error if params can't be parsed)
+    sut._cmd("hello", returncode=True, expected_output=True)
+    try:
+        sut2._cmd("hello", returncode=True, expected_output=True)
+    except conn.MockConnectionException as e:
+        pass
 
 def test_connected_login():
     """ conn: connection's _login is not called if already logged in
