@@ -496,8 +496,8 @@ class Connected(AState):
             str(self),
         ))
         if hasattr(connection, "credentials"):
-            connection._logger.debug("authenticate with credentials '{}'"
-                    .format(connection.credentials))
+            connection._logger.debug("authenticate for user '{}'"
+                    .format(connection.credentials[0]))
             # make sure you are ready to login
             if connection.can_login():
                 connection._prompt()
