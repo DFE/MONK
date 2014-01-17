@@ -80,11 +80,7 @@ class Device(object):
                 connection.login()
                 return connection.cmd(msg)
             except conn.ConnectionException as excpt:
-                logger.exception("{}:{}:{}".format(
-                    self.name,
-                    connection.name,
-                    excpt
-                ))
+                self._logger.exception(excpt)
         # no connection was able to get to the return statement
         raise CantHandleException("dev:'{}',conns:'{}':couldn't send cmd '{}'".format(
             self.name,
