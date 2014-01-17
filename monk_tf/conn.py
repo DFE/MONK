@@ -84,6 +84,15 @@ class EmptyResponseException(ConnectionException):
     """
     pass
 
+class CantConnectException(ConnectionException):
+    """ is raised if a connection can't be established.
+
+    Reasons might be that the physical connection is not established or that
+    the executing user lacks privileges to use this connection, e.g., when he
+    is not in the *dialout* group on a Linux machine.
+    """
+    pass
+
 
 ##########################################
 #
@@ -277,10 +286,19 @@ class SerialConnection(AConnection):
         :param serial_class: the class that provides the serial interace.
         """
         self.serial_class = serial_class if serial_class else serial.Serial
+        kwargs["port"] = kwargs.get("port", "/dev/ttyUSB1")
+        kwargs["baudrate"] = int(kwargs.get("baudrate", 115200))
+        kwargs["timeout"] = float(kwargs.get("timeout", 1.5))
+        if "user" in kwargs and "password" in kwargs and not "credentials" in kwargs:
+            kwargs["credentials"] = (kwargs.pop("user"), kwargs.pop("password"))
         super(SerialConnection, self).__init__(*args, **kwargs)
 
     def _connect(self):
-        self._serial = self.serial_class(*self._args, **self._kwargs)
+        try:
+            self._serial = self.serial_class(*self._args, **self._kwargs)
+        except OSError as e:
+            self._logger.exception(e)
+            raise CantConnectException("Check cables and user rights!")
 
     def _login(self):
         self._cmd(self.credentials[0], returncode=False)
