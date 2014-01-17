@@ -206,6 +206,15 @@ class AConnection(object):
             self._logger.debug("current state '{}'".format(self.current_state))
         return out
 
+    def can_login(self):
+        """ checks wether the prompt is one of the login prompts
+
+        :return: True if a login prompt or False otherwise
+        """
+        return any(self.last_prompt.endswith(p) for p in (
+                        self.pw_prompt,
+                        self.user_prompt,))
+
     def _prompt(self):
         """ request a prompt.
 
@@ -306,9 +315,7 @@ class SerialConnection(AConnection):
             raise UnexpectedPromptException(
                 "'{}'.endswith('{}')".format(self.last_prompt, self.pw_prompt))
         self._cmd(self.credentials[1], returncode=False)
-        if any(self.last_prompt.endswith(p) for p in (
-                self.pw_prompt,
-                self.user_prompt,)):
+        if self.can_login():
             raise UnexpectedPromptException(
                 "login should be finished but prompt is '{}'".format(
                     self.last_prompt))
@@ -492,12 +499,13 @@ class Connected(AState):
             connection._logger.debug("authenticate with credentials '{}'"
                     .format(connection.credentials))
             # make sure you are ready to login
-            if any(connection.last_prompt.endswith(p) for p in (
-                    connection.pw_prompt,
-                    connection.user_prompt,)):
+            if connection.can_login():
                 connection._prompt()
             try:
-                out = connection._login()
+                # here check again and only login if not already logged in!
+                # same check as before
+                if connection.can_login():
+                    out = connection._login()
             except ConnectionException as e:
                 self.event = self._LOGGED_OUT
                 raise type(e), type(e)(e.message), sys.exc_info()[2]

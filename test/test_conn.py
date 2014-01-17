@@ -72,6 +72,38 @@ def test_wrong_state():
     sut.cmd("")
     # finished, because cmd should raise exception
 
+def test_connected_login():
+    """ conn: connection's _login is not called if already logged in
+    """
+    # set up
+    sut = MockConnection(start_state=conn.Connected())
+    # execute
+    sut.login()
+    sut.login()
+    sut.login()
+    # assert
+    nt.ok_("_login" not in sut.calls)
+
+class MockConnection(conn.AConnection):
+
+    def __init__(self, *args, **kwargs):
+        self.calls = []
+        self.logged_in = kwargs.pop("logged_in", False)
+        super(MockConnection, self).__init__(*args, **kwargs)
+
+    def _connect(self):
+        self.calls.add("_connect")
+
+    def _login(self):
+        self.calls.add("_login")
+        self.logged_in = True
+
+    def _cmd(self, *args, **kwargs):
+        self.calls.add("_cmd")
+
+    def _disconnect(self):
+        self.calls.add("_disconnect")
+
 class MockState(conn.AState):
     calls = []
 
