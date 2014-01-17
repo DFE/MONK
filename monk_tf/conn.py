@@ -298,7 +298,7 @@ class SerialConnection(AConnection):
             self._serial = self.serial_class(*self._args, **self._kwargs)
         except OSError as e:
             self._logger.exception(e)
-            raise CantConnectException("Check USB cables and user rights!")
+            raise CantConnectException("Check cables and user rights!")
 
     def _login(self):
         self._cmd(self.credentials[0], returncode=False)
