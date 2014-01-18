@@ -21,6 +21,7 @@ Contents
 
    intro
    contributing
+   devel
    codingstyle
    modules
    glossary

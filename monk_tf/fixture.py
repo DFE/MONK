@@ -40,7 +40,7 @@ A hello world test with it looks like this::
 
 So using this layer setting up a device only takes one line of code. The rest
 of the information is in that ``target_device.cfg`` file. Although this data
-file can have any format you want, MONK currently only comes with one text
+file can have any format you want, :term:`MONK` currently only comes with one text
 format parser predefined, which is the :py:class:`~monk_tf.fixture.XiniParser`.
 The ``Xini`` is short for :term:`extended INI`. An example data file might look
 like this::
@@ -62,7 +62,7 @@ is a subsection of *device1* and is therefore a nested section. This nesting
 can be done unlimited, by surrounding a section with more and more pairs of
 squared brackets (``[]``) according to the level of nesting that should be
 achieved. Thus in this example *serial1* belongs to *device1* and the types
-show which corresponding MONK object should be created.
+show which corresponding :term:`MONK` object should be created.
 
 Classes
 -------
@@ -100,12 +100,14 @@ class AParseException(ADeviceException):
     pass
 
 class NotXiniException(AParseException):
-    """ Could not be parsed as :term:`extended INI`.
+    """
+    is raised when a :term:`fixture file` could not be parsed as
+    :term:`extended INI`.
     """
     pass
 
 class CantParseException(ADeviceException):
-    """ Occurs, when a Fixture can not parse a given file
+    """ is raised when a Fixture can not parse a given file.
     """
     pass
 
@@ -132,7 +134,7 @@ class XiniParser(config.ConfigObj, AParser):
     """
 
     def _load(self, infile, configspec):
-        """ changes exception type raised
+        """ changes exception type raised.
 
         Overwrites method from :py:class:`~configobj.ConfigObj` to raise a
         :py:class:`~monk_tf.fixture.NotXiniException` instead of a
@@ -151,15 +153,17 @@ class XiniParser(config.ConfigObj, AParser):
 ##############################################################
 
 class Fixture(object):
-    """ Creates MONK objects based on dictionary like objects.
+    """ Creates :term:`MONK` objects based on dictionary like objects.
 
     This is the class that provides the fundamental feature of this layer. It
     reads data files by trying to parse them though its list of known parsers
-    and if it succeeds, it creates MONK objects based on the configuration
-    given by the data file. Most likely these objects are one or more devices
-    that have at least one connection each. If more than one data file is read
-    containing the same name on the highest level, then the latest data gets
-    used. This does not work on lower levels of nesting, though.
+    and if it succeeds, it creates :term:`MONK` objects based on the
+    configuration given by the data file. Most likely these objects are one or
+    more :py:class:`~monk_tf.dev.Device` objects that have at least one
+    :py:class:`~monk_tf.conn.AConnection` object each. If more than one
+    :term:`fixture file` is read containing the same name on the highest level,
+    then the latest data gets used. This does not work on lower levels of
+    nesting, though.
 
     One source of data (either a filename or a child class of
     :py:class:`~monk_tf.fixture.AParser`) can be given to an object of this
@@ -185,8 +189,23 @@ class Fixture(object):
         XiniParser,
     ]
 
-    def __init__(self, source=None, start_props=None, name=None, parsers=None,
-            classes=None):
+    def __init__(self, source=None, name=None, parsers=None, classes=None):
+        """
+
+        :param source: The :term:`fixture file` or
+                       :py:class:`~monk_tf.fixture.AParser` object to be read.
+
+        :param name: The name of this object.
+
+        :param parsers: An :python:term:`iterable` of
+                        :py:class:`~monk_tf.fixture.AParser` classes to be used
+                        for parsing a given
+                        :py:attr:`~monk_tf.fixture.Fixture.source`.
+
+        :param classes: A :py:class:`dict` of classes to class names. Used for
+                        parsing the type attribute in
+                        :term:`fixture files<fixture file>`.
+        """
         self.name = name or self.__class__.__name__
         self._logger = logging.getLogger("{}:{}".format(__name__, self.name))
         self.devs = []
@@ -246,7 +265,7 @@ class Fixture(object):
         self.props.update(props)
 
     def _initialize(self):
-        """ Create MONK objects based on self's properties.
+        """ Create :term:`MONK` objects based on self's properties.
         """
         self._logger.debug("initialize with props: " + str(self.props))
         self.devs = []

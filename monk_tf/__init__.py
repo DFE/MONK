@@ -17,3 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+
+"""
+This is the package overview of :term:`MONK`.
+
+The following texts contain the three layers:
+"""

@@ -34,12 +34,14 @@ logger = logging.getLogger(__name__)
 ############
 
 class DeviceException(Exception):
-    """ base class for Exceptions of the device layer
+    """ base class for Exceptions of the device layer.
     """
     pass
 
 class CantHandleException(DeviceException):
-    """ a request can't be handled by the connections of a :py:class:`~monk_tf.dev.Device`.
+    """ 
+    is raised when a request ca not be handled by the connections of a
+    :py:class:`~monk_tf.dev.Device`.
     """
     pass
 
@@ -51,14 +53,14 @@ class CantHandleException(DeviceException):
 ##############################
 
 class Device(object):
-    """ a :term:`target device` abstraction
+    """ is the API abstraction of a :term:`target device`.
     """
 
     def __init__(self, *args, **kwargs):
         """
         :param conns: list of connections. The following works as well::
 
-            Device(OneConnection(...), AnotherConnection(...),...)
+            ``Device(OneConnection(...), AnotherConnection(...),...)``
 
         :param name: Device name for logging purposes.
         """
@@ -70,8 +72,10 @@ class Device(object):
         ))
 
     def cmd(self, msg):
-        """ send a :term:`shell command` to the :term:`target device`
+        """ send a :term:`shell command` to the :term:`target device`.
+
         :param msg: the :term:`shell command`.
+
         :return: the standard output of the :term:`shell command`.
         """
         for connection in self.conns:
@@ -82,7 +86,7 @@ class Device(object):
             except conn.ConnectionException as excpt:
                 self._logger.exception(excpt)
         # no connection was able to get to the return statement
-        raise CantHandleException("dev:'{}',conns:'{}':couldn't send cmd '{}'".format(
+        raise CantHandleException("dev:'{}',conns:'{}':could not send cmd '{}'".format(
             self.name,
             map(str, self.conns),
             msg,

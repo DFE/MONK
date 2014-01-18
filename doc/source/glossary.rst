@@ -7,61 +7,127 @@ Glossary
 
 .. glossary::
 
-    cross-compiling
-        The act of compiling software on one architecture, i.e. a personal
-        computer, for another architecture, i.e. an embedded system.
+    API
+        Short for Application Programming Interface. The interface a piece of
+        software provides to other software to use for programming purposes.
 
-    embedded system
+    cross-compiling
+        The act of compiling software on one architecture, i.e., a personal
+        computer, for another architecture, i.e., an :term:`embedded system`.
+
+    cross-testing
+        The act of testing a :term:`system under test` on one device (the
+        :term:`test host`) while
+        executing it on another (the :term:`target device`).
+
+    DFE
+        DResearch Fahrzeugelektronik GmbH. The company which develops
+        :term:`MONK`.
+
+    embedded system
         A computer highly adapted to a specific usecase, often used inside
-        cars, trains, airplane and the likes.
+        cars, trains, airplanes, etc.
 
     extended INI
         A text format based on the :term:`INI` format, that also allows
         nesting.
+
+    fixture file
+        A file that contains data in :term:`extended INI` format. It will be
+        read by a :py:class:`~monk_tf.fixture.Fixture` object.
 
     INI
         A traditional text file format consisting of sections that contain
         key-value pairs of data. Used often for configuration files and
         description of relational data.
 
+    MONK
+        This is the framework you are reading the documentaion from, right now!
+
+    nose
+        A Python tool to run :term:`unit tests<unit test>`. See its PyPi page:
+        `nose <https://pypi.python.org/pypi/nose/1.3.0>`_.
+
+    open source
+        Software that can be used and developed without the need to pay license
+        fees first. The usage here is broader than the combination of the
+        defintion of Free Software by the Free Software Foundation and the
+        defintion of Open Source by the Open Source Initiative.
+
+    PIP
+        the package manager for Python packages. Often used together with
+        :term:`virtualenv` to create independently managed projects.
+
+    regression test
+        A test that is created for the purpose of being run many times, e.g.,
+        every night or after every change to a system.
+
     reST
         reST is the short form of *restructuredText*, which is a markup format
-        for text files. Much like `Wiki markup`_ or `Markdown`_ it is a
-        language with 2 goals: easily readable and writeable source code, as
-        well as a logical structure understandable by a compiler program.
-        Writing reST source files is often not too different from simply
-        writing a text into a normal txt file. But with the logical structure
-        together it can be compiled to formatted HTML or PDF. Writing in those
-        markup languages is also considered easier then writing HTML directly.
-        reST itself was created for documenting the Python core libraries.
-        Today it developed to the quasi standard for documenting all kinds of
-        Python projects and some projects in other languages use it as well.
-        See the `reST website`_ for more details.
+        for text files.
 
-    target vs development system
-        Embedded systems are highly specialised for one task and that task
-        alone. Because these tasks are unrelated to software development most
-        of the time, the software for these embedded systems needs to be
-        developed on a separated system, which is often a normal personal
-        computer. The system the software is developed **on** is called the
-        *development system* and the system the software is developed **for**
-        is called the *target system*.
+    shell command
+        A command that can be executed by a shell, typcially bash. Shell
+        commands are sent when interacting with a :term:`target device`
+        remotely via serial connection or ssh.
 
-    test framework
-        A well maintained :term:`test scripting` project consists of two parts.
+    SUT
+        An abbreviation of :term:`system under test`.
+
+    system under test
+        The system of hardware and software that should be run in a test. It
+        can be very small like a function or really big, like a network of
+        servers. It completely depends on the :term:`test case`. It is good
+        practice to call the system under test :term:`SUT` in
+        :term:`test scripts<test scripting>`.
+
+    target device
+        A device that you interact with remotely to test it. In our case it is
+        a :term:`embedded system` that is configured to do a specific task
+        which will be tested in our :term:`test cases<test case>`. A
+        :term:`MONK` test always requires two computers. A target device and a
+        :term:`test host`.
+
+    test case
+        A test case is a set of :term:`test fixture`, actions, verification
+        steps, and clean up steps that run one specific test.
+
+    test fixture
+        The :term:`system under test` and its surrounding environment in
+        specificially defined state (as far as it is possible).
+
+    test framework
+        A well maintained :term:`test scripting` project consists of two parts.
         One part are the *test scripts* themselves and the other part is a
         *test framework* of helper classes and functions that should help in
         clarifying the test code and take care of some of the complexity.
 
-    test scripting
+    test host
+        A computer that runs your :term:`test suites<test suite>` for you. It
+        does not contain the :term:`system under test` though. This would be
+        the :term:`target device`. A :term:`MONK` test always requires both a
+        :term:`target device` and a test host.
+
+    test scripting
         writing tests in a programming language. Other ways of testing software
         could be record&replay or manual testing.
 
-    Usecase
-        Contains all the default configurations of a general branch of
-        activities with the framework. Every time you use MONK, you will also
-        apply a Usecase, if you know about it or not. The most important and
-        simplest Usecase is the :py:mod:`monk_tf.SingleUsecase`.
+    test suite
+        A set of :term:`test cases<test case>` that is run together.
+
+    unit test
+        In general a unit test is the lowest level of testing, verifying a
+        specific unit of a system for one detail of functionality. In
+        :term:`open source` development the term is often used for all kinds of
+        tests that are written with a unit test framework. This also includes
+        integration tests, :term:`regression tests<regression test>`, etc. In
+        this documentation the second definition is used.
+
+    virtualenv
+        A tool that creates independent Python environments in which Python
+        packages can be installed, removed or updated depending on manual
+        usage of the package manager :term:`pip`, and via *requirements.txt*
+        files.
 
 
 .. Links
