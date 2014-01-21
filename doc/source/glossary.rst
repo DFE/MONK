@@ -32,6 +32,9 @@ Glossary
         A text format based on the :term:`INI` format, that also allows
         nesting.
 
+    fixture
+        Short for :term:`test fixture`.
+
     fixture file
         A file that contains data in :term:`extended INI` format. It will be
         read by a :py:class:`~monk_tf.fixture.Fixture` object.
