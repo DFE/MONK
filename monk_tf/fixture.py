@@ -23,13 +23,13 @@ have described.
 A hello world test with it looks like this::
 
     import nose
-    from monk_tf import harness
+    from monk_tf import fixture
 
     def test_hello():
         ''' say hello
         '''
         # set up
-        h = harness.Harness('target_device.cfg')
+        h = fixture.Fixture('target_device.cfg')
         expected_out = "hello"
         # execute
         out = h.devs[0].cmd('echo "hello"')
@@ -41,7 +41,7 @@ A hello world test with it looks like this::
 So using this layer setting up a device only takes one line of code. The rest
 of the information is in that ``target_device.cfg`` file. Although this data
 file can have any format you want, MONK currently only comes with one text
-format parser predefined, which is the :py:class:`~monk_tf.harness.XiniParser`.
+format parser predefined, which is the :py:class:`~monk_tf.fixture.XiniParser`.
 The ``Xini`` is short for :term:`extended INI`. An example data file might look
 like this::
 
@@ -105,7 +105,7 @@ class NotXiniException(AParseException):
     pass
 
 class CantParseException(ADeviceException):
-    """ Occurs, when a Harness can not parse a given file
+    """ Occurs, when a Fixture can not parse a given file
     """
     pass
 
@@ -119,11 +119,11 @@ class AParser(dict):
     """ Base class for all Parsers.
 
     Do not instantiate this class! This basically just provides the :term:`API`
-    that is needed by :py:class:`~monk_tf.harness.Harness` to interact with the
+    that is needed by :py:class:`~monk_tf.fixture.Fixture` to interact with the
     data that is parsed. Each child class should make sure that it always
     provides its parsed data like a :py:class:`dict` would. If you require your
     own parser, you can extend this and look at
-    :py:class:`~monk_tf.harness.XiniParser` for a very basic example.
+    :py:class:`~monk_tf.fixture.XiniParser` for a very basic example.
     """
     pass
 
@@ -135,7 +135,7 @@ class XiniParser(config.ConfigObj, AParser):
         """ changes exception type raised
 
         Overwrites method from :py:class:`~configobj.ConfigObj` to raise a
-        :py:class:`~monk_tf.harness.NotXiniException` instead of a
+        :py:class:`~monk_tf.fixture.NotXiniException` instead of a
         :py:class:`~configobj.ConfigObjError`.
         """
         try:
@@ -146,11 +146,11 @@ class XiniParser(config.ConfigObj, AParser):
 
 ##############################################################
 #
-# Harness Classes - creates MONK objects based on dictionaries
+# Fixture Classes - creates MONK objects based on dictionaries
 #
 ##############################################################
 
-class Harness(object):
+class Fixture(object):
     """ Creates MONK objects based on dictionary like objects.
 
     This is the class that provides the fundamental feature of this layer. It
@@ -162,14 +162,14 @@ class Harness(object):
     used. This does not work on lower levels of nesting, though.
 
     One source of data (either a filename or a child class of
-    :py:class:`~monk_tf.harness.AParser`) can be given to an object of this
+    :py:class:`~monk_tf.fixture.AParser`) can be given to an object of this
     class by its constructer, others can be added afterwards with the
-    :py:meth:`~monk_tf.harness.Harness.read` method. An example looks like
+    :py:meth:`~monk_tf.fixture.Fixture.read` method. An example looks like
     this::
 
-        import monk_tf.harness as mh
+        import monk_tf.fixture as mf
 
-        h = mh.Harness('/etc/monk_tf/default_devices.cfg')
+        h = mf.Fixture('/etc/monk_tf/default_devices.cfg')
                 .read('~/.monk/default_devices.cfg')
                 # can also be a parser object
                 .read(XiniParser('~/testsuite12345/suite_devices.cfg'))
@@ -200,7 +200,7 @@ class Harness(object):
         """ Read more data, either as a filename or as a parser.
 
         :param source: the data source; either a filename or a
-                       :py:class:`~monk_tf.harness.AParser` child class
+                       :py:class:`~monk_tf.fixture.AParser` child class
                        instance.
 
         :return: self
@@ -215,11 +215,11 @@ class Harness(object):
         """ Parse data file.
 
         :param source: the data source; either a filename or a
-                       :py:class:`~monk_tf.harness.AParser` child class
+                       :py:class:`~monk_tf.fixture.AParser` child class
                        instance.
 
-        :return: Returns a :py:class:`~monk_tf.harness.AParser` instance.
-        :raises: :py:class:`~monk_tf.harness.CantParseException`
+        :return: Returns a :py:class:`~monk_tf.fixture.AParser` instance.
+        :raises: :py:class:`~monk_tf.fixture.CantParseException`
         """
         self._logger.debug("parse: " + str(source))
         if isinstance(source, AParser):
@@ -237,7 +237,7 @@ class Harness(object):
         """ Updates the properties with a dictionary-like object.
 
         This basically uses :py:meth:`dict.update` to update
-        :py:attr:`self.props <~monk_tf.harness.Harness.props>` with a new set
+        :py:attr:`self.props <~monk_tf.fixture.Fixture.props>` with a new set
         of data.
 
         :param props: object that can be used with :py:meth:`dict.update`
