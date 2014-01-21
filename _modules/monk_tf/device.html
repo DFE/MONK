@@ -1,0 +1,424 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>monk_tf.device &mdash; MONK 0.1.4 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="MONK 0.1.4 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">MONK 0.1.4 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for monk_tf.device</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c">#</span>
+<span class="c"># Copyright (C) 2012, 2013 DResearch Fahrzeugelektronik GmbH</span>
+<span class="c"># Maintained by project-monk@dresearch-fe.de</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="c">#</span>
+
+<span class="sd">&quot;&quot;&quot; Package for the device class &quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">atexit</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">connection</span>
+<span class="kn">import</span> <span class="nn">bcc</span>
+
+
+<div class="viewcode-block" id="Device"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.device.Device">[docs]</a><span class="k">class</span> <span class="nc">Device</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; This class abstracts access to a device, i.e. one single</span>
+<span class="sd">        physical system.</span>
+
+<span class="sd">        Bsp: </span>
+<span class="sd">            &gt;&gt;&gt; import device</span>
+<span class="sd">            &gt;&gt;&gt; d = device.Device()</span>
+<span class="sd">            &gt;&gt;&gt; d.wait_for_network()</span>
+<span class="sd">            login</span>
+<span class="sd">            True</span>
+<span class="sd">            &gt;&gt;&gt; d.conn.host</span>
+<span class="sd">            &#39;172.29.21.174&#39;</span>
+
+<span class="sd">        FIXME bcc integrieren</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">DEVICE_TYPES</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&quot;hidav&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&quot;name&quot;</span>          <span class="p">:</span> <span class="s">&quot;HidaV&quot;</span><span class="p">,</span>
+            <span class="s">&quot;network_setup&quot;</span> <span class="p">:</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="s">&quot;eth1&quot;</span><span class="p">),</span>
+            <span class="s">&quot;login&quot;</span>         <span class="p">:</span> <span class="p">(</span><span class="s">&quot;root&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">),</span>
+            <span class="s">&quot;boot_prompt&quot;</span>   <span class="p">:</span> <span class="s">&quot;HidaV boot on&quot;</span><span class="p">,</span>
+            <span class="s">&quot;reset_cb&quot;</span>      <span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+            <span class="s">&quot;serial_skip_pw&quot;</span><span class="p">:</span> <span class="bp">True</span> <span class="p">},</span>
+        <span class="s">&quot;hipox&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s">&quot;name&quot;</span>          <span class="p">:</span> <span class="s">&quot;Hipox&quot;</span><span class="p">,</span>
+            <span class="s">&quot;network_setup&quot;</span> <span class="p">:</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="s">&quot;eth1&quot;</span><span class="p">),</span>
+            <span class="s">&quot;login&quot;</span>         <span class="p">:</span> <span class="p">(</span><span class="s">&quot;root&quot;</span><span class="p">,</span> <span class="s">&quot;hydra01&quot;</span><span class="p">),</span>
+            <span class="s">&quot;boot_prompt&quot;</span>   <span class="p">:</span> <span class="s">&quot;$ &quot;</span><span class="p">,</span>
+            <span class="s">&quot;reset_cb&quot;</span>      <span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+            <span class="s">&quot;serial_skip_pw&quot;</span><span class="p">:</span> <span class="bp">False</span> <span class="p">},</span>
+    <span class="p">}</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">devtype</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Initialize a device instance.</span>
+
+<span class="sd">            :param devtype: Device type, either &quot;hidav&quot; or &quot;hipox&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setup</span> <span class="o">=</span> <span class="n">Device</span><span class="o">.</span><span class="n">DEVICE_TYPES</span><span class="p">[</span><span class="n">devtype</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Unknown device type </span><span class="si">%s</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="n">devtype</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">bcc</span> <span class="o">=</span> <span class="n">bcc</span><span class="o">.</span><span class="n">Bcc</span><span class="p">()</span>
+        <span class="n">rst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bcc</span><span class="o">.</span><span class="n">reset</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup</span><span class="p">[</span><span class="s">&quot;reset_cb&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="bp">True</span> <span class="k">else</span> <span class="bp">None</span>
+        <span class="c"># checking the environment variable before reboot</span>
+        <span class="n">need_reboot</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s">&quot;MONK_NEED_END_REBOOT&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">need_reboot</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">atexit</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__shutdown</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">conn</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">Connection</span><span class="p">(</span>
+            <span class="n">network_setup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup</span><span class="p">[</span><span class="s">&quot;network_setup&quot;</span><span class="p">],</span>
+            <span class="n">login</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup</span><span class="p">[</span><span class="s">&quot;login&quot;</span><span class="p">],</span>
+            <span class="n">serial_skip_pw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup</span><span class="p">[</span><span class="s">&quot;serial_skip_pw&quot;</span><span class="p">],</span>
+            <span class="n">reset_cb</span> <span class="o">=</span> <span class="n">rst</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">__shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Shut down the device.</span>
+
+<span class="sd">            This function is atexit() registered. It shuts down the device by</span>
+<span class="sd">            setting a low WD timeout, then issuing reboot() via serial.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="s">&quot;Shutting down the device.&quot;</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">_serial</span><span class="o">.</span><span class="n">_reset_cb</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">_serial</span><span class="o">.</span><span class="n">reboot</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bcc</span><span class="o">.</span><span class="n">heartbeat</span> <span class="o">=</span> <span class="mi">10</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">bcc</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="c"># Interpreter Shutdown Time Pokemon Exception Handling (ISTPEH):</span>
+            <span class="c"># gotta catch them all!</span>
+            <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="Device.reboot"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.device.Device.reboot">[docs]</a>    <span class="k">def</span> <span class="nf">reboot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">to_nand</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Reboot the device. Return after reboot was successful.</span>
+
+<span class="sd">            Optionally reboot to NAND flash into the currently active</span>
+<span class="sd">            kernel / root fs combination (see bootconfig).</span>
+
+<span class="sd">            :param to_nand: reboot into currently active NAND partitions</span>
+<span class="sd">            :return:        buffer containing all the messages from the reboot</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;HidaV&quot;</span> <span class="ow">and</span> <span class="n">to_nand</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Benutze Hidav und nand true...&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">_serial</span><span class="o">.</span><span class="n">boot_to_nand</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="bp">True</span> <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">_serial</span><span class="o">.</span><span class="n">reboot</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Device.wait_for_network"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.device.Device.wait_for_network">[docs]</a>    <span class="k">def</span> <span class="nf">wait_for_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_wait</span><span class="o">=</span><span class="mi">120</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Wait for networking to come up.</span>
+
+<span class="sd">            :param max_wait: max time in seconds to wait</span>
+<span class="sd">            :return:         True if networking is available,</span>
+<span class="sd">                False if timeout occurred.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Waiting for Networking to come up...&quot;</span><span class="p">)</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">has_networking</span><span class="p">():</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;wait {0}s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">max_wait</span><span class="p">))</span>
+            <span class="n">max_wait</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">max_wait</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">max_wait</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">firmware_version</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Firmware version property. This is the device&#39;s lsb_version</span>
+<span class="sd">            revision string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fw_version</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fw_version</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span>  <span class="c"># pylint: disable-msg=W0201</span>
+                    <span class="s">&quot;lsb_release -r | awk &#39;{ print $2 }&#39;&quot;</span> <span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fw_version</span>
+
+
+    <span class="nd">@firmware_version.deleter</span>     <span class="c"># pylint: disable-msg=E1101</span>
+<div class="viewcode-block" id="Device.firmware_version"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.device.Device.firmware_version">[docs]</a>    <span class="k">def</span> <span class="nf">firmware_version</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c"># pylint: disable-msg=E0102</span>
+        <span class="sd">&quot;&quot;&quot; Firmware version property deleter. &quot;&quot;&quot;</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fw_version</span>
+
+
+    <span class="c"># FIXME bootconfig property is HidaV specific and should be refactored into a devtype specific class</span></div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bootconfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Bootconfig property. This is a dictionary representing the device&#39;s</span>
+<span class="sd">            boot partition configuration.</span>
+<span class="sd">            E.g.</span>
+
+<span class="sd">                {&quot;epoch&quot;: 42, &quot;kernel&quot;: 2, &quot;rootfs&quot;: 5}</span>
+
+<span class="sd">            would indicate the current kernel is on mtd2, the current rootfs on</span>
+<span class="sd">            mtd5, and the entry is the 42nd ever written.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bootconfig</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span>  <span class="c"># pylint: disable-msg=W0201</span>
+                    <span class="sd">&quot;&quot;&quot;bootconfig | &quot;&quot;&quot;</span>
+                <span class="o">+</span>   <span class="s">&quot;&quot;&quot;awk &#39;/kernel/{ k=$2 } /rootfs/{ r=$2 } &quot;&quot;&quot;</span>
+                <span class="o">+</span>       <span class="s">&quot;&quot;&quot; /epoch/{ e=$2 } END{ print k &quot; &quot; r &quot; &quot; e }&#39;&quot;&quot;&quot;</span>
+                        <span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot; &quot;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bootconfig</span> <span class="o">=</span> <span class="p">{</span> <span class="s">&quot;kernel&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                                     <span class="s">&quot;rootfs&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                                     <span class="s">&quot;epoch&quot;</span> <span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">ret</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>  <span class="p">}</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;Unable to determine boot configuration.&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bootconfig</span> <span class="o">=</span> <span class="p">{</span> <span class="s">&quot;kernel&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s">&quot;rootfs&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s">&quot;epoch&quot;</span><span class="p">:</span> <span class="mi">0</span> <span class="p">}</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bootconfig</span>
+
+
+    <span class="nd">@bootconfig.setter</span>              <span class="c"># pylint: disable-msg=E1101</span>
+    <span class="k">def</span> <span class="nf">bootconfig</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>  <span class="c"># pylint: disable-msg=E0102,E0202</span>
+        <span class="sd">&quot;&quot;&quot; Set the bootconfig property (kernel and rootfs mtd; not the epoch).</span>
+
+<span class="sd">            :param value: dictionary containing kernel and rootfs partition</span>
+<span class="sd">                number to be set, e.g.  {&quot;kernel&quot;: 2, &quot;rootfs&quot;: 5}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">bootconfig</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s">&quot;kernel&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bootconfig</span><span class="p">[</span><span class="s">&quot;kernel&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Setting kernel partition to mtd</span><span class="si">%s</span><span class="s">&quot;</span>
+                                <span class="o">%</span> <span class="n">value</span><span class="p">[</span><span class="s">&quot;kernel&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="s">&quot;bootconfig set-kernel mtd</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">value</span><span class="p">[</span><span class="s">&quot;kernel&quot;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s">&quot;rootfs&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bootconfig</span><span class="p">[</span><span class="s">&quot;rootfs&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Setting rootfs partition to mtd</span><span class="si">%s</span><span class="s">&quot;</span>
+                                <span class="o">%</span> <span class="n">value</span><span class="p">[</span><span class="s">&quot;rootfs&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="s">&quot;bootconfig set-rootfs mtd</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">value</span><span class="p">[</span><span class="s">&quot;rootfs&quot;</span><span class="p">])</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">bootconfig</span>
+
+
+    <span class="nd">@bootconfig.deleter</span>     <span class="c"># pylint: disable-msg=E1101</span>
+<div class="viewcode-block" id="Device.bootconfig"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.device.Device.bootconfig">[docs]</a>    <span class="k">def</span> <span class="nf">bootconfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c"># pylint: disable-msg=E0102</span>
+        <span class="sd">&quot;&quot;&quot; Bootconfig property deleter. &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bootconfig</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+</div>
+<div class="viewcode-block" id="Device.update_package_index"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.device.Device.update_package_index">[docs]</a>    <span class="k">def</span> <span class="nf">update_package_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Update the device&#39;s package index remotely.</span>
+
+<span class="sd">            :raise: Exception if the update failed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Updating the package index...&quot;</span><span class="p">)</span>
+        <span class="n">ret</span><span class="p">,</span> <span class="n">msgs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="s">&quot;opkg update&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ret</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Updating the package index failed with #</span><span class="si">%s</span><span class="s">:</span><span class="se">\n</span><span class="si">%s</span><span class="s">&quot;</span>
+                    <span class="o">%</span> <span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="n">msgs</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="Device.install_package"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.device.Device.install_package">[docs]</a>    <span class="k">def</span> <span class="nf">install_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package_name</span><span class="p">,</span> <span class="n">force</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Install a package on the device. The package index will be updated</span>
+<span class="sd">            prior to the installation.</span>
+
+<span class="sd">            :param package_name: name of the package to be installed</span>
+<span class="sd">            :param force:        force re-installation of already installed </span>
+<span class="sd">                                 package</span>
+<span class="sd">            :raise:              exception if the install failed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="s">&quot;--force-reinstall&quot;</span> <span class="k">if</span> <span class="n">force</span> <span class="k">else</span> <span class="s">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Installing package </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">.&quot;</span>
+                            <span class="o">%</span> <span class="p">(</span><span class="n">package_name</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_package_index</span><span class="p">()</span>
+        <span class="n">ret</span><span class="p">,</span> <span class="n">msgs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="s">&quot;opkg install </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">package_name</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">ret</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Installing package </span><span class="si">%s</span><span class="s"> failed with #</span><span class="si">%s</span><span class="s">:</span><span class="se">\n</span><span class="si">%s</span><span class="s">&quot;</span>
+                    <span class="o">%</span> <span class="p">(</span><span class="n">package_name</span><span class="p">,</span> <span class="n">ret</span><span class="p">,</span> <span class="n">msgs</span><span class="p">))</span>
+
+</div>
+<div class="viewcode-block" id="Device.remove_package"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.device.Device.remove_package">[docs]</a>    <span class="k">def</span> <span class="nf">remove_package</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Remove a package from the device.</span>
+
+<span class="sd">            :param package_name: name of the package to be removed.</span>
+<span class="sd">            :raise:              exception if the install failed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Removing package </span><span class="si">%s</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="n">package_name</span><span class="p">)</span>
+        <span class="n">ret</span><span class="p">,</span> <span class="n">msgs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span>
+                <span class="s">&quot;opkg remove --force-removal-of-dependent-packages </span><span class="si">%s</span><span class="s">&quot;</span>
+                <span class="o">%</span> <span class="n">package_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ret</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Installing package </span><span class="si">%s</span><span class="s"> failed with #</span><span class="si">%s</span><span class="s">:</span><span class="se">\n</span><span class="si">%s</span><span class="s">&quot;</span>
+                    <span class="o">%</span> <span class="p">(</span><span class="n">package_name</span><span class="p">,</span> <span class="n">ret</span><span class="p">,</span> <span class="n">msgs</span><span class="p">))</span>
+
+</div></div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.device.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Standalone function; only defined if the class is run by itself.</span>
+<span class="sd">        This function uses some basic capabilities of the class. It is</span>
+<span class="sd">        intended to be used for interactive testing during development,</span>
+<span class="sd">        and as a showcase on how to use the class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dev</span> <span class="o">=</span> <span class="n">Device</span><span class="p">(</span><span class="n">devtype</span> <span class="o">=</span> <span class="s">&quot;hipox&quot;</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">dev</span><span class="o">.</span><span class="n">bcc</span><span class="o">.</span><span class="n">ignition</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&quot;Please switch on the device.&quot;</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">print</span> <span class="s">&quot;Connecting to device...&quot;</span>
+    <span class="k">print</span> <span class="s">&quot;Firmware version: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">dev</span><span class="o">.</span><span class="n">firmware_version</span>
+
+    <span class="k">print</span> <span class="s">&quot;Boot config:&quot;</span>
+    <span class="k">print</span> <span class="s">&quot;  Kernel:      /dev/mtd</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">dev</span><span class="o">.</span><span class="n">bootconfig</span><span class="p">[</span><span class="s">&quot;kernel&quot;</span><span class="p">]</span>
+    <span class="k">print</span> <span class="s">&quot;  rootfs: /dev/blockdev</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">dev</span><span class="o">.</span><span class="n">bootconfig</span><span class="p">[</span><span class="s">&quot;rootfs&quot;</span><span class="p">]</span>
+    <span class="k">print</span> <span class="s">&quot;  epoch :             #</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">dev</span><span class="o">.</span><span class="n">bootconfig</span><span class="p">[</span><span class="s">&quot;epoch&quot;</span><span class="p">]</span>
+
+    <span class="k">print</span> <span class="s">&quot;Waiting for Networking to come up...&quot;</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">dev</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">has_networking</span><span class="p">():</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;.&quot;</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">We now have networking.&quot;</span>
+
+    <span class="k">print</span> <span class="s">&quot; Checking package install functionality:&quot;</span>
+    <span class="k">print</span> <span class="s">&quot; ----------------------&quot;</span>
+    <span class="k">print</span> <span class="s">&quot; Package &#39;zip&#39; is not installed:&quot;</span>
+    <span class="n">retc</span><span class="p">,</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">dev</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="s">&quot;zip --help&quot;</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&quot;Retcode: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">retc</span>
+    <span class="k">print</span> <span class="n">msg</span>
+    <span class="k">print</span> <span class="s">&quot;----------------------&quot;</span>
+
+    <span class="k">print</span> <span class="s">&quot; Installing zip&quot;</span>
+    <span class="n">dev</span><span class="o">.</span><span class="n">install_package</span><span class="p">(</span><span class="s">&quot;zip&quot;</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&quot;Now zip is  there:&quot;</span>
+    <span class="n">retc</span><span class="p">,</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">dev</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="s">&quot;zip --help&quot;</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&quot;Retcode: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">retc</span>
+    <span class="k">print</span> <span class="n">msg</span>
+    <span class="k">print</span> <span class="s">&quot;----------------------&quot;</span>
+
+    <span class="k">print</span> <span class="s">&quot; Removing zip&quot;</span>
+    <span class="n">dev</span><span class="o">.</span><span class="n">remove_package</span> <span class="p">(</span><span class="s">&quot;zip&quot;</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&quot;Now zip is gone:&quot;</span>
+    <span class="n">retc</span><span class="p">,</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">dev</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="s">&quot;zip --help&quot;</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&quot;Retcode: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">retc</span>
+    <span class="k">print</span> <span class="n">msg</span>
+    <span class="k">print</span> <span class="s">&quot;----------------------&quot;</span>
+
+    <span class="k">print</span> <span class="s">&quot;Now shutting down the device.&quot;</span>
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+    
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">MONK 0.1.4 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, 2013, DResearch Fahrzeugelektronik GmbH.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+        <br />
+        <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">
+            <img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" />
+        </a><br />
+        This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.
+    </div>
+
+  </body>
+</html>

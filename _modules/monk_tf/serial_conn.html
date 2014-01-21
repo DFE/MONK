@@ -1,0 +1,527 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>monk_tf.serial_conn &mdash; MONK 0.1.4 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="MONK 0.1.4 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">MONK 0.1.4 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for monk_tf.serial_conn</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c">#</span>
+<span class="c"># Copyright (C) 2012, 2013 DResearch Fahrzeugelektronik GmbH</span>
+<span class="c"># Maintained by project-monk@dresearch-fe.de</span>
+<span class="c">#</span>
+<span class="c"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c"># it under the terms of the GNU General Public License as published by</span>
+<span class="c"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c"># (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c"># This program is distributed in the hope that it will be useful,</span>
+<span class="c"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the</span>
+<span class="c"># GNU General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c"># You should have received a copy of the GNU General Public License</span>
+<span class="c"># along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="c">#</span>
+
+<span class="sd">&quot;&quot;&quot; Package for the Serial Connection class &quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">serial</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">urllib</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">bcc</span>
+
+<span class="n">LAST_LINE_UPON_SHUTDOWN</span> <span class="o">=</span> <span class="s">&quot;Detaching DM devices&quot;</span> 
+
+<div class="viewcode-block" id="SerialConn"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.serial_conn.SerialConn">[docs]</a><span class="k">class</span> <span class="nc">SerialConn</span><span class="p">(</span><span class="n">serial</span><span class="o">.</span><span class="n">Serial</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Serial connection to a device.</span>
+<span class="sd">       The serial class implements device access via the serial port.</span>
+
+<span class="sd">       FIXME: ``*args`` nach benannten Parametern funktioniert nicht. Lösung bereits unsauber implementiert.</span>
+<span class="sd">       FIXME: bei Problemen im Login kann es sein, dass die while Loop in __wait_for_known_boot_state() nicht aufhört!</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">login</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;root&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">),</span> 
+                 <span class="n">skip_pass</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">boot_prompt</span><span class="o">=</span><span class="s">&quot;HidaV boot on&quot;</span><span class="p">,</span> 
+                 <span class="n">reset_cb</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize a new instance of the serial communication class.</span>
+
+<span class="sd">           :param login:       tuple of (username, pass)</span>
+<span class="sd">           :type login:        set of two members</span>
+<span class="sd">           :param skip_pass:   True if the login does not prompt for a password</span>
+<span class="sd">           :param boot_prompt: the prompt to identify the boot loader with</span>
+<span class="sd">           :param reset_cb:    custom RESET callback to run when the device</span>
+<span class="sd">                               is rebooted</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__args</span> <span class="o">=</span> <span class="n">args</span> <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__kwargs</span> <span class="o">=</span> <span class="n">kwargs</span> <span class="k">if</span> <span class="n">kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="k">try</span><span class="p">:</span>    
+            <span class="nb">super</span><span class="p">(</span><span class="n">SerialConn</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">__args</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">__kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span> 
+            <span class="k">pass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_login</span> <span class="o">=</span> <span class="n">login</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_skip_pass</span> <span class="o">=</span> <span class="n">skip_pass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_boot_prompt</span> <span class="o">=</span> <span class="n">boot_prompt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_cb</span> <span class="o">=</span> <span class="n">reset_cb</span>
+
+
+<div class="viewcode-block" id="SerialConn.read_until"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.serial_conn.SerialConn.read_until">[docs]</a>    <span class="k">def</span> <span class="nf">read_until</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">trigger_write</span><span class="o">=</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Read up to a trigger text, then stop.</span>
+
+<span class="sd">            :param target: target string to match</span>
+<span class="sd">            :param trigger_write: </span>
+<span class="sd">                string to be sent via serial if a read timeout occurs</span>
+<span class="sd">            :param timeout: custom timeout for :py:obj:`read` and :py:obj:`write`</span>
+<span class="sd">            :return: all text read up to the point where :py:obj:`target` </span>
+<span class="sd">                appeared, including :py:obj:`target`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;reading &#39;til [</span><span class="si">%s</span><span class="s">], triggering output with [</span><span class="si">%s</span><span class="s">]&quot;</span> 
+                <span class="o">%</span> <span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">target</span><span class="p">),</span> <span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">trigger_write</span><span class="p">)))</span>
+        <span class="n">buf</span>      <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="n">log_line</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">timeout</span><span class="p">:</span>
+            <span class="n">old_wto</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">writeTimeout</span> 
+            <span class="n">old_rto</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">writeTimeout</span> <span class="o">=</span> <span class="n">timeout</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">buf</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">ret</span><span class="p">:</span>
+                <span class="n">buf</span> <span class="o">+=</span> <span class="n">ret</span>
+                <span class="k">if</span> <span class="n">ret</span> <span class="o">==</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;[</span><span class="si">%s</span><span class="s">]&quot;</span>  <span class="o">%</span> <span class="n">log_line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+                    <span class="n">log_line</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">log_line</span> <span class="o">+=</span> <span class="n">ret</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Triggering with [</span><span class="si">%s</span><span class="s">] target [</span><span class="si">%s</span><span class="s">]&quot;</span> 
+                                        <span class="o">%</span> <span class="p">(</span><span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">trigger_write</span><span class="p">),</span> <span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">target</span><span class="p">)))</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.25</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="n">trigger_write</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Got it: [</span><span class="si">%s</span><span class="s">]&quot;</span> <span class="o">%</span> <span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">target</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">timeout</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">old_rto</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">writeTimeout</span> <span class="o">=</span> <span class="n">old_wto</span>
+        <span class="k">return</span> <span class="n">buf</span>
+
+</div>
+<div class="viewcode-block" id="SerialConn.dump_receive_buffer"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.serial_conn.SerialConn.dump_receive_buffer">[docs]</a>    <span class="k">def</span> <span class="nf">dump_receive_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the contents of the serial input buffer &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inWaiting</span><span class="p">())</span>
+
+</div>
+<div class="viewcode-block" id="SerialConn.readline_until"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.serial_conn.SerialConn.readline_until">[docs]</a>    <span class="k">def</span> <span class="nf">readline_until</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">trigger_write</span><span class="o">=</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Read up to a trigger text, read the whole line, then stop.</span>
+
+<span class="sd">            This method works just like :py:meth:`read_until` with the exception </span>
+<span class="sd">            that it will read the whole last line containing the target string.</span>
+<span class="sd">            </span>
+<span class="sd">            :param target:        target string to match</span>
+<span class="sd">            :param trigger_write: string to be sent via serial if a read timeout </span>
+<span class="sd">                occurs</span>
+<span class="sd">            :return:              all text read up to the point where </span>
+<span class="sd">                :py:obj:`target` appeared, including :py:obj:`target`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_until</span><span class="p">(</span> <span class="n">target</span><span class="p">,</span> <span class="n">trigger_write</span> <span class="p">)</span>
+        <span class="n">buf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">buf</span>
+
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">__boot_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; The current system state.</span>
+
+<span class="sd">            :return: string &quot;bootloader&quot;, &quot;login&quot;, &quot;shell&quot;, or &quot;UNKNOWN&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_until</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="s">&quot;shell&quot;</span>  <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_login</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot;@&quot;</span> <span class="ow">in</span> <span class="n">buf</span> \
+                        <span class="k">else</span> <span class="s">&quot;login&quot;</span> <span class="k">if</span> <span class="s">&quot;login:&quot;</span> <span class="ow">in</span> <span class="n">buf</span> \
+                        <span class="k">else</span> <span class="s">&quot;bootloader&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boot_prompt</span> <span class="ow">in</span> <span class="n">buf</span> \
+                        <span class="k">else</span> <span class="s">&quot;UNKNOWN&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Current system state is </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">ret</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ret</span>
+
+
+    <span class="k">def</span> <span class="nf">__wait_for_known_boot_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Wait for a KNOWN boot state. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Waiting for a known system state...&quot;</span><span class="p">)</span>
+
+        <span class="n">state</span> <span class="o">=</span> <span class="s">&quot;UNKNOWN&quot;</span>
+        <span class="k">while</span> <span class="n">state</span> <span class="o">==</span> <span class="s">&quot;UNKNOWN&quot;</span><span class="p">:</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__boot_state</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Got system state </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">state</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">state</span>
+
+
+<div class="viewcode-block" id="SerialConn.login"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.serial_conn.SerialConn.login">[docs]</a>    <span class="k">def</span> <span class="nf">login</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Log in to a device.</span>
+
+<span class="sd">            This method will log in to a device. It will check wheter we are </span>
+<span class="sd">            already logged in (in which case the method succeeds early), and </span>
+<span class="sd">            whether we&#39;re currently in the boot loader (in which case the </span>
+<span class="sd">            method will boot the device, then log in).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__wait_for_known_boot_state</span><span class="p">();</span>
+
+        <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s">&quot;shell&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Already logged in.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s">&quot;bootloader&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;System has stopped at&quot;</span>
+                                <span class="o">+</span> <span class="s">&quot; bootloader; booting...&quot;</span><span class="p">)</span>
+            <span class="c"># the bootloader loses bytes on the serial line, so repeat this </span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">boot</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">boot</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">boot</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Login for user </span><span class="si">%s</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_login</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flushInput</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flushOutput</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_until</span><span class="p">(</span><span class="s">&quot;login:&quot;</span><span class="p">,</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_login</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_skip_pass</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Sending password for user </span><span class="si">%s</span><span class="s">.&quot;</span> 
+                                    <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_login</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">read_until</span><span class="p">(</span><span class="s">&quot;Password:&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_login</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_until</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_login</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s">&quot;@&quot;</span><span class="p">)</span>
+        <span class="c"># make sure no kernel messages go to the serial console while</span>
+        <span class="c"># we are remote-controlling the device</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;echo &quot;0 0 0 0&quot; &gt; /proc/sys/kernel/printk</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">__run_cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Generic command executor for both boot loader and linux shell cmds.</span>
+
+<span class="sd">            This method will run a command, wrapping the command&#39;s output into</span>
+<span class="sd">            boundaries for later extraction.</span>
+
+<span class="sd">            :param cmd: command to execute</span>
+<span class="sd">            :return:    string buffer containing command output</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flushInput</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flushOutput</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_until</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>   <span class="s">r&#39;remote_trigger=&quot;OUTPUT&quot;;&#39;</span>
+                    <span class="o">+</span> <span class="s">r&#39;echo &quot;===${remote_trigger} STARTS===&quot;;&#39;</span> 
+                    <span class="o">+</span> <span class="n">cmd</span> 
+                    <span class="o">+</span> <span class="s">r&#39;;echo &quot;===${remote_trigger} ENDS===&quot;&#39;</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+
+        <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readline_until</span><span class="p">(</span><span class="s">&quot;===OUTPUT ENDS===&quot;</span><span class="p">)</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s">&quot;===OUTPUT STARTS===&quot;</span><span class="p">)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
+
+        <span class="n">end</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s">&quot;===OUTPUT ENDS===&quot;</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">rindex</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">buf</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="SerialConn.cmd"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.serial_conn.SerialConn.cmd">[docs]</a>    <span class="k">def</span> <span class="nf">cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Execute a linux user space command on the remote system.</span>
+<span class="sd">            This method will execute a command on the remote system,</span>
+<span class="sd">            returning the retcode of that command and all the output</span>
+<span class="sd">            which appeared on the serial console while the command was</span>
+<span class="sd">            executed.</span>
+
+<span class="sd">            .. warning:: </span>
+<span class="sd">                The command to be run MUST be guaranteed to return; </span>
+<span class="sd">                so issuing &quot;halt&quot; or &quot;reboot&quot; is a bad idea. Also, Linux</span>
+<span class="sd">                user space is required for execution (e.g. when calculating</span>
+<span class="sd">                the return value of the command executed). :py:meth:`cmd` does </span>
+<span class="sd">                not currently work with the boot loader prompt.</span>
+
+<span class="sd">            :param cmd: the command to run</span>
+<span class="sd">            :return:    tuple of (retcode, command output) </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">cmd</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">+</span> <span class="s">r&#39;; echo -e &quot;\nRETCODE=$?&quot;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Executing command [</span><span class="si">%s</span><span class="s">]&quot;</span> <span class="o">%</span> <span class="n">cmd</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">login</span><span class="p">()</span>
+        <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__run_cmd</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+
+        <span class="n">rcd</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">r&#39;RETCODE=(?P&lt;retcode&gt;[0-9]+)&#39;</span><span class="p">,</span> 
+                        <span class="n">buf</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&quot;retcode&quot;</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Command [</span><span class="si">%s</span><span class="s">] ret: #</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">rcd</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">rcd</span><span class="p">,</span> <span class="n">buf</span>
+
+</div>
+<div class="viewcode-block" id="SerialConn.logout"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.serial_conn.SerialConn.logout">[docs]</a>    <span class="k">def</span> <span class="nf">logout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Log out of the system. &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__boot_state</span> <span class="o">==</span> <span class="s">&quot;shell&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Logging out.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">exit</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">read_until</span><span class="p">(</span><span class="s">&quot;login:&quot;</span><span class="p">)</span>
+    
+    </div>
+<div class="viewcode-block" id="SerialConn.reboot"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.serial_conn.SerialConn.reboot">[docs]</a>    <span class="k">def</span> <span class="nf">reboot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reboot_cmd</span><span class="o">=</span><span class="s">&quot;halt&quot;</span><span class="p">,</span> <span class="n">sync</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">stop_at_bootloader</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Reboot the system.</span>
+<span class="sd">        </span>
+<span class="sd">            This method will reboot the system, kicking it with a HW reset if the </span>
+<span class="sd">            serial class was asked to do so at instantiation time.</span>
+<span class="sd">            </span>
+<span class="sd">            By default the method will issue a reboot command and then return </span>
+<span class="sd">            immediately.</span>
+
+<span class="sd">            :param reboot_cmd: actual command to trigger the reboot; </span>
+<span class="sd">                Defaults to &quot;halt&quot; since most of our systems are self-resetting :)</span>
+
+<span class="sd">            :param sync: Wait for the reboot to happen; return only after the </span>
+<span class="sd">                device rebooted and a login is available. Defaults to False.</span>
+
+<span class="sd">            :param stop_at_bootloader: Reboot, then wait for boot loader </span>
+<span class="sd">                messages on the serial line, then interrupt the boot loader. </span>
+<span class="sd">                This function returns after we got a boot loader prompt.</span>
+
+<span class="sd">            :return: All the console messages from when the reboot has been </span>
+<span class="sd">                issued up to the point the method stopped reading. May be the </span>
+<span class="sd">                empty string if an asynchronous reboot has been requested.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Rebooting </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="s">&quot;and stopping at bootloader&quot;</span> <span class="k">if</span>
+                <span class="n">stop_at_bootloader</span> <span class="k">else</span> <span class="s">&quot;synchronously&quot;</span> <span class="k">if</span> <span class="n">sync</span> <span class="k">else</span> <span class="s">&quot;.&quot;</span><span class="p">))</span>
+
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__wait_for_known_boot_state</span><span class="p">()</span>
+
+        <span class="n">buf</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">state</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;shell&quot;</span><span class="p">,</span> <span class="s">&quot;login&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">login</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">+</span> <span class="n">reboot_cmd</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reset_cb</span><span class="p">:</span>
+                <span class="n">buf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readline_until</span><span class="p">(</span><span class="n">LAST_LINE_UPON_SHUTDOWN</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_reset_cb</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">stop_at_bootloader</span><span class="p">:</span>
+            <span class="n">buf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_until</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_boot_prompt</span><span class="p">,</span> <span class="s">&quot;.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">sync</span><span class="p">:</span>
+            <span class="n">buf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readline_until</span><span class="p">(</span><span class="s">&quot;login:&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;OK&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">buf</span>
+
+</div>
+<div class="viewcode-block" id="SerialConn.boot_to_nand"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.serial_conn.SerialConn.boot_to_nand">[docs]</a>    <span class="k">def</span> <span class="nf">boot_to_nand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kernel_partition</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">rootfs_partition</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+                            <span class="n">sync</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Reboot the device to NAND.</span>
+
+<span class="sd">            :param kernel_partition: </span>
+<span class="sd">                kernel partition number to boot into.</span>
+<span class="sd">            :param rootfs_partition: </span>
+<span class="sd">                root fs parition number to boot into.</span>
+<span class="sd">            :param sync:  </span>
+<span class="sd">                Wait for the reboot to happen; return only after the device </span>
+<span class="sd">                rebooted and a login is available. Defaults to False.</span>
+<span class="sd">            :return:            </span>
+<span class="sd">                All the console messages from when the reboot has been issued up </span>
+<span class="sd">                to the point the method stopped reading.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">buf</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">kernel_partition</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">kernel_offset</span> <span class="o">=</span> <span class="s">&quot;0x200000&quot;</span> <span class="k">if</span> <span class="n">kernel_partition</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="s">&quot;0xC00000&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Rebooting to NAND&quot;</span> 
+                               <span class="o">+</span> <span class="s">&quot; (kernel: mtd</span><span class="si">%s</span><span class="s">, rootfs: mtd</span><span class="si">%s</span><span class="s">).&quot;</span>
+                               <span class="o">%</span> <span class="p">(</span><span class="n">kernel_partition</span><span class="p">,</span> <span class="n">rootfs_partition</span><span class="p">))</span>
+
+        <span class="n">buf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reboot</span><span class="p">(</span><span class="n">sync</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">stop_at_bootloader</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">flushInput</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flushOutput</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">kernel_partition</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Setting kernel offset to </span><span class="si">%s</span><span class="s">.&quot;</span> 
+                               <span class="o">%</span> <span class="n">kernel_offset</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">setenv kernel_offset </span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">kernel_offset</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">rootfs_partition</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Setting kernel root to /dev/blockdev</span><span class="si">%s</span><span class="s">.&quot;</span> 
+                               <span class="o">%</span> <span class="n">rootfs_partition</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">setenv rootfs_device /dev/blockdev</span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> 
+                        <span class="o">%</span> <span class="n">rootfs_partition</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Issuing &#39;run bootnand&#39;.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">run bootnand</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sync</span><span class="p">:</span>
+            <span class="n">buf</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readline_until</span><span class="p">(</span><span class="s">&quot;login:&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Now rebooted to NAND.&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">buf</span>
+
+</div></div>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.serial_conn.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Standalone function to run the class all by itself.</span>
+
+<span class="sd">        This function uses some basic capabilities of the class. It is</span>
+<span class="sd">        intended to be used for interactive testing during development,</span>
+<span class="sd">        and as a showcase on how to use the class. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">bcc</span><span class="o">.</span><span class="n">Bcc</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&quot;Usage: </span><span class="si">%s</span><span class="s"> &lt;username&gt; &lt;password&gt; [&lt;command&gt;]&quot;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+    <span class="n">scn</span> <span class="o">=</span> <span class="n">SerialConn</span><span class="p">(</span><span class="n">logger</span><span class="o">.</span><span class="n">init</span><span class="p">(),</span> <span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+            <span class="n">reset_cb</span><span class="o">=</span><span class="n">b</span><span class="o">.</span><span class="n">reset</span><span class="p">)</span>
+    <span class="n">scn</span><span class="o">.</span><span class="n">port</span>     <span class="o">=</span> <span class="s">&quot;/dev/ttyUSB1&quot;</span>
+    <span class="n">scn</span><span class="o">.</span><span class="n">baudrate</span> <span class="o">=</span> <span class="mi">115200</span>
+    <span class="n">scn</span><span class="o">.</span><span class="n">bytesize</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">scn</span><span class="o">.</span><span class="n">parity</span>   <span class="o">=</span> <span class="s">&#39;N&#39;</span>
+    <span class="n">scn</span><span class="o">.</span><span class="n">stopbits</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">scn</span><span class="o">.</span><span class="n">timeout</span>  <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">scn</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">3</span><span class="p">:]:</span>
+            <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s"> ######## &quot;</span>
+            <span class="k">print</span> <span class="s">&quot; ######## Running custom command &gt;&gt;&gt;&gt; </span><span class="si">%s</span><span class="s"> &lt;&lt;&lt;&lt;&quot;</span> <span class="o">%</span> <span class="n">cmd</span>
+            <span class="k">print</span> <span class="s">&quot; ######## </span><span class="se">\n</span><span class="s">&quot;</span>
+            <span class="n">retcode</span><span class="p">,</span> <span class="n">bla</span> <span class="o">=</span> <span class="n">scn</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+            <span class="k">print</span> <span class="s">&quot;</span><span class="se">\n\n</span><span class="s">#######</span><span class="se">\n</span><span class="s">RETCODE: </span><span class="si">%s</span><span class="s">, EXEC MSGS:</span><span class="se">\n</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">retcode</span><span class="p">,</span> <span class="n">bla</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+    <span class="k">print</span> <span class="s">&quot; ######## &quot;</span>
+    <span class="k">print</span> <span class="s">&quot; ######## ls /&quot;</span>
+    <span class="k">print</span> <span class="s">&quot; ######## &quot;</span>
+    <span class="k">print</span> <span class="n">scn</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="s">&quot;ls /&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">print</span> <span class="s">&quot; ######## &quot;</span>
+    <span class="k">print</span> <span class="s">&quot; ######## Rebooting...&quot;</span>
+    <span class="k">print</span> <span class="s">&quot; ######## &quot;</span>
+    <span class="n">bootlog</span> <span class="o">=</span> <span class="n">scn</span><span class="o">.</span><span class="n">reboot</span><span class="p">(</span><span class="n">sync</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&quot; ######## &quot;</span>
+    <span class="k">print</span> <span class="s">&quot; ######## Reboot OK&quot;</span>
+    <span class="k">print</span> <span class="s">&quot; ######## </span><span class="se">\n</span><span class="s">&quot;</span>
+    <span class="k">print</span> <span class="s">&quot;   --- reboot messages ---  </span><span class="se">\n</span><span class="s">&quot;</span>
+    <span class="k">print</span> <span class="n">bootlog</span>
+    <span class="k">print</span> <span class="s">&quot;   --- ------ -------- ---  </span><span class="se">\n</span><span class="s">&quot;</span>
+    <span class="k">print</span> <span class="s">&quot; ######## &quot;</span>
+    <span class="k">print</span> <span class="s">&quot; ######## Rebooting into bootloader...&quot;</span>
+    <span class="k">print</span> <span class="s">&quot; ######## &quot;</span>
+    <span class="n">bootlog</span> <span class="o">=</span> <span class="n">scn</span><span class="o">.</span><span class="n">reboot</span><span class="p">(</span><span class="n">stop_at_bootloader</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+    <span class="k">print</span> <span class="s">&quot; ######## Device stopped in boot loader&quot;</span>
+    <span class="k">print</span> <span class="s">&quot;   --- reboot messages ---  </span><span class="se">\n</span><span class="s">&quot;</span>
+    <span class="k">print</span> <span class="n">bootlog</span>
+    <span class="k">print</span> <span class="s">&quot;   --- ------ -------- ---  </span><span class="se">\n</span><span class="s">&quot;</span>
+    <span class="k">print</span> <span class="n">scn</span><span class="o">.</span><span class="n">dump_receive_buffer</span><span class="p">()</span>
+
+</div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">MONK 0.1.4 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, 2013, DResearch Fahrzeugelektronik GmbH.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+        <br />
+        <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">
+            <img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" />
+        </a><br />
+        This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.
+    </div>
+
+  </body>
+</html>

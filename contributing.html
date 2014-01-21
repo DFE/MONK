@@ -1,0 +1,511 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Contributing &mdash; MONK 0.1.4 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="MONK 0.1.4 documentation" href="index.html" />
+    <link rel="next" title="Development Process" href="devel.html" />
+    <link rel="prev" title="Getting Started" href="intro.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="devel.html" title="Development Process"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="Getting Started"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MONK 0.1.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="contributing">
+<span id="chap-contrib"></span><h1>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+<p>Our project lives from your contributions. That is why we took a lot of effort
+to make contributing to <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> as easy as possible. Following the guide
+on this page leads you to your first steps developing with and for
+<a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>. If you want to get into the details look that the next section:
+<a class="reference internal" href="devel.html#chap-devel"><em>Development Process</em></a>.</p>
+<div class="section" id="prerequisites">
+<span id="contrib-pre"></span><h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> is written in <strong>Python 2.7</strong>, which means it is mostly self
+containing and able to work on any operating system. Not all OS dependencies
+can be obvious, though. This means, that in some places you might have to
+investigate a solution by yourself. Feel free to drop us a line, though. Maybe
+we already faced your problem before or might include your solution as your
+first contribution!</p>
+<p>Most <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> developers work on Ubuntu, Suse and Fedora systems. If you
+have one of those systems, your chances are very high that you can follow this
+guide without any problems. This document itself is written on a <strong>Ubuntu
+13.04</strong> machine and all examples here are tested on that platform.</p>
+<p>On most Linux distributions Python 2.7 should already be installed, so you
+have nothing to do in that regard. To test it, open a Terminal and look if
+that works without an error message:</p>
+<div class="highlight-python"><pre>$ python
+Python 2.7.4 (default, Apr 19 2013, 18:28:01)
+[GCC 4.7.3] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+&gt;&gt;&gt; print "hi"
+hi
+&gt;&gt;&gt; exit()</pre>
+</div>
+<p>If it worked, than you already have Python and are ready to go. If not, you
+might find information on <a class="reference external" href="http://www.python.org/getit/">the Python website</a>.</p>
+<p>Another requirement is the version control system used for <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>. It is
+called <strong>git</strong> and you can find a lot of information about it in the <a class="reference external" href="http://git-scm.com/book">git
+book</a>. To follow this guide it is not necessary to know everything about git,
+though.  Do not worry about it. The only thing you should have a look at is the
+<a class="reference external" href="http://git-scm.com/book/en/Getting-Started-Installing-Git">Installing Git</a> chapter.</p>
+<p>Then you will need 2 development packages. One is <strong>python-dev</strong> (might be
+called <em>python-devel</em>) and the other one
+is <strong>libssh-2-1-dev</strong> (sometimes called <em>libssh2-devel</em>). They are necessary
+to build the Python package <em>libssh2</em>, which can be installed for you
+automatically, if you have the 2 <em>*-dev</em> packages installed. Those are
+packages created by your operating system vendor and you should use his
+resources to get them. On Ubuntu 13.04 you can do the following:</p>
+<div class="highlight-python"><pre>$ sudo apt-get install python-dev libssh-2-1-dev</pre>
+</div>
+<p>You will also need a Python tool, that helps with generalizing
+development environments. It is called <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a>. If your operating
+system does not come with a prebuilt <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a>, you can follow the
+<a class="reference external" href="http://www.virtualenv.org/en/latest/#installation">virtualenv Installation Guide</a>.</p>
+<p>And of course you will need <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK&#8217;s</em></a> source code. If you have installed
+<em>git</em> on your system, you can go to your preferred development folder and write
+the following line:</p>
+<div class="highlight-python"><pre>$ git clone https://github.com/DFE/MONK</pre>
+</div>
+<p>This will create a new folder in that location and will download the source
+code inside.</p>
+<p>Now you are ready to start developing for <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>. Great!</p>
+</div>
+<div class="section" id="starting-the-environment">
+<span id="contrib-startenv"></span><h2>Starting The Environment<a class="headerlink" href="#starting-the-environment" title="Permalink to this headline">¶</a></h2>
+<p>Now we want to discuss how to start our environment. It means an additional
+step before and after your editing, but it comes with a lot of advantages.  The
+tool that helps us here is <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a> and what it does is creating a
+defined local environment. It resets standard variables like <tt class="docutils literal"><span class="pre">PATH</span></tt> and
+creates additional folders at the position of your <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a>. Using it
+gives the following advantages:</p>
+<blockquote>
+<div><ul class="simple">
+<li>All developers using the same <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a> initialization work in
+pretty much the same environment.</li>
+<li>You separate your development environment from your system, which might be
+good, if you normally use another python version or another set of python
+packages.</li>
+<li>A lot of tools and services expect to run python code in a
+<a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a>. So it is always good to be prepared for it.</li>
+</ul>
+</div></blockquote>
+<p>Working with <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a> requires the following steps:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Create a <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a> (only once)</li>
+<li>Initialize the <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a> (every time before you work)</li>
+<li>Install the requirements (once in the beginning, and updated when changed)</li>
+<li>Develop, test and do whatever you need to do.</li>
+<li>Deactivate the <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a> (every time after you are finished with
+your work)</li>
+</ol>
+</div></blockquote>
+<p>To create the <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a> <tt class="docutils literal"><span class="pre">cd</span></tt> into your <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> folder, and then
+run the following command:</p>
+<div class="highlight-python"><pre>MONK$ virtualenv .</pre>
+</div>
+<p>Now you run <tt class="docutils literal"><span class="pre">git</span> <span class="pre">status</span></tt>. You will see there are a lot of new folders which
+are not part of the <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> repository. Those were created by
+<a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a> and normally you do not need to touch them directly.</p>
+<p>Every time before you start working on something you should run this command:</p>
+<div class="highlight-python"><pre>MONK$ . bin/activate
+(MONK)MONK$</pre>
+</div>
+<p>If the activation was successful, then you should see the name of the folder
+inside braces before your prompt. If you do not see it, then please refer to
+the <a class="reference external" href="http://www.virtualenv.org/en/latest/">virtualenv documentation</a>.</p>
+<p>The next step you need to do is run the requirements. If you want to develop,
+you can install the <em>requirements-tests.txt</em> and if you want to develop you can
+install the <em>requirements-develop.txt</em>. Because it does not hurt, we just
+install both now:</p>
+<div class="highlight-python"><pre>(MONK)MONK$ pip install -r requirements-test.txt
+(MONK)MONK$ pip install -r requirements-develop.txt</pre>
+</div>
+<p>Remember that this step only needs to be done once in the beginning and when
+those file got updated. If there are no changes it does not hurt to call them
+again, but it also should not change anything.
+Now you can start working. In a later chapter we will look at things we can do
+here.</p>
+<p>Now that you have tested that everything is okay, you want to install
+<a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> inside of your <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a> in a way, that makes it possible
+to test it and to develop it. This is achieved with the following command:</p>
+<div class="highlight-python"><pre>(MONK)MONK$ python setup.py develop</pre>
+</div>
+<p>After you are finished, you deactivate the <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a> with this command:</p>
+<div class="highlight-python"><pre>(MONK)MONK$ deactivate
+MONK$</pre>
+</div>
+<p>You see, that the name in brackets before the prompt is gone and you are back
+in the normal mode.</p>
+<p>Now you know everything you need to start working with <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a>.
+Awesome!</p>
+</div>
+<div class="section" id="running-the-testsuite">
+<span id="contrib-runtests"></span><h2>Running The Testsuite<a class="headerlink" href="#running-the-testsuite" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You need to install the requirements-test.txt file and execute
+<tt class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">develop</span></tt> before you can go on with this part! See
+<a class="reference internal" href="#contrib-startenv"><em>Starting The Environment</em></a> for a setup.</p>
+</div>
+<p>By now we have prepared our system, we retrieved the source code for
+<a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>, and we saw how to use <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a> to start our development
+environment. As a first example of doing stuff, we want to run
+<a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK&#8217;s</em></a> <a class="reference internal" href="glossary.html#term-test-suite"><em class="xref std std-term">test&nbsp;suite</em></a>. It will also show us, if everything is
+installed correctly.</p>
+<p>To run the test suite go into the <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a> and then run the setup
+command for <strong>nosetests</strong>. <a class="reference internal" href="glossary.html#term-nose"><em class="xref std std-term">Nose</em></a> is a tool that finds and runs
+testsuites while also collecting coverage data. This tool will be automatically
+installed while running the setup command. You only need to worry about it in
+case of errors or when you start to write unit tests yourself. In that case
+refer to the <a class="reference external" href="https://nose.readthedocs.org/en/latest/">nosetests documentation</a>.</p>
+<p>The command:</p>
+<div class="highlight-python"><pre>MONK$ . bin/activate
+(MONK)MONK$ python setup.py nosetests</pre>
+</div>
+<p>This command will install all required python packages locally into the folder.
+Read the output carefully. In general you should see successful attempts to
+download and install some packages, then a <tt class="docutils literal"><span class="pre">DEBUG</span></tt> output, were <em>nose</em>
+searches the path for all kinds of tests, then tests and their success,
+followed by the coverage data and a short summary that should be successful.
+If you experience errors in this step it is save to contact
+our mailing list (<a class="reference external" href="mailto:project-monk&#37;&#52;&#48;dresearch-fe&#46;de">project-monk<span>&#64;</span>dresearch-fe<span>&#46;</span>de</a>)!</p>
+<p>To check if it is working, you can go into one file that is being tested and
+change something. Because we can be sure that there is a test for
+<tt class="docutils literal"><span class="pre">monk_tf/serial_conn.py</span></tt>, we will change that:</p>
+<div class="highlight-python"><pre>(MONK)MONK$ vim monk_tf/conn.py #or any editor of your choice</pre>
+</div>
+<p>In that file add a line with <tt class="docutils literal"><span class="pre">raise</span> <span class="pre">Exception(&quot;Hello</span> <span class="pre">Error!&quot;)</span></tt> in the
+constructor of <a class="reference internal" href="monk_tf.html#monk_tf.conn.SerialConnection" title="monk_tf.conn.SerialConnection"><tt class="xref py py-class docutils literal"><span class="pre">SerialConnection</span></tt></a> (the
+<tt class="xref py py-meth docutils literal"><span class="pre">__init__()</span></tt> method).  If you run the
+tests again with <tt class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">nosetests</span></tt> from the project&#8217;s root folder
+(<a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> in our example), the tests with <a class="reference internal" href="monk_tf.html#module-monk_tf.conn" title="monk_tf.conn"><tt class="xref py py-mod docutils literal"><span class="pre">conn</span></tt></a> should
+all fail with that exception.</p>
+<p>After you are finished, you can remove the Exception and do not forget to
+<em>deactivate</em> your environment:</p>
+<div class="highlight-python"><pre>(MONK)MONK$ deactivate</pre>
+</div>
+<p>The interesting point is, that you can now test on the go while developing. Not
+much different from what an IDE would offer you. But in contrast to the IDE you
+also know that you have an equal environment to other developers, users and
+your <a class="reference external" href="http://en.wikipedia.org/wiki/Continuous_integration">CI server</a>, in our case <a class="reference external" href="https://travis-ci.org/DFE/MONK">Travis CI</a>.</p>
+</div>
+<div class="section" id="reading-the-documentation">
+<span id="contrib-read"></span><h2>Reading the Documentation<a class="headerlink" href="#reading-the-documentation" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> documentation is written in <a class="reference external" href="http://sphinx-doc.org/">Sphinx</a>. Sphinx is a set of
+tools, which compiles documents in the <a class="reference internal" href="glossary.html#term-rest"><em class="xref std std-term">restructuredText</em></a> markup
+language to different formats like HTML and PDF. <a class="reference internal" href="glossary.html#term-rest"><em class="xref std std-term">reST</em></a> is a language
+that is both written for compilers to parse, as well as for humans to read.
+That makes reading <a class="reference internal" href="glossary.html#term-rest"><em class="xref std std-term">.rst</em></a> directly in your editor possible. Text
+editors like VIM will even highlight the <a class="reference internal" href="glossary.html#term-rest"><em class="xref std std-term">reST</em></a> format for you. So the
+simplest way to read the documentation will be directly in the source tree:</p>
+<div class="highlight-python"><pre>(MONK)MONK$ cd doc/source
+#read this page's source file:
+(MONK)MONK$ vim contributing.rst</pre>
+</div>
+<p>Another way to read the docs, is on <a class="reference external" href="https://github.com/DFE/MONK/blob/dev/doc/source/contributing.rst">the corresponding Github page</a>, but make
+sure that you are at the right commit. The advantages of the website are that
+you do not need any environment for reading it, Github already parses it to
+HTML for you and you can even edit the text there. For changing the
+documentation that might be a solid way to handle it, although we did not test
+it until now!</p>
+<p>The more advanced way is to build the docs yourself to PDF or HTML. This will
+be explained in the next section. The advantages here are that you read all the
+warnings and error messages and have full control over every part of your
+documentation. If you want to be a successful <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> developer this is
+definitely the way to go. It is not the easiest, though. But we trust you can
+handle it!</p>
+</div>
+<div class="section" id="building-the-documentation">
+<span id="contrib-build"></span><h2>Building the Documentation<a class="headerlink" href="#building-the-documentation" title="Permalink to this headline">¶</a></h2>
+<p>As always the first step is to go into your <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> repository and
+activate the <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a>:</p>
+<div class="highlight-python"><pre>$ cd &lt;MONK&gt;
+MONK$ . bin/activate
+(MONK)MONK$</pre>
+</div>
+<p>Then you go into the doc folder:</p>
+<div class="highlight-python"><pre>(MONK)MONK$ cd doc
+(MONK)doc$</pre>
+</div>
+<p>When you look into that folder you see that there is a <em>Makefile</em> and that
+contains tasks for everything you could want to do. In general you just want
+the html docs. In that case you call:</p>
+<div class="highlight-python"><pre>(MONK)doc$ make html</pre>
+</div>
+<p>If you want to build everything and decide later what to use, then:</p>
+<div class="highlight-python"><pre>(MONK)doc$ make</pre>
+</div>
+<p>Keep in mind that building everything requires some latex related system
+libraries. Until now we have no comprehensive list about those and fall back to
+simply install the Lyx Latex editor, which automatically installs all required
+packages (and some more):</p>
+<div class="highlight-python"><pre>(MONK)doc$ deactivate
+doc$ sudo apt-get install lyx
+doc$ . ../bin/activate
+(MONK)doc$ make</pre>
+</div>
+<p>We seldomly use PDF by now, that is why nobody got to improve that part. So if
+you use that heavily, then we would appreciate your commits there!</p>
+<p>The output you see then begins by trying to delete old folders that might still
+be lying around. Then <em>Sphinx</em> is started and the output you see is <em>Sphinx</em>
+going through its compilation process, followed by the output from <em>latexpdf</em> a
+tool to generate PDFs from text files.</p>
+<p>If everything ran successfully, you should find the following documents, which
+can be opened with a browser and a pdf reader respectively:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">MONK</span><span class="o">/</span><span class="n">doc</span><span class="o">/</span><span class="n">build</span><span class="o">/</span><span class="n">html</span><span class="o">/</span><span class="n">index</span><span class="o">.</span><span class="n">html</span>
+<span class="n">MONK</span><span class="o">/</span><span class="n">doc</span><span class="o">/</span><span class="n">build</span><span class="o">/</span><span class="n">latex</span><span class="o">/</span><span class="n">MONK</span><span class="o">.</span><span class="n">pdf</span>
+</pre></div>
+</div>
+<p>For problems with building the HTML you should refer to the <a class="reference external" href="http://sphinx-doc.org/">Sphinx</a>
+Documentation. For problems with building the PDF we can’t help you. Sorry!
+But we wish you a great deal of luck! :)</p>
+<p>In the end, do not forget to deactivate your <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a>:</p>
+<div class="highlight-python"><pre>(MONK)doc$ deactivate
+doc$</pre>
+</div>
+</div>
+<div class="section" id="change-example-creation-of-this-tutorial">
+<span id="contrib-example"></span><h2>Change Example: Creation Of This Tutorial<a class="headerlink" href="#change-example-creation-of-this-tutorial" title="Permalink to this headline">¶</a></h2>
+<p>As a last point of this tutorial I want to discuss how the changes were made to
+put this tutorial here in this place. This part is just for reading. I hope you
+understand that it is not possible to have any specific change in the project,
+that can be always go through the whole <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>
+<a class="reference internal" href="devel.html#chap-devel"><em>development&nbsp;process</em></a> each time someone wants to go through
+the tutorial. We just hope that after reading this you will have the confidence
+to go ahead and do something yourself with <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>.  If you hit any road
+blocks on the way, do not hesitate to ask for our help!</p>
+<div class="section" id="history-lesson">
+<span id="contrib-history"></span><h3>History Lesson<a class="headerlink" href="#history-lesson" title="Permalink to this headline">¶</a></h3>
+<p>This tutorial was developed, because one of our developers felt, that the
+previous version of this document was not very convincing to new users. It was
+basically a list of details about the development process, with too much
+information and too little guidance. So when the time was right and enough
+changes to the development process were made, this tutorial was created for new
+comers, to get an easier step into <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> and <a class="reference internal" href="glossary.html#term-open-source"><em class="xref std std-term">open&nbsp;source</em></a>
+development. Although there is probably still a lot to be done better, we hope
+we at least succeeded in convincing you to work with us on <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>.</p>
+</div>
+<div class="section" id="the-preparation">
+<span id="contrib-example-prep"></span><h3>The Preparation<a class="headerlink" href="#the-preparation" title="Permalink to this headline">¶</a></h3>
+<p>The problem was discovered by one coworker with the Github shorthand erikb85.
+When he noticed the problem, he started <a class="reference external" href="DevenvIssue">an Issue</a> on our
+developer platform Github. In that he described the problem. Because in this
+case he already knew the solution to the problem, he described that as well. In
+most cases the solution will not be clear. Then that part of the Issue
+description stays empty until a solution is found.</p>
+<p>After that he fetched the newest version of <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> from Github. Because
+he already has a development environment, it was not necessary to clone
+<a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>:</p>
+<div class="highlight-python"><pre>#go to the MONK folder
+$ cd MONK
+#make sure to be on the right branch
+MONK$ git checkout dev
+#pull updates from Github
+MONK$ git pull --rebase</pre>
+</div>
+<p>Then he created a feature branch for his new commits and added it to the
+<em>Notes</em> section in the Issue:</p>
+<div class="highlight-python"><pre>MONK$ git checkout -b f-docs-devenv</pre>
+</div>
+<p>Now he started the development environment and went to the documentation
+folder:</p>
+<div class="highlight-python"><pre>MONK$ . bin/activate
+(MONK)MONK$ cd doc
+(MONK)doc$</pre>
+</div>
+<p>Then he started to edit the <em>contributing.rst</em> and built the html documentation
+to check his results:</p>
+<div class="highlight-python"><pre>(MONK)doc$ vim source/contributing.rst
+(MONK)doc$ make html
+...
+(MONK)doc$ chromium-browser build/html/contributing.html
+# repeat until happy or time runs out</pre>
+</div>
+<p>When he left work, he committed his changes in form of a WIP commit, always
+mentioning the Github Issue with <tt class="docutils literal"><span class="pre">#36</span></tt>. This way Github always knew were the
+commit belongs to and could list it in the Issue:</p>
+<div class="highlight-python"><pre>(MONK)doc$ git add source/contributing.rst
+(MONK)doc$ git commit -s
+#commit message:
+WIP: contributing.rst: Rewrite for development env
+
+See Github Issue #36.
+
+Signed-off-by: Erik Bernoth &lt;erik.bernoth@gmail.com&gt;
+#end of commit message
+#be careful with the following command, because it influences the internal
+#structure of your git repository as well as GitHub's
+(MONK)doc$ git push -f origin f-docs-devenv</pre>
+</div>
+<p>Now the most up-to-date version is always online and all commits show in the
+GitHub Issue. Some major decisions are also written as comments to the Issue.
+An example is <a class="reference external" href="tutcomment">the comment</a>, which discusses changes to the
+topic issue, which seemed meaningful at some point while working on solving
+it. This is also a place for reviewers, interested users and other developers
+to discuss their ideas about the problem.</p>
+<p>After this tutorial was finished, it got the label <em>reviewable</em> and other
+developers took a look into it. A reviewer will checkout the same branch (not a
+commit specifically) and look at the results. If code was changed he will look
+what happened and if the code still works as expected, if unit tests are there,
+if they pass and if the coding style guide was followed. If he is happy, he
+will write a comment with a simple <tt class="docutils literal"><span class="pre">ACK</span></tt> inside. Sometimes it gets more
+complicated and he will communicate with the developer directly. The result
+will be as in this case more commits by the reviewers or some changes by the
+developer himself. If 2 reviewers give an <tt class="docutils literal"><span class="pre">ACK</span></tt> in comments or directly to
+the developer he or a maintainer will go through the commits and add a line for
+each reviewer to the commit message, saying that this commit was checked by
+whom:</p>
+<div class="highlight-python"><pre>TODO: add Acked-by line according to Issues #36 reviewers. If you are a
+reviewer and read this, add an Acked-by example with your name here,
+please.</pre>
+</div>
+<p>Then a maintainer will close the issue and merge the feature branch with the
+<tt class="docutils literal"><span class="pre">dev</span></tt> branch. Now the Issue is solved.</p>
+<p>As you might have noticed, the last steps were explained more broadly. They
+require a deeper understanding of git and at the point were you get there, a
+<a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> developer will probably already help you, anyway.</p>
+</div>
+</div>
+<div class="section" id="final-words">
+<span id="contrib-final"></span><h2>Final Words<a class="headerlink" href="#final-words" title="Permalink to this headline">¶</a></h2>
+<p>Okay, that closes the tutorial. Now you have learned all the steps in the
+development process and seen one example of how it was applied. You should know
+why and how to use <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a>, git, Github and <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>. Some more
+detailed descriptions follow in the next chapters. We hope, you could learn
+something and have a good time developing on <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>.</p>
+<p>Thanks for reading to this point!</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Contributing</a><ul>
+<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li><a class="reference internal" href="#starting-the-environment">Starting The Environment</a></li>
+<li><a class="reference internal" href="#running-the-testsuite">Running The Testsuite</a></li>
+<li><a class="reference internal" href="#reading-the-documentation">Reading the Documentation</a></li>
+<li><a class="reference internal" href="#building-the-documentation">Building the Documentation</a></li>
+<li><a class="reference internal" href="#change-example-creation-of-this-tutorial">Change Example: Creation Of This Tutorial</a><ul>
+<li><a class="reference internal" href="#history-lesson">History Lesson</a></li>
+<li><a class="reference internal" href="#the-preparation">The Preparation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#final-words">Final Words</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="intro.html"
+                        title="previous chapter">Getting Started</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="devel.html"
+                        title="next chapter">Development Process</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/contributing.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="devel.html" title="Development Process"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="Getting Started"
+             >previous</a> |</li>
+        <li><a href="index.html">MONK 0.1.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, 2013, DResearch Fahrzeugelektronik GmbH.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+        <br />
+        <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">
+            <img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" />
+        </a><br />
+        This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.
+    </div>
+
+  </body>
+</html>

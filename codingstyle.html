@@ -1,0 +1,491 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Coding Style Guide &mdash; MONK 0.1.4 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="MONK 0.1.4 documentation" href="index.html" />
+    <link rel="next" title="monk_tf" href="modules.html" />
+    <link rel="prev" title="Development Process" href="devel.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="monk_tf"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="devel.html" title="Development Process"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MONK 0.1.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="coding-style-guide">
+<h1>Coding Style Guide<a class="headerlink" href="#coding-style-guide" title="Permalink to this headline">¶</a></h1>
+<p>This guide summarizes how we MONK developers think the source code should be
+formatted. Consider these <em>guidelines</em> advice rather than law. Sometimes
+you might hit a point, where the current version of the document can&#8217;t help
+you. In this case you can do the following:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Check whether the newest version of this document contains any
+changes concerning your situation. Also consider building the docs
+yourself.</li>
+<li>Refer to <a class="reference external" href="http://www.python.org/dev/peps/pep-0008">PEP-008</a>, the official style guide for Python core
+development. The Python Core project is, of course, a lot bigger than
+MONK, meaning you might find something there, that has not been addressed
+in MONK yet. Place a comment in the code explaining why you were not able
+to follow MONK&#8217;s style guide. If possible, create an <a class="reference external" href="https://github.com/DFE/MONK/issues/new">Issue</a> and try to
+get the style guide changed accordingly.</li>
+<li>Discuss with other developers whether there might be a way that you are not
+aware of.</li>
+<li>Do what makes most sense in your context. Use comments extensively and
+find meaningful ways to tell <tt class="docutils literal"><span class="pre">pylint</span></tt> and other tools that this line is
+to be treated as an exception.</li>
+</ol>
+</div></blockquote>
+<div class="section" id="in-general">
+<h2>In General<a class="headerlink" href="#in-general" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul>
+<li><p class="first">Avoid features specific to your python binary. That includes your language
+version as well as the interpreter you are using, i.e. CPython, Jython or
+Pypy.</p>
+</li>
+<li><p class="first">Every line should consist of <a class="reference external" href="https://jamiecurle.co.uk/blog/79-characters-or-less/">79 characters</a> at most.</p>
+</li>
+<li><p class="first">No line should contain more than one statement.</p>
+</li>
+<li><p class="first">All classes should be <a class="reference external" href="http://www.python.org/doc/newstyle/">New Style Classes</a>.</p>
+</li>
+<li><p class="first">Do not use getters/setters. Use <a class="reference external" href="http://stackoverflow.com/questions/6618002/python-property-versus-getters-and-setters">properties</a> instead.</p>
+</li>
+<li><p class="first">When <a class="reference external" href="http://stackoverflow.com/questions/2209755/python-operation-vs-is-not">comparing singletons</a> like <tt class="docutils literal"><span class="pre">None</span></tt> always use <tt class="docutils literal"><span class="pre">is</span></tt> instead of
+<tt class="docutils literal"><span class="pre">==</span></tt>.</p>
+</li>
+<li><p class="first">When overwriting comparator functions like <tt class="docutils literal"><span class="pre">__eq__</span></tt>, ensure that you
+overwrite all of them.</p>
+</li>
+<li><p class="first">Every function consists of 30 statements and 12 branches at most.</p>
+</li>
+<li><p class="first">Use the <tt class="docutils literal"><span class="pre">with</span></tt> clause to open context managers, e.g. when you use
+<a class="reference external" href="http://docs.python.org/library/functions.html#open" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">open()</span></tt></a>.</p>
+</li>
+<li><p class="first">Write your code as type independently as possible, since we should reap the
+<a class="reference external" href="http://c2.com/cgi/wiki?BenefitsOfDynamicTyping">benefits of dynamic typing</a> while using it. E.g. use &#8220;<a class="reference external" href="http://en.wikipedia.org/wiki/Duck_typing#Concept_examples">duck testing</a>&#8221;.</p>
+</li>
+<li><p class="first">Use <a class="reference external" href="http://docs.python.org/library/functions.html#isinstance" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">isinstance()</span></tt></a> instead of <a class="reference external" href="http://docs.python.org/library/functions.html#type" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">type()</span></tt></a> comparisons
+because it also <a class="reference external" href="http://stackoverflow.com/a/1549854/131120">checks for inheritance</a>.</p>
+</li>
+<li><p class="first">When checking for emptyness of lists, consider that empty lists are already
+<cite>False</cite>. There is no need to <a class="reference external" href="http://www.python.org/dev/peps/pep-0008/#programming-recommendations">check for their length</a>.</p>
+</li>
+<li><p class="first">Do not check for the <tt class="docutils literal"><span class="pre">True</span></tt>-ness of a value explicitely with
+<tt class="docutils literal"><span class="pre">if</span> <span class="pre">bool_val</span> <span class="pre">is</span> <span class="pre">True:</span></tt> because it is already <tt class="docutils literal"><span class="pre">True</span></tt> or <tt class="docutils literal"><span class="pre">False</span></tt>. Use
+<tt class="docutils literal"><span class="pre">if</span> <span class="pre">bool_val:</span></tt> instead.</p>
+</li>
+<li><p class="first">Callable Python scripts should always contain a <tt class="docutils literal"><span class="pre">main()</span></tt> method. This way
+your code will not only be executable by your script but can also be used by
+other python modules which import yours. If you do not include one, and
+instead put your code directly into the if, then only your script can make
+use of that code, which is not preferred. Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&quot;hello world&quot;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="whitespace">
+<h2>Whitespace<a class="headerlink" href="#whitespace" title="Permalink to this headline">¶</a></h2>
+<p>In Python whitespace has meaning. Thus, treating whitespace should receive even
+more consideration than in other languages. Whitespace means:</p>
+<blockquote>
+<div><ul class="simple">
+<li>(a space character)</li>
+<li><tt class="docutils literal"><span class="pre">\t</span></tt> (a tab character)</li>
+<li><tt class="docutils literal"><span class="pre">\n</span></tt> (a line feed character; typical for most Unix-like operating systems)</li>
+<li><tt class="docutils literal"><span class="pre">\r\n</span></tt> (a carriage return character, followed by a line feed character;
+typical for Windows)</li>
+</ul>
+</div></blockquote>
+<p>Rules:</p>
+<blockquote>
+<div><ul class="simple">
+<li>4 spaces indentation</li>
+<li>no tabulator characters, only spaces</li>
+<li>New lines are <tt class="docutils literal"><span class="pre">\n</span></tt> characters.</li>
+<li>Classes, functions, and blocks should be separated by 2 empty lines each.</li>
+<li><em>no whitespace</em> in params, brackets, and braces</li>
+<li><em>no whitespace</em> before commas, semicolons and colons</li>
+<li><em>no whitespace</em> before <tt class="docutils literal"><span class="pre">(</span></tt> in function and class headers</li>
+<li><em>no whitespace</em> before list indexing, e.g. <tt class="docutils literal"><span class="pre">list[5],</span> <span class="pre">slice[3:4]</span></tt></li>
+<li><em>no whitespace</em> in default param assignments, e.g. <tt class="docutils literal"><span class="pre">def</span> <span class="pre">function(a=13):</span></tt></li>
+<li>exactly one space around assignments/operators</li>
+</ul>
+</div></blockquote>
+<p>A complete example of correct whitespacing:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">function</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">my_list</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">my_list</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">another_function</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">e</span><span class="p">):</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">d</span> <span class="o">+</span> <span class="n">e</span>
+    <span class="n">function</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">e</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="naming">
+<h2>Naming<a class="headerlink" href="#naming" title="Permalink to this headline">¶</a></h2>
+<p>Files, folders, modules, classes, functions, and attributes are to be named
+in the following fashion:</p>
+<blockquote>
+<div><ul class="simple">
+<li>files, folders, modules, packages: <tt class="docutils literal"><span class="pre">all_lower_case</span></tt></li>
+<li>variables (including global variables): <tt class="docutils literal"><span class="pre">all_lower_case</span></tt></li>
+<li>constants (convention only, not enforced by interpreter): <tt class="docutils literal"><span class="pre">ALL_UPPER_CASE</span></tt></li>
+<li>classes: <tt class="docutils literal"><span class="pre">BigCamelCase</span></tt></li>
+<li>functions, methods: <tt class="docutils literal"><span class="pre">all_lower_case</span></tt></li>
+<li>Naming something with a leading underscore declares it to be soft private
+(e.g. <tt class="docutils literal"><span class="pre">_like_javas_protected</span></tt>).</li>
+<li>Naming something with two leading underscores makes it private, i.e. only
+usable inside this class (e.g. <tt class="docutils literal"><span class="pre">__only_for_me</span></tt>).</li>
+<li>Use of double underscores at beginning and end should be avoided, since
+Python itself uses this convention for special names
+(e.g. <tt class="docutils literal"><span class="pre">something.__doc__</span></tt>)</li>
+<li>Use <tt class="docutils literal"><span class="pre">self</span></tt> to reference the object calling a method.</li>
+<li>Use <tt class="docutils literal"><span class="pre">cls</span></tt> to reference the class in class functions.</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="files-modules">
+<h2>Files - Modules<a class="headerlink" href="#files-modules" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul>
+<li><p class="first">Files are to be encoded using <tt class="docutils literal"><span class="pre">utf-8</span></tt>.</p>
+</li>
+<li><p class="first">Every file starts with the following 2 lines:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- encoding: utf-8 -*-</span>
+</pre></div>
+</div>
+<p>The first line calls the python binary the way you would from the shell.
+This way it is possible to use the script in a virtual environment. The
+second line tells other tools about the expected encoding of this
+file.</p>
+</li>
+<li><p class="first">Following these there is an empty line followed by the copyright and
+licensing text.</p>
+</li>
+<li><p class="first">After this general information there is the module docstring.</p>
+</li>
+<li><dl class="first docutils">
+<dt>The docstring is followed by the imports in this order:</dt>
+<dd><ul class="first last simple">
+<li>general imports from the Python standard library</li>
+<li>imports from frameworks</li>
+<li>imports from your own project</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">Next are global variables and constants, if necessary (use of them
+is generally discouraged).</p>
+</li>
+<li><p class="first">Next, there is the main part containing the class.</p>
+</li>
+<li><p class="first">If required, the <tt class="docutils literal"><span class="pre">main()</span></tt> function follows below the class.</p>
+</li>
+<li><p class="first">At the end there is the call of the <tt class="docutils literal"><span class="pre">main()</span></tt> function:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="comments">
+<h2>Comments<a class="headerlink" href="#comments" title="Permalink to this headline">¶</a></h2>
+<p>In general it is best to write code as self-explanatory as possible. Yet
+sometimes you can&#8217;t get around writing comments, to make things clear. Here are
+some situations in which you <em>should</em> write a comment:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Each module, class, and function needs to be accompanied by a <a class="reference external" href="http://www.python.org/dev/peps/pep-0257/#what-is-a-docstring">docstring</a>.</li>
+<li>Whenever you find yourself writing code that cannot be understood without
+explanation (although you might want to consider refactoring the code
+instead).</li>
+<li>If you want pylint or other static code checkers to ignore a piece of code
+that violates the existing coding style.</li>
+<li>If you took a sizable piece of code from a book or a website, reference
+the source (and be sure to check the license of that code).</li>
+<li>Reference dependencies between code parts, which might not be obvious.
+This is crucial, if someone wants to make changes on either side, as these
+might introduce new bugs caused by unknown dependencies.</li>
+</ul>
+</div></blockquote>
+<p>Comments themselves must also be written uniformly. Therefore you should follow
+these requirements when writing a comment:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">Each comment is written in English.</p>
+</li>
+<li><p class="first">Each comment describes something underneath, excepting docstrings which also
+partly describe code that is above them, e.g. in function doc strings.</p>
+</li>
+<li><p class="first">To put it the other way around: comments are not appended to a line of
+code, instead they are written above the line they describe:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">#good comment about do_something</span>
+<span class="n">do_something</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span> <span class="c">#bad comment about do_something</span>
+<span class="c">#bad comment about do_something</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Exceptions to this are docstrings which usually are directly underneath of
+what is to be described:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Something</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This is a docstring.</span>
+
+<span class="sd">    It is put directly underneath the class definition.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This is also a docstring.</span>
+
+<span class="sd">        It is put directly underneath the method definition.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c">#This is not a docstring, thus it is put above its target.</span>
+        <span class="n">do_something</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Each comment is indented the same way as the text underneath, <em>not</em> as
+the text above it. This is because indented text is treated as <em>inside</em>
+a function, while the next line of the same indention is treated as
+<em>outside</em> the definition, as with every other Python code:</p>
+<div class="highlight-python"><pre>def do_something(*args):
+    """This is the correct way to indent a docstring.
+
+    The Python compiler understands that this belongs to the function
+    declaration above.
+    """
+
+def do_else():
+"""This is the wrong way to indent a docstring.
+
+It won't even be recognised as a docstring.
+"""</pre>
+</div>
+</li>
+<li><p class="first">Texts in comments are parsable by the <a class="reference external" href="http://sphinx-doc.org/">Sphinx</a> documentation generator.
+This <strong>is</strong> a complicated issue, so do not expect to find a 1 minute solution
+here! Seriously, start reading the Sphinx website, if you need to write more
+than one or two lines of documentation!</p>
+</li>
+<li><p class="first">Single line comments begin with a hash (<tt class="docutils literal"><span class="pre">#</span></tt>) character.</p>
+</li>
+<li><dl class="first docutils">
+<dt>Multiline comments, including <a class="reference external" href="http://www.python.org/dev/peps/pep-0257/#what-is-a-docstring">docstring</a>, adhere to the following rules:</dt>
+<dd><ul class="first last simple">
+<li>They start with three straight double quote (<tt class="docutils literal"><span class="pre">&quot;&quot;&quot;</span></tt>) characters.</li>
+<li>The first line of the comment starts directly afterwards and is treated
+as a short summary by many tools.</li>
+<li>Newlines are used meaningfully inside and there should be at least one
+empty line between the summary (the first line) and the verbose
+documentation (the rest of the docstring).</li>
+<li>The commenting text is not followed by an empty line.</li>
+<li>The end is marked by a line consisting exclusively of three straight
+double quote (<tt class="docutils literal"><span class="pre">&quot;&quot;&quot;</span></tt>) characters.</li>
+<li>They should consist of complete sentences.</li>
+<li>They should contain descriptions for elements like parameters, as
+<a class="reference external" href="http://sphinx-doc.org/domains.html#info-field-lists">described in the Sphinx Docs</a>.</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">Comments for version control systems <cite>should be added</cite> to the
+<tt class="docutils literal"><span class="pre">__version__</span></tt> magic variable.</p>
+</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="exception-handling">
+<h2>Exception Handling<a class="headerlink" href="#exception-handling" title="Permalink to this headline">¶</a></h2>
+<p>In most cases exception handling should be done like in any other proper Python
+project. Here are some things to consider:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">Use Exception objects and <tt class="docutils literal"><span class="pre">raise</span></tt> to initiate exception handling.</p>
+</li>
+<li><p class="first">State the Exception classes explicitly in <tt class="docutils literal"><span class="pre">except</span></tt> clauses because
+<cite>explicit is better than implicit</cite>.</p>
+</li>
+<li><p class="first">Minimize the number of lines in <tt class="docutils literal"><span class="pre">try</span></tt> clauses to avoid
+<a class="reference external" href="http://www.codinghorror.com/blog/2012/07/new-programming-jargon.html">Pokemon exception handling</a>.</p>
+</li>
+<li><p class="first">In Python, it is encouraged to use function parameters as expected instead
+of forcing certain types. If the delivered objects do not have the expected
+capabilities and there is no sensible way to handle this, then <tt class="docutils literal"><span class="pre">raise</span></tt>
+exceptions:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">u_gonna_quack</span><span class="p">(</span><span class="n">duck</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;I&#39;m expecting a duck but don&#39;t force it to be one.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">duck</span><span class="o">.</span><span class="n">quack</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;The param duck can&#39;t quack.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="imports">
+<h2>Imports<a class="headerlink" href="#imports" title="Permalink to this headline">¶</a></h2>
+<p>As stated above, <tt class="docutils literal"><span class="pre">import</span></tt> calls should be written below the module
+docstring, above the constant/global variable definitions, and in the
+following order:</p>
+<blockquote>
+<div><ul class="simple">
+<li>general imports from the Python standard library</li>
+<li>imports from frameworks</li>
+<li>imports from your own project</li>
+</ul>
+</div></blockquote>
+<p>Different imports should be on different lines. An exception to this are
+statements like <tt class="docutils literal"><span class="pre">from</span> <span class="pre">abc</span> <span class="pre">import</span> <span class="pre">x,y,z</span></tt>, making different imports from
+the same source. This is discouraged for other reasons, though. Instead of
+<tt class="docutils literal"><span class="pre">from</span> <span class="pre">abc</span> <span class="pre">import</span> <span class="pre">x,y,z</span></tt> you should use <tt class="docutils literal"><span class="pre">import</span> <span class="pre">abc</span></tt> and then refer to
+<tt class="docutils literal"><span class="pre">abc.x</span></tt> later on. This way it is easier to identify where something comes
+from, even though it is a little more work writing. Always remember
+<a class="reference external" href="http://www.python.org/dev/peps/pep-0020/">explicit is better than implicit</a>.</p>
+</div>
+<div class="section" id="the-end">
+<h2>The End<a class="headerlink" href="#the-end" title="Permalink to this headline">¶</a></h2>
+<p>You&#8217;ve read it all. I&#8217;m so proud of you!</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Coding Style Guide</a><ul>
+<li><a class="reference internal" href="#in-general">In General</a></li>
+<li><a class="reference internal" href="#whitespace">Whitespace</a></li>
+<li><a class="reference internal" href="#naming">Naming</a></li>
+<li><a class="reference internal" href="#files-modules">Files - Modules</a></li>
+<li><a class="reference internal" href="#comments">Comments</a></li>
+<li><a class="reference internal" href="#exception-handling">Exception Handling</a></li>
+<li><a class="reference internal" href="#imports">Imports</a></li>
+<li><a class="reference internal" href="#the-end">The End</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="devel.html"
+                        title="previous chapter">Development Process</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="modules.html"
+                        title="next chapter">monk_tf</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/codingstyle.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="monk_tf"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="devel.html" title="Development Process"
+             >previous</a> |</li>
+        <li><a href="index.html">MONK 0.1.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, 2013, DResearch Fahrzeugelektronik GmbH.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+        <br />
+        <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">
+            <img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" />
+        </a><br />
+        This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.
+    </div>
+
+  </body>
+</html>

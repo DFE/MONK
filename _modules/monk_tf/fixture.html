@@ -1,0 +1,383 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>monk_tf.fixture &mdash; MONK 0.1.4 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="MONK 0.1.4 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">MONK 0.1.4 documentation</a> &raquo;</li>
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for monk_tf.fixture</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c">#</span>
+<span class="c"># MONK automated test framework</span>
+<span class="c">#</span>
+<span class="c"># Copyright (C) 2013 DResearch Fahrzeugelektronik GmbH</span>
+<span class="c"># Written and maintained by MONK Developers &lt;project-monk@dresearch-fe.de&gt;</span>
+<span class="c">#</span>
+<span class="c"># This program is free software; you can redistribute it and/or</span>
+<span class="c"># modify it under the terms of the GNU General Public License</span>
+<span class="c"># as published by the Free Software Foundation; either version</span>
+<span class="c"># 3 of the License, or (at your option) any later version.</span>
+<span class="c">#</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Instead of creating :py:class:`~monk_tf.dev.Device` and</span>
+<span class="sd">:py:class:`~monk_tf.conn.AConnection` objects by yourself, you can also choose</span>
+<span class="sd">to put corresponding data in a separate file and let this layer handle the</span>
+<span class="sd">object concstruction and destruction for you. Doing this will probably make</span>
+<span class="sd">your test code look more clean, keep the amount of places where you need to</span>
+<span class="sd">change something as small as possible, and lets you reuse data that you already</span>
+<span class="sd">have described.</span>
+
+<span class="sd">A hello world test with it looks like this::</span>
+
+<span class="sd">    import nose</span>
+<span class="sd">    from monk_tf import fixture</span>
+
+<span class="sd">    def test_hello():</span>
+<span class="sd">        &#39;&#39;&#39; say hello</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        # set up</span>
+<span class="sd">        h = fixture.Fixture(&#39;target_device.cfg&#39;)</span>
+<span class="sd">        expected_out = &quot;hello&quot;</span>
+<span class="sd">        # execute</span>
+<span class="sd">        out = h.devs[0].cmd(&#39;echo &quot;hello&quot;&#39;)</span>
+<span class="sd">        # assert</span>
+<span class="sd">        nose.tools.eq_(expected_out, out)</span>
+<span class="sd">        # tear down</span>
+<span class="sd">        h.tear_down()</span>
+
+<span class="sd">So using this layer setting up a device only takes one line of code. The rest</span>
+<span class="sd">of the information is in that ``target_device.cfg`` file. Although this data</span>
+<span class="sd">file can have any format you want, MONK currently only comes with one text</span>
+<span class="sd">format parser predefined, which is the :py:class:`~monk_tf.fixture.XiniParser`.</span>
+<span class="sd">The ``Xini`` is short for :term:`extended INI`. An example data file might look</span>
+<span class="sd">like this::</span>
+
+<span class="sd">    [device1]</span>
+<span class="sd">        type=Device</span>
+<span class="sd">        [[serial1]]</span>
+<span class="sd">            type=SerialConnection</span>
+<span class="sd">            port=/dev/ttyUSB1</span>
+<span class="sd">            user=example</span>
+<span class="sd">            password=secret</span>
+
+<span class="sd">As you can see it looks like a :term:`INI` file. There are sections, consisting</span>
+<span class="sd">of a title enclosed in squared brackets (``[]``) and lists of properties,</span>
+<span class="sd">consisting of equal-sign (``=``) separated key-value pairs. The unusual part is</span>
+<span class="sd">that the section *serial1* is surrounded by two pairs of squared brackets</span>
+<span class="sd">(``[]``). This is the specialty of this format, because it means that *serial1*</span>
+<span class="sd">is a subsection of *device1* and is therefore a nested section. This nesting</span>
+<span class="sd">can be done unlimited, by surrounding a section with more and more pairs of</span>
+<span class="sd">squared brackets (``[]``) according to the level of nesting that should be</span>
+<span class="sd">achieved. Thus in this example *serial1* belongs to *device1* and the types</span>
+<span class="sd">show which corresponding MONK object should be created.</span>
+
+<span class="sd">Classes</span>
+<span class="sd">-------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">configobj</span> <span class="kn">as</span> <span class="nn">config</span>
+
+<span class="kn">import</span> <span class="nn">conn</span>
+<span class="kn">import</span> <span class="nn">dev</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+<span class="c">############</span>
+<span class="c">#</span>
+<span class="c"># Exceptions</span>
+<span class="c">#</span>
+<span class="c">############</span>
+
+<div class="viewcode-block" id="ADeviceException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.ADeviceException">[docs]</a><span class="k">class</span> <span class="nc">ADeviceException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Base class for Exceptions of the device layer.</span>
+
+<span class="sd">    If you want to make sure that you catch all Exceptions that are related</span>
+<span class="sd">    with this layer, then you should catch *ADeviceExceptions*. This also means</span>
+<span class="sd">    that if you extend this list of exceptions you should inherit from this</span>
+<span class="sd">    exception and not from :py:exc:`~exceptions.Exception`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="AParseException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.AParseException">[docs]</a><span class="k">class</span> <span class="nc">AParseException</span><span class="p">(</span><span class="n">ADeviceException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Base class for exceptions when a parsing error occurs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="NotXiniException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.NotXiniException">[docs]</a><span class="k">class</span> <span class="nc">NotXiniException</span><span class="p">(</span><span class="n">AParseException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Could not be parsed as :term:`extended INI`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="CantParseException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.CantParseException">[docs]</a><span class="k">class</span> <span class="nc">CantParseException</span><span class="p">(</span><span class="n">ADeviceException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Occurs, when a Fixture can not parse a given file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+
+<span class="c">######################################################</span>
+<span class="c">#</span>
+<span class="c"># Parsers - Read a text file and be used like a dict()</span>
+<span class="c">#</span>
+<span class="c">######################################################</span>
+</div>
+<div class="viewcode-block" id="AParser"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.AParser">[docs]</a><span class="k">class</span> <span class="nc">AParser</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Base class for all Parsers.</span>
+
+<span class="sd">    Do not instantiate this class! This basically just provides the :term:`API`</span>
+<span class="sd">    that is needed by :py:class:`~monk_tf.fixture.Fixture` to interact with the</span>
+<span class="sd">    data that is parsed. Each child class should make sure that it always</span>
+<span class="sd">    provides its parsed data like a :py:class:`dict` would. If you require your</span>
+<span class="sd">    own parser, you can extend this and look at</span>
+<span class="sd">    :py:class:`~monk_tf.fixture.XiniParser` for a very basic example.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="XiniParser"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.XiniParser">[docs]</a><span class="k">class</span> <span class="nc">XiniParser</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">ConfigObj</span><span class="p">,</span> <span class="n">AParser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Reads config files in :term:`extended INI` format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">configspec</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; changes exception type raised</span>
+
+<span class="sd">        Overwrites method from :py:class:`~configobj.ConfigObj` to raise a</span>
+<span class="sd">        :py:class:`~monk_tf.fixture.NotXiniException` instead of a</span>
+<span class="sd">        :py:class:`~configobj.ConfigObjError`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">XiniParser</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">configspec</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">config</span><span class="o">.</span><span class="n">ConfigObjError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">t</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">traceback</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+            <span class="k">raise</span> <span class="n">NotXiniException</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">traceback</span>
+
+<span class="c">##############################################################</span>
+<span class="c">#</span>
+<span class="c"># Fixture Classes - creates MONK objects based on dictionaries</span>
+<span class="c">#</span>
+<span class="c">##############################################################</span>
+</div>
+<div class="viewcode-block" id="Fixture"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.Fixture">[docs]</a><span class="k">class</span> <span class="nc">Fixture</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Creates MONK objects based on dictionary like objects.</span>
+
+<span class="sd">    This is the class that provides the fundamental feature of this layer. It</span>
+<span class="sd">    reads data files by trying to parse them though its list of known parsers</span>
+<span class="sd">    and if it succeeds, it creates MONK objects based on the configuration</span>
+<span class="sd">    given by the data file. Most likely these objects are one or more devices</span>
+<span class="sd">    that have at least one connection each. If more than one data file is read</span>
+<span class="sd">    containing the same name on the highest level, then the latest data gets</span>
+<span class="sd">    used. This does not work on lower levels of nesting, though.</span>
+
+<span class="sd">    One source of data (either a filename or a child class of</span>
+<span class="sd">    :py:class:`~monk_tf.fixture.AParser`) can be given to an object of this</span>
+<span class="sd">    class by its constructer, others can be added afterwards with the</span>
+<span class="sd">    :py:meth:`~monk_tf.fixture.Fixture.read` method. An example looks like</span>
+<span class="sd">    this::</span>
+
+<span class="sd">        import monk_tf.fixture as mf</span>
+
+<span class="sd">        h = mf.Fixture(&#39;/etc/monk_tf/default_devices.cfg&#39;)</span>
+<span class="sd">                .read(&#39;~/.monk/default_devices.cfg&#39;)</span>
+<span class="sd">                # can also be a parser object</span>
+<span class="sd">                .read(XiniParser(&#39;~/testsuite12345/suite_devices.cfg&#39;))</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_DEFAULT_CLASSES</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&quot;Device&quot;</span> <span class="p">:</span> <span class="n">dev</span><span class="o">.</span><span class="n">Device</span><span class="p">,</span>
+        <span class="s">&quot;SerialConnection&quot;</span> <span class="p">:</span> <span class="n">conn</span><span class="o">.</span><span class="n">SerialConnection</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">_DEFAULT_PARSERS</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">XiniParser</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">start_props</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parsers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+            <span class="n">classes</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&quot;{}:{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">devs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parsers</span> <span class="o">=</span> <span class="n">parsers</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_DEFAULT_PARSERS</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classes</span> <span class="o">=</span> <span class="n">classes</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_DEFAULT_CLASSES</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">props</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">source</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Fixture.read"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.Fixture.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Read more data, either as a filename or as a parser.</span>
+
+<span class="sd">        :param source: the data source; either a filename or a</span>
+<span class="sd">                       :py:class:`~monk_tf.fixture.AParser` child class</span>
+<span class="sd">                       instance.</span>
+
+<span class="sd">        :return: self</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;read: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_props</span><span class="p">(</span><span class="n">props</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span>
+</div>
+    <span class="k">def</span> <span class="nf">_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Parse data file.</span>
+
+<span class="sd">        :param source: the data source; either a filename or a</span>
+<span class="sd">                       :py:class:`~monk_tf.fixture.AParser` child class</span>
+<span class="sd">                       instance.</span>
+
+<span class="sd">        :return: Returns a :py:class:`~monk_tf.fixture.AParser` instance.</span>
+<span class="sd">        :raises: :py:class:`~monk_tf.fixture.CantParseException`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;parse: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">AParser</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">source</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">parser</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parsers</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">parser</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">AParseException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                    <span class="k">continue</span>
+            <span class="k">raise</span> <span class="n">CantParseException</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_update_props</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">props</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Updates the properties with a dictionary-like object.</span>
+
+<span class="sd">        This basically uses :py:meth:`dict.update` to update</span>
+<span class="sd">        :py:attr:`self.props &lt;~monk_tf.fixture.Fixture.props&gt;` with a new set</span>
+<span class="sd">        of data.</span>
+
+<span class="sd">        :param props: object that can be used with :py:meth:`dict.update`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;add props: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">props</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">props</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create MONK objects based on self&#39;s properties.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;initialize with props: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">devs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">dname</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">dconf</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="n">dname</span><span class="p">])</span>
+            <span class="n">dclass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">[</span><span class="n">dconf</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;type&quot;</span><span class="p">)]</span>
+            <span class="n">dconns</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">cname</span> <span class="ow">in</span> <span class="n">dconf</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">cconf</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">dconf</span><span class="p">[</span><span class="n">cname</span><span class="p">])</span>
+                <span class="n">cclass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classes</span><span class="p">[</span><span class="n">cconf</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;type&quot;</span><span class="p">)]</span>
+                <span class="n">cconf</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cname</span>
+                <span class="n">dconns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cclass</span><span class="p">(</span><span class="o">**</span><span class="n">cconf</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">devs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dclass</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">dname</span><span class="p">,</span> <span class="n">conns</span><span class="o">=</span><span class="n">dconns</span><span class="p">))</span>
+
+<div class="viewcode-block" id="Fixture.tear_down"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.Fixture.tear_down">[docs]</a>    <span class="k">def</span> <span class="nf">tear_down</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Can be used for explicit destruction of managed objects.</span>
+
+<span class="sd">        This should be called in every :term:`test case` as the last step.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">devs</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">device</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">devs</span> <span class="o">=</span> <span class="p">[]</span>
+</div>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;{cls}.devs:{devs}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">cls</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                <span class="n">devs</span><span class="o">=</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">devs</span><span class="p">],</span>
+        <span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/logo.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">MONK 0.1.4 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, 2013, DResearch Fahrzeugelektronik GmbH.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+        <br />
+        <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">
+            <img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" />
+        </a><br />
+        This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.
+    </div>
+
+  </body>
+</html>

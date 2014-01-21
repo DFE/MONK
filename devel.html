@@ -1,0 +1,305 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Development Process &mdash; MONK 0.1.4 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="MONK 0.1.4 documentation" href="index.html" />
+    <link rel="next" title="Coding Style Guide" href="codingstyle.html" />
+    <link rel="prev" title="Contributing" href="contributing.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="codingstyle.html" title="Coding Style Guide"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="contributing.html" title="Contributing"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MONK 0.1.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="development-process">
+<span id="chap-devel"></span><h1>Development Process<a class="headerlink" href="#development-process" title="Permalink to this headline">¶</a></h1>
+<p>This page describes all the details about the development process. If you want
+an overview like tutorial, have a look at <a class="reference internal" href="contributing.html#chap-contrib"><em>Contributing</em></a>.</p>
+<div class="section" id="communicating-with-the-developers">
+<h2>Communicating with the Developers<a class="headerlink" href="#communicating-with-the-developers" title="Permalink to this headline">¶</a></h2>
+<p>You can communicate with other <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> developers in one of the following
+ways:</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p class="first"><strong>the Mailing List</strong>: You can ask questions at
+<a class="reference external" href="mailto:project-monk&#37;&#52;&#48;dresearch-fe&#46;de">project-monk<span>&#64;</span>dresearch-fe<span>&#46;</span>de</a>.  You can also have a look at <a class="reference external" href="https://groups.google.com/a/dresearch-fe.de/forum/?fromgroups#!forum/project-monk">the archives</a>
+to see old conversations.</p>
+</li>
+<li><p class="first"><strong>the Bug Tracker</strong>: If you have encountered a specific problem you want
+to work on, you can create an Issue <a class="reference external" href="https://github.com/DFE/MONK/issues">here</a>. It is also possible to
+work with Github Pull Requests.</p>
+</li>
+<li><p class="first"><strong>the Stammtisch Meeting</strong>: If you happen to be in Berlin on any Tuesday
+afternoon at 2:30 pm, you are welcome to join our regular meeting on all
+topics concerning <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> at:</p>
+<div class="line-block">
+<div class="line">DResearch Fahrzeugelektronik GmbH</div>
+<div class="line">Otto-Schmirgal-Str. 3</div>
+<div class="line">D-10319 Berlin</div>
+<div class="line">Germany</div>
+</div>
+</li>
+</ol>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="the-development-process">
+<h1>The Development Process<a class="headerlink" href="#the-development-process" title="Permalink to this headline">¶</a></h1>
+<p>If you want to see your changes applied to <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>, the best way is to
+first communicate your ideas with the other <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> developers. You should
+only start development, if they agree the change makes sense. Otherwise, your
+work might turn out to be a waste of time.</p>
+<p>If you have write access to the repository (which is only supposed to happen if
+you are a regular member of <a class="reference external" href="https://github.com/DFE">the DFE group</a>), you should simply fork, create
+an Issue and track your changes in a feature branch.</p>
+<p>If you do not have write access, you will have to use pull requests. Remember
+that a feature branch will automatically be generated for your pull
+request.</p>
+<p>Step-by-step guide:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><strong>Start from the dev branch</strong>: You always need to ensure your commits
+can be applied without problem on the current HEAD of the <tt class="docutils literal"><span class="pre">dev</span></tt>
+branch.</li>
+<li><strong>Create meaningful commits</strong>: Commits should adhere to the
+requirements described in <a class="reference internal" href="#commit-policy">Commit Policy</a>. An important point is,
+that they should always contain only one meaningful change.</li>
+<li><strong>Create a pull request</strong>: Follow <a class="reference external" href="https://help.github.com/articles/using-pull-requests">Pull Request Guide</a> on GitHub.</li>
+<li><strong>Receive acknowledgements</strong>: Before a maintainer may accept your changes,
+you will need to find one or more DFE developers to acknowledge them.
+These people should be mentioned within your commit message, as
+described later.</li>
+<li><strong>Get it merged</strong>: If you have a pull request or Issue containing your
+problem, your solution, and the commits containing the two Acked-Bys,
+get one of the maintainers to merge it.</li>
+</ol>
+</div></blockquote>
+<p>If you need to change anything on your commits, e.g. to add some <tt class="docutils literal"><span class="pre">Acked-by</span></tt>
+lines, it is okay to <tt class="docutils literal"><span class="pre">rebase</span> <span class="pre">-i</span></tt> or <tt class="docutils literal"><span class="pre">commit</span> <span class="pre">--amend</span></tt> your changes on
+your feature branch or pull request as nobody else is supposed to work on
+the same feature branch anyway.</p>
+</div>
+<div class="section" id="branching-model">
+<h1>Branching Model<a class="headerlink" href="#branching-model" title="Permalink to this headline">¶</a></h1>
+<p>There are five different kinds of branches in <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><strong>the Master Branch</strong> is the stable branch. It should only contain
+project states that may be distributed to users.</li>
+<li><strong>the Dev Branch</strong> contains all currently accepted features. Changes here
+might be more unstable than in the Master Branch and might not be properly
+documented. Using this branch might sometimes break your code, but as a
+<a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> developer you will always need to start implementing your
+features and bug fixes from the HEAD of this branch.</li>
+<li><strong>Feature Branches</strong> are used by members of <a class="reference external" href="https://github.com/DFE">the DFE group</a> to work on
+new features.</li>
+<li><strong>Bugfix Branches</strong> are used by members of <a class="reference external" href="https://github.com/DFE">the DFE group</a> to work on
+bug fixes.</li>
+<li><strong>Pull Requests</strong> are used by external <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> developers who want to
+get their changes merged into <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>.</li>
+</ol>
+</div></blockquote>
+</div>
+<div class="section" id="acceptance-criteria-for-the-dev-branch">
+<h1>Acceptance Criteria for the Dev Branch<a class="headerlink" href="#acceptance-criteria-for-the-dev-branch" title="Permalink to this headline">¶</a></h1>
+<p><tt class="docutils literal"><span class="pre">dev</span></tt> contains the latest changes that are considered to be working by their
+creators and at least one reviewer. To continually ensure good quality of the
+code, some requirements must be met for a commit to be allowed into <tt class="docutils literal"><span class="pre">dev</span></tt>:</p>
+<blockquote>
+<div><ul class="simple">
+<li>All commits refer to an Issue on <a class="reference external" href="https://github.com/DFE/MONK">GitHub</a>.</li>
+<li>The Issue contains an understandable description of the problem that enables
+reproduction, if necessesary.</li>
+<li>The Issue contains an understandable and assessable description of the
+solution.</li>
+<li>All code changes are well documented, formatted according to the coding
+standards and follow high quality standards even in areas that are not
+specifically mentioned here.</li>
+<li>Code changes are unit tested with 100% statement coverage for the changes
+involved.</li>
+<li>If necessary and possible: integration tests and documentation adapted
+accordingly.</li>
+<li>Two DFE team members have acknowledged the solution&#8217;s successful and
+complete implementation.</li>
+</ul>
+</div></blockquote>
+<p>These requirements can be overruled only by 100% acceptance of all developers,
+reviewers and both maintainers for a single Issue, if considered necessary.</p>
+<p>Changes to this list of rules can only be achieved by acceptance at the
+Stammtisch Meeting.</p>
+</div>
+<div class="section" id="acceptance-criteria-for-the-master-branch">
+<h1>Acceptance Criteria for the Master Branch<a class="headerlink" href="#acceptance-criteria-for-the-master-branch" title="Permalink to this headline">¶</a></h1>
+<p>The <tt class="docutils literal"><span class="pre">dev</span></tt> branch may be merged into the <tt class="docutils literal"><span class="pre">master</span></tt> branch whenever the
+Stammtisch decides that <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>&#8216;s current state warrants doing so.</p>
+</div>
+<div class="section" id="commit-policy">
+<h1>Commit Policy<a class="headerlink" href="#commit-policy" title="Permalink to this headline">¶</a></h1>
+<p>All commits are are expected to adhere to the following requirements:</p>
+<blockquote>
+<div><ul class="simple">
+<li><strong>KISS principle</strong>: Commits should contain one meaningful change and
+that one change only. This does not mean you should only put changes in one
+file or one deletion/insertion into one commit, but that all of the changes
+should belong together to do one meaningful thing.</li>
+<li><strong>All English</strong>: All relevant texts in <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> (like this
+documentation) are written in English so that non German speakers may use
+it. This, of course, applies to commits as well.</li>
+<li><strong>Summary Upfront</strong>: The first line contains a short summary with no more
+than 50 characters. This line must be followed by an empty line.</li>
+<li><strong>Descriptive Content</strong>: The following paragraphs contain the long
+description of the problem as well as its solution.</li>
+<li><strong>72 characters per line</strong>: Comment messages should not exceed 72
+characters per line, except for longer URLs, quotations or messages that
+would be unintelligible in some other way when split.</li>
+<li><strong>Refer to an Issue on GitHub</strong>: If you have not done so already within
+the description, this would be a good place to specify which Issue on
+GitHub your commit belongs to.</li>
+<li><strong>Signed-off-bys</strong>: After the long description all developers involved in
+creating this commit should on seperate lines beginning with
+<tt class="docutils literal"><span class="pre">Signed-off-by:</span></tt>. These lines should include their names and email
+addresses.</li>
+<li><strong>Acked-bys</strong>: Afterwards all people who checked the quality of the
+commits should be mentioned in the same fashion with <tt class="docutils literal"><span class="pre">Acked-by:</span></tt>
+lines.</li>
+</ul>
+</div></blockquote>
+<p>Finally, a complete example doing everything right:</p>
+<div class="highlight-python"><pre>some_file: limit checks debugged
+
+There was a problem with the limits in this line. They excluded 0,
+which is still an acceptable value. This led to unexpected error
+messages in the GUI.
+
+The bug was fixed by changing `&gt;0` to `&gt;=0`.
+
+For more details see GitHub Issue #312.
+
+Signed-off-by: Peter Parker &lt;parker@dresearch-fe.de&gt;
+Acked-by: Bruce Wayne &lt;wayne@dresearch-fe.de&gt;
+Acked-by: Clark Kent &lt;kent@dresearch-fe.de&gt;</pre>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Development Process</a><ul>
+<li><a class="reference internal" href="#communicating-with-the-developers">Communicating with the Developers</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#the-development-process">The Development Process</a></li>
+<li><a class="reference internal" href="#branching-model">Branching Model</a></li>
+<li><a class="reference internal" href="#acceptance-criteria-for-the-dev-branch">Acceptance Criteria for the Dev Branch</a></li>
+<li><a class="reference internal" href="#acceptance-criteria-for-the-master-branch">Acceptance Criteria for the Master Branch</a></li>
+<li><a class="reference internal" href="#commit-policy">Commit Policy</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="contributing.html"
+                        title="previous chapter">Contributing</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="codingstyle.html"
+                        title="next chapter">Coding Style Guide</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/devel.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="codingstyle.html" title="Coding Style Guide"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="contributing.html" title="Contributing"
+             >previous</a> |</li>
+        <li><a href="index.html">MONK 0.1.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, 2013, DResearch Fahrzeugelektronik GmbH.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+        <br />
+        <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">
+            <img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" />
+        </a><br />
+        This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.
+    </div>
+
+  </body>
+</html>

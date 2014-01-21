@@ -1,0 +1,214 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Glossary &mdash; MONK 0.1.4 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="MONK 0.1.4 documentation" href="index.html" />
+    <link rel="prev" title="monk_tf Package" href="monk_tf.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="monk_tf.html" title="monk_tf Package"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MONK 0.1.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="glossary">
+<h1>Glossary<a class="headerlink" href="#glossary" title="Permalink to this headline">¶</a></h1>
+<dl class="glossary docutils">
+<dt id="term-api">API</dt>
+<dd>Short for Application Programming Interface. The interface a piece of
+software provides to other software to use for programming purposes.</dd>
+<dt id="term-cross-compiling">cross-compiling</dt>
+<dd>The act of compiling software on one architecture, i.e., a personal
+computer, for another architecture, i.e., an <a class="reference internal" href="#term-embedded-system"><em class="xref std std-term">embedded&nbsp;system</em></a>.</dd>
+<dt id="term-cross-testing">cross-testing</dt>
+<dd>The act of testing a <a class="reference internal" href="#term-system-under-test"><em class="xref std std-term">system&nbsp;under&nbsp;test</em></a> on one device (the
+<a class="reference internal" href="#term-test-host"><em class="xref std std-term">test&nbsp;host</em></a>) while
+executing it on another (the <a class="reference internal" href="#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>).</dd>
+<dt id="term-dfe">DFE</dt>
+<dd>DResearch Fahrzeugelektronik GmbH. The company which develops
+<a class="reference internal" href="#term-monk"><em class="xref std std-term">MONK</em></a>.</dd>
+<dt id="term-embedded-system">embedded&nbsp;system</dt>
+<dd>A computer highly adapted to a specific usecase, often used inside
+cars, trains, airplanes, etc.</dd>
+<dt id="term-extended-ini">extended&nbsp;INI</dt>
+<dd>A text format based on the <a class="reference internal" href="#term-ini"><em class="xref std std-term">INI</em></a> format, that also allows
+nesting.</dd>
+<dt id="term-fixture-file">fixture&nbsp;file</dt>
+<dd>A file that contains data in <a class="reference internal" href="#term-extended-ini"><em class="xref std std-term">extended&nbsp;INI</em></a> format. It will be
+read by a <a class="reference internal" href="monk_tf.html#monk_tf.fixture.Fixture" title="monk_tf.fixture.Fixture"><tt class="xref py py-class docutils literal"><span class="pre">Fixture</span></tt></a> object.</dd>
+<dt id="term-ini">INI</dt>
+<dd>A traditional text file format consisting of sections that contain
+key-value pairs of data. Used often for configuration files and
+description of relational data.</dd>
+<dt id="term-monk">MONK</dt>
+<dd>This is the framework you are reading the documentaion from, right now!</dd>
+<dt id="term-nose">nose</dt>
+<dd>A Python tool to run <a class="reference internal" href="#term-unit-test"><em class="xref std std-term">unit&nbsp;tests</em></a>. See its PyPi page:
+<a class="reference external" href="https://pypi.python.org/pypi/nose/1.3.0">nose</a>.</dd>
+<dt id="term-open-source">open&nbsp;source</dt>
+<dd>Software that can be used and developed without the need to pay license
+fees first. The usage here is broader than the combination of the
+defintion of Free Software by the Free Software Foundation and the
+defintion of Open Source by the Open Source Initiative.</dd>
+<dt id="term-pip">PIP</dt>
+<dd>the package manager for Python packages. Often used together with
+<a class="reference internal" href="#term-virtualenv"><em class="xref std std-term">virtualenv</em></a> to create independently managed projects.</dd>
+<dt id="term-regression-test">regression&nbsp;test</dt>
+<dd>A test that is created for the purpose of being run many times, e.g.,
+every night or after every change to a system.</dd>
+<dt id="term-rest">reST</dt>
+<dd>reST is the short form of <em>restructuredText</em>, which is a markup format
+for text files.</dd>
+<dt id="term-shell-command">shell&nbsp;command</dt>
+<dd>A command that can be executed by a shell, typcially bash. Shell
+commands are sent when interacting with a <a class="reference internal" href="#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>
+remotely via serial connection or ssh.</dd>
+<dt id="term-sut">SUT</dt>
+<dd>An abbreviation of <a class="reference internal" href="#term-system-under-test"><em class="xref std std-term">system&nbsp;under&nbsp;test</em></a>.</dd>
+<dt id="term-system-under-test">system&nbsp;under&nbsp;test</dt>
+<dd>The system of hardware and software that should be run in a test. It
+can be very small like a function or really big, like a network of
+servers. It completely depends on the <a class="reference internal" href="#term-test-case"><em class="xref std std-term">test&nbsp;case</em></a>. It is good
+practice to call the system under test <a class="reference internal" href="#term-sut"><em class="xref std std-term">SUT</em></a> in
+<a class="reference internal" href="#term-test-scripting"><em class="xref std std-term">test&nbsp;scripts</em></a>.</dd>
+<dt id="term-target-device">target&nbsp;device</dt>
+<dd>A device that you interact with remotely to test it. In our case it is
+a <a class="reference internal" href="#term-embedded-system"><em class="xref std std-term">embedded&nbsp;system</em></a> that is configured to do a specific task
+which will be tested in our <a class="reference internal" href="#term-test-case"><em class="xref std std-term">test&nbsp;cases</em></a>. A
+<a class="reference internal" href="#term-monk"><em class="xref std std-term">MONK</em></a> test always requires two computers. A target device and a
+<a class="reference internal" href="#term-test-host"><em class="xref std std-term">test&nbsp;host</em></a>.</dd>
+<dt id="term-test-case">test&nbsp;case</dt>
+<dd>A test case is a set of <a class="reference internal" href="#term-test-fixture"><em class="xref std std-term">test&nbsp;fixture</em></a>, actions, verification
+steps, and clean up steps that run one specific test.</dd>
+<dt id="term-test-fixture">test&nbsp;fixture</dt>
+<dd>The <a class="reference internal" href="#term-system-under-test"><em class="xref std std-term">system&nbsp;under&nbsp;test</em></a> and its surrounding environment in
+specificially defined state (as far as it is possible).</dd>
+<dt id="term-test-framework">test&nbsp;framework</dt>
+<dd>A well maintained <a class="reference internal" href="#term-test-scripting"><em class="xref std std-term">test&nbsp;scripting</em></a> project consists of two parts.
+One part are the <em>test scripts</em> themselves and the other part is a
+<em>test framework</em> of helper classes and functions that should help in
+clarifying the test code and take care of some of the complexity.</dd>
+<dt id="term-test-host">test&nbsp;host</dt>
+<dd>A computer that runs your <a class="reference internal" href="#term-test-suite"><em class="xref std std-term">test&nbsp;suites</em></a> for you. It
+does not contain the <a class="reference internal" href="#term-system-under-test"><em class="xref std std-term">system&nbsp;under&nbsp;test</em></a> though. This would be
+the <a class="reference internal" href="#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>. A <a class="reference internal" href="#term-monk"><em class="xref std std-term">MONK</em></a> test always requires both a
+<a class="reference internal" href="#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a> and a test host.</dd>
+<dt id="term-test-scripting">test&nbsp;scripting</dt>
+<dd>writing tests in a programming language. Other ways of testing software
+could be record&amp;replay or manual testing.</dd>
+<dt id="term-test-suite">test&nbsp;suite</dt>
+<dd>A set of <a class="reference internal" href="#term-test-case"><em class="xref std std-term">test&nbsp;cases</em></a> that is run together.</dd>
+<dt id="term-unit-test">unit&nbsp;test</dt>
+<dd>In general a unit test is the lowest level of testing, verifying a
+specific unit of a system for one detail of functionality. In
+<a class="reference internal" href="#term-open-source"><em class="xref std std-term">open&nbsp;source</em></a> development the term is often used for all kinds of
+tests that are written with a unit test framework. This also includes
+integration tests, <a class="reference internal" href="#term-regression-test"><em class="xref std std-term">regression&nbsp;tests</em></a>, etc. In
+this documentation the second definition is used.</dd>
+<dt id="term-virtualenv">virtualenv</dt>
+<dd>A tool that creates independent Python environments in which Python
+packages can be installed, removed or updated depending on manual
+usage of the package manager <a class="reference internal" href="#term-pip"><em class="xref std std-term">pip</em></a>, and via <em>requirements.txt</em>
+files.</dd>
+</dl>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="monk_tf.html"
+                        title="previous chapter">monk_tf Package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/glossary.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="monk_tf.html" title="monk_tf Package"
+             >previous</a> |</li>
+        <li><a href="index.html">MONK 0.1.4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, 2013, DResearch Fahrzeugelektronik GmbH.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+        <br />
+        <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">
+            <img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" />
+        </a><br />
+        This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.
+    </div>
+
+  </body>
+</html>
