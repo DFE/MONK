@@ -64,15 +64,18 @@
 <span class="sd">&quot;&quot;&quot; Connection Layer</span>
 
 <span class="sd">Implements the lowest layer of interaction with a :term:`target device`. This</span>
-<span class="sd">means that you can use this module to create connections, interact with them</span>
+<span class="sd">means that you can use this module to create</span>
+<span class="sd">:py:class:`~monk_tf.conn.AConnection` objects, interact with them</span>
 <span class="sd">and manipulate their internal states.</span>
 
-<span class="sd">States are implemented with the State design pattern. Connection objects hold a</span>
-<span class="sd">current_state attribute. Everytime a public method of a connection is called,</span>
-<span class="sd">the object will forward that message to its current_state and the state will</span>
+<span class="sd">States are implemented with the State design pattern via</span>
+<span class="sd">:py:class:`~monk_tf.conn.AState`. Connection objects hold a</span>
+<span class="sd">:py:attr:`~monk_tf.conn.AConnection.current_state` attribute. Everytime a</span>
+<span class="sd">public method of a connection is called, the object will forward that message</span>
+<span class="sd">to its :py:attr:`~monk_tf.conn.AConnection.current_state` and the state will</span>
 <span class="sd">then execute the method depending on what the task of the state is.</span>
 
-<span class="sd">The code is split into the following parts:</span>
+<span class="sd">The code of this module is split into the following parts:</span>
 <span class="sd">    1. *Exceptions* - all exceptions that are used in this module</span>
 <span class="sd">    2. *AConnection* - the abstract Connection class which all other</span>
 <span class="sd">       connections are based on.</span>
@@ -81,8 +84,9 @@
 <span class="sd">       your test cases.</span>
 <span class="sd">    4. *Real Connections* - the real connections that connect MONK to a</span>
 <span class="sd">       :term:`target device`.</span>
-<span class="sd">    4. *AState* - the abstract State class which all other states are based on.</span>
-<span class="sd">    5. *State Classes* - the implementation of the state machine.</span>
+<span class="sd">    5. *AState* - the abstract State class which all other states are based on.</span>
+<span class="sd">    6. *State Classes* - the implementation of the state machine.</span>
+
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
@@ -100,37 +104,46 @@
 <span class="c">############</span>
 
 <div class="viewcode-block" id="ConnectionException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.conn.ConnectionException">[docs]</a><span class="k">class</span> <span class="nc">ConnectionException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; baseclass for exceptions of this package</span>
+    <span class="sd">&quot;&quot;&quot; is the baseclass for exceptions of this package.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 </div>
 <div class="viewcode-block" id="NotConnectedException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.conn.NotConnectedException">[docs]</a><span class="k">class</span> <span class="nc">NotConnectedException</span><span class="p">(</span><span class="n">ConnectionException</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; connection is not established, yet</span>
+    <span class="sd">&quot;&quot;&quot; is raised when connection is not established, yet.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 </div>
 <div class="viewcode-block" id="AuthenticationRequiredException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.conn.AuthenticationRequiredException">[docs]</a><span class="k">class</span> <span class="nc">AuthenticationRequiredException</span><span class="p">(</span><span class="n">ConnectionException</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; user is not authenticated, yet</span>
+    <span class="sd">&quot;&quot;&quot; is raised when user is not authenticated, yet.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 </div>
 <div class="viewcode-block" id="MockConnectionException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.conn.MockConnectionException">[docs]</a><span class="k">class</span> <span class="nc">MockConnectionException</span><span class="p">(</span><span class="n">ConnectionException</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; a mock exception that can be used in test scenarios</span>
+    <span class="sd">&quot;&quot;&quot; is a mock exception that can be used in test scenarios.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 </div>
 <div class="viewcode-block" id="UnexpectedPromptException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.conn.UnexpectedPromptException">[docs]</a><span class="k">class</span> <span class="nc">UnexpectedPromptException</span><span class="p">(</span><span class="n">ConnectionException</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; the last prompt was not what was expected</span>
+    <span class="sd">&quot;&quot;&quot; is raised when the last prompt was not what was expected.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 </div>
 <div class="viewcode-block" id="CommandException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.conn.CommandException">[docs]</a><span class="k">class</span> <span class="nc">CommandException</span><span class="p">(</span><span class="n">ConnectionException</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; there was an unidentified problem while executing a cmd</span>
+    <span class="sd">&quot;&quot;&quot; is raised when there was an unidentified problem while executing a cmd.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 </div>
 <div class="viewcode-block" id="EmptyResponseException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.conn.EmptyResponseException">[docs]</a><span class="k">class</span> <span class="nc">EmptyResponseException</span><span class="p">(</span><span class="n">ConnectionException</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; sending a command resulted in no response</span>
+    <span class="sd">&quot;&quot;&quot; is raised when sending a command resulted in no response.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="CantConnectException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.conn.CantConnectException">[docs]</a><span class="k">class</span> <span class="nc">CantConnectException</span><span class="p">(</span><span class="n">ConnectionException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; is raised if a connection can&#39;t be established.</span>
+
+<span class="sd">    Reasons might be that the physical connection is not established or that</span>
+<span class="sd">    the executing user lacks privileges to use this connection, e.g., when he</span>
+<span class="sd">    is not in the *dialout* group on a Linux machine.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 
@@ -158,13 +171,24 @@
             <span class="n">linesep</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
             <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        :param start_state: the state the connection should start in</span>
-<span class="sd">        :param name: a name to differentiate the connecton from others</span>
+
+<span class="sd">        :param start_state: the :py:class:`~monk_tf.conn.AState` object the</span>
+<span class="sd">                            connection should start in.</span>
+
+<span class="sd">        :param name: a name to differentiate the connecton from others. This is</span>
+<span class="sd">                     mostly used for :py:mod:`logging` output.</span>
+
 <span class="sd">        :param user_prompt: the prompt that requests the login username.</span>
+
 <span class="sd">        :param pw_prompt: the prompt that requests the login password.</span>
+
 <span class="sd">        :param credentials: login credentials as needed by the corresponding</span>
-<span class="sd">                            connection</span>
-<span class="sd">        :param linesep: the line separator used in shell commands.</span>
+<span class="sd">                            connection type, e.g.,</span>
+<span class="sd">                            :py:class:`~monk_tf.conn.SerialConnection`.</span>
+
+<span class="sd">        :param linesep: the line separator used in shell commands. This depends</span>
+<span class="sd">                        mostly on your TermIOs configuration and the</span>
+<span class="sd">                        :term:`target device`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_state</span> <span class="o">=</span> <span class="n">start_state</span> <span class="k">if</span> <span class="n">start_state</span> <span class="k">else</span> <span class="n">Disconnected</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="k">if</span> <span class="n">name</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
@@ -184,9 +208,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">last_cmd</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
 
 <div class="viewcode-block" id="AConnection.connect"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.conn.AConnection.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; initiate connection with :term:`target device`</span>
+        <span class="sd">&quot;&quot;&quot; initiate connection with :term:`target device`.</span>
 
-<span class="sd">        :return: whatever the current state might return. Might be None.</span>
+<span class="sd">        :return: Depends on the specific connection. Might be None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;connecting...&quot;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
@@ -195,16 +219,16 @@
             <span class="k">raise</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)(</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">),</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_state</span><span class="o">.</span><span class="n">next_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;new state &#39;{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_state</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;current state &#39;{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_state</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">out</span>
 </div>
 <div class="viewcode-block" id="AConnection.login"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.conn.AConnection.login">[docs]</a>    <span class="k">def</span> <span class="nf">login</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; authenticate to :term:`target device`</span>
+        <span class="sd">&quot;&quot;&quot; authenticate to :term:`target device`.</span>
 
 <span class="sd">        It uses a tupel of ``(user, password)`` that is hopefully stored in an</span>
 <span class="sd">        attribute ``credentials``.</span>
 
-<span class="sd">        :return: whatever the current state might return. Might be None.</span>
+<span class="sd">        :return: Depends on the specific connection. Might be None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;authenticating...&quot;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
@@ -213,14 +237,15 @@
             <span class="k">raise</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)(</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">),</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_state</span><span class="o">.</span><span class="n">next_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;new state &#39;{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_state</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;current state &#39;{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_state</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">out</span>
 </div>
 <div class="viewcode-block" id="AConnection.cmd"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.conn.AConnection.cmd">[docs]</a>    <span class="k">def</span> <span class="nf">cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; send :term:`shell command` to :term:`target device`</span>
+        <span class="sd">&quot;&quot;&quot; send :term:`shell command` to :term:`target device`.</span>
 
 <span class="sd">        :param msg: the :term:`shell command`</span>
-<span class="sd">        :return: the standard output of the :term:`shell command`.</span>
+
+<span class="sd">        :return: Depends on the specific connection. Might be None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;sending cmd &#39;{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">msg</span><span class="p">))</span>
         <span class="k">try</span><span class="p">:</span>
@@ -229,13 +254,13 @@
             <span class="k">raise</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)(</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">),</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_state</span><span class="o">.</span><span class="n">next_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;new state &#39;{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_state</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;current state &#39;{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_state</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">out</span>
 </div>
 <div class="viewcode-block" id="AConnection.disconnect"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.conn.AConnection.disconnect">[docs]</a>    <span class="k">def</span> <span class="nf">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; deactivate the connection to :term:`target device`</span>
+        <span class="sd">&quot;&quot;&quot; deactivate the connection to :term:`target device`.</span>
 
-<span class="sd">        :return: whatever the current state might return. Might be None.</span>
+<span class="sd">        :return: Depends on the specific connection. Might be None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;logging out...&quot;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
@@ -244,13 +269,23 @@
             <span class="k">raise</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)(</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">),</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_state</span><span class="o">.</span><span class="n">next_state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;new state &#39;{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_state</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;current state &#39;{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_state</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">out</span>
+</div>
+<div class="viewcode-block" id="AConnection.can_login"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.conn.AConnection.can_login">[docs]</a>    <span class="k">def</span> <span class="nf">can_login</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; checks wether the prompt is one of the login prompts.</span>
+
+<span class="sd">        :return: True if a login prompt or False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_prompt</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">pw_prompt</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">user_prompt</span><span class="p">,))</span>
 </div>
     <span class="k">def</span> <span class="nf">_prompt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; request a prompt.</span>
 
-<span class="sd">        This is like hitting the Return button in a shell session</span>
+<span class="sd">        This is like hitting the Return button in a shell session.</span>
+
 <span class="sd">        :return: the new prompt and whatever the :term:`target system` wants to</span>
 <span class="sd">                 respond.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -273,7 +308,7 @@
 <span class="c">###################################################</span>
 </div>
 <div class="viewcode-block" id="EchoConnection"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.conn.EchoConnection">[docs]</a><span class="k">class</span> <span class="nc">EchoConnection</span><span class="p">(</span><span class="n">AConnection</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; return everything sent to this connection; for debugging</span>
+    <span class="sd">&quot;&quot;&quot; return everything sent to this connection.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -286,7 +321,7 @@
     <span class="k">def</span> <span class="nf">_login</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logged_in</span> <span class="o">=</span> <span class="bp">True</span>
 
-    <span class="k">def</span> <span class="nf">_cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">msg</span>
 
     <span class="k">def</span> <span class="nf">_disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -294,7 +329,7 @@
 
 </div>
 <div class="viewcode-block" id="DefectiveConnection"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.conn.DefectiveConnection">[docs]</a><span class="k">class</span> <span class="nc">DefectiveConnection</span><span class="p">(</span><span class="n">AConnection</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; raise a MockConnectionException on each call</span>
+    <span class="sd">&quot;&quot;&quot; raise a :py:class:`~monk_tf.conn.MockConnectionException` on each call.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">_connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -303,7 +338,7 @@
     <span class="k">def</span> <span class="nf">_login</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">MockConnectionException</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">MockConnectionException</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -317,20 +352,33 @@
 <span class="c">###############################################</span>
 </div>
 <div class="viewcode-block" id="SerialConnection"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.conn.SerialConnection">[docs]</a><span class="k">class</span> <span class="nc">SerialConnection</span><span class="p">(</span><span class="n">AConnection</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; connect to :term:`target device` via serial interface</span>
+    <span class="sd">&quot;&quot;&quot; connect to :term:`target device` via serial interface.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
             <span class="n">serial_class</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
             <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        With this class you can use all params from</span>
+<span class="sd">        :py:class:`~monk_tf.conn.AConnection` and additionally:</span>
+
 <span class="sd">        :param serial_class: the class that provides the serial interace.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">serial_class</span> <span class="o">=</span> <span class="n">serial_class</span> <span class="k">if</span> <span class="n">serial_class</span> <span class="k">else</span> <span class="n">serial</span><span class="o">.</span><span class="n">Serial</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s">&quot;port&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;port&quot;</span><span class="p">,</span> <span class="s">&quot;/dev/ttyUSB1&quot;</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s">&quot;baudrate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;baudrate&quot;</span><span class="p">,</span> <span class="mi">115200</span><span class="p">))</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s">&quot;timeout&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;timeout&quot;</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">))</span>
+        <span class="k">if</span> <span class="s">&quot;user&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="s">&quot;password&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="ow">not</span> <span class="s">&quot;credentials&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s">&quot;credentials&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;user&quot;</span><span class="p">),</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;password&quot;</span><span class="p">))</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">SerialConnection</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_serial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">serial_class</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_serial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">serial_class</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">CantConnectException</span><span class="p">(</span><span class="s">&quot;Check cables and user rights!&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_login</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cmd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">credentials</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">returncode</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
@@ -338,9 +386,7 @@
             <span class="k">raise</span> <span class="n">UnexpectedPromptException</span><span class="p">(</span>
                 <span class="s">&quot;&#39;{}&#39;.endswith(&#39;{}&#39;)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_prompt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pw_prompt</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_cmd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">credentials</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">returncode</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_prompt</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">pw_prompt</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">user_prompt</span><span class="p">,)):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">can_login</span><span class="p">():</span>
             <span class="k">raise</span> <span class="n">UnexpectedPromptException</span><span class="p">(</span>
                 <span class="s">&quot;login should be finished but prompt is &#39;{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">last_prompt</span><span class="p">))</span>
@@ -405,7 +451,7 @@
 <span class="sd">    Therefore it does not make sense to keep a lot of stateful information in a</span>
 <span class="sd">    single AState object. This makes creation of many AState objects of the</span>
 <span class="sd">    same type unnecessary, which is why this class makes sure that all it&#39;s</span>
-<span class="sd">    child classes can only have a single implementation. This design pattern is</span>
+<span class="sd">    child classes can only have a single instance. This design pattern is</span>
 <span class="sd">    called Singleton.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -498,7 +544,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Connected.connect"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.conn.Connected.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; does nothing, because already connected</span>
+        <span class="sd">&quot;&quot;&quot; does nothing, because is already connected.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">event</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_CONNECT</span>
         <span class="n">connection</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;execute event &#39;{}&#39; in state &#39;{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
@@ -520,16 +566,17 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="p">,</span>
             <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
         <span class="p">))</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="s">&quot;credentials&quot;</span><span class="p">):</span>
-            <span class="n">connection</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;authenticate with credentials &#39;{}&#39;&quot;</span>
-                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">credentials</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="s">&quot;credentials&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">connection</span><span class="o">.</span><span class="n">credentials</span><span class="p">:</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;authenticate for user &#39;{}&#39;&quot;</span>
+                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">credentials</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
             <span class="c"># make sure you are ready to login</span>
-            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">last_prompt</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">(</span>
-                    <span class="n">connection</span><span class="o">.</span><span class="n">pw_prompt</span><span class="p">,</span>
-                    <span class="n">connection</span><span class="o">.</span><span class="n">user_prompt</span><span class="p">,)):</span>
+            <span class="k">if</span> <span class="n">connection</span><span class="o">.</span><span class="n">can_login</span><span class="p">():</span>
                 <span class="n">connection</span><span class="o">.</span><span class="n">_prompt</span><span class="p">()</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">out</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">_login</span><span class="p">()</span>
+                <span class="c"># here check again and only login if not already logged in!</span>
+                <span class="c"># same check as before</span>
+                <span class="k">if</span> <span class="n">connection</span><span class="o">.</span><span class="n">can_login</span><span class="p">():</span>
+                    <span class="n">out</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">_login</span><span class="p">()</span>
             <span class="k">except</span> <span class="n">ConnectionException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">event</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_LOGGED_OUT</span>
                 <span class="k">raise</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)(</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">),</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">2</span><span class="p">]</span>
@@ -587,7 +634,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Authenticated.connect"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.conn.Authenticated.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; does nothing, because already connected.</span>
+        <span class="sd">&quot;&quot;&quot; does nothing, because is already connected.</span>
 
 <span class="sd">        :param connection: the connection that uses this state.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -599,7 +646,7 @@
         <span class="n">connection</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;already connected&quot;</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="Authenticated.login"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.conn.Authenticated.login">[docs]</a>    <span class="k">def</span> <span class="nf">login</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connection</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; does nothing, because already logged in.</span>
+        <span class="sd">&quot;&quot;&quot; does nothing, because is already logged in.</span>
 
 <span class="sd">        :param connection: the connection that uses this state.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -692,7 +739,7 @@
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2012, 2013, DResearch Fahrzeugelektronik GmbH.
+        &copy; Copyright 2012, 2013, 2014, DResearch Fahrzeugelektronik GmbH.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
         <br />
         <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">

@@ -90,7 +90,7 @@
 
 <span class="sd">So using this layer setting up a device only takes one line of code. The rest</span>
 <span class="sd">of the information is in that ``target_device.cfg`` file. Although this data</span>
-<span class="sd">file can have any format you want, MONK currently only comes with one text</span>
+<span class="sd">file can have any format you want, :term:`MONK` currently only comes with one text</span>
 <span class="sd">format parser predefined, which is the :py:class:`~monk_tf.fixture.XiniParser`.</span>
 <span class="sd">The ``Xini`` is short for :term:`extended INI`. An example data file might look</span>
 <span class="sd">like this::</span>
@@ -112,7 +112,7 @@
 <span class="sd">can be done unlimited, by surrounding a section with more and more pairs of</span>
 <span class="sd">squared brackets (``[]``) according to the level of nesting that should be</span>
 <span class="sd">achieved. Thus in this example *serial1* belongs to *device1* and the types</span>
-<span class="sd">show which corresponding MONK object should be created.</span>
+<span class="sd">show which corresponding :term:`MONK` object should be created.</span>
 
 <span class="sd">Classes</span>
 <span class="sd">-------</span>
@@ -150,12 +150,14 @@
     <span class="k">pass</span>
 </div>
 <div class="viewcode-block" id="NotXiniException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.NotXiniException">[docs]</a><span class="k">class</span> <span class="nc">NotXiniException</span><span class="p">(</span><span class="n">AParseException</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Could not be parsed as :term:`extended INI`.</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    is raised when a :term:`fixture file` could not be parsed as</span>
+<span class="sd">    :term:`extended INI`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 </div>
 <div class="viewcode-block" id="CantParseException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.CantParseException">[docs]</a><span class="k">class</span> <span class="nc">CantParseException</span><span class="p">(</span><span class="n">ADeviceException</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Occurs, when a Fixture can not parse a given file</span>
+    <span class="sd">&quot;&quot;&quot; is raised when a Fixture can not parse a given file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 
@@ -182,7 +184,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">configspec</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; changes exception type raised</span>
+        <span class="sd">&quot;&quot;&quot; changes exception type raised.</span>
 
 <span class="sd">        Overwrites method from :py:class:`~configobj.ConfigObj` to raise a</span>
 <span class="sd">        :py:class:`~monk_tf.fixture.NotXiniException` instead of a</span>
@@ -201,15 +203,17 @@
 <span class="c">##############################################################</span>
 </div>
 <div class="viewcode-block" id="Fixture"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.Fixture">[docs]</a><span class="k">class</span> <span class="nc">Fixture</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Creates MONK objects based on dictionary like objects.</span>
+    <span class="sd">&quot;&quot;&quot; Creates :term:`MONK` objects based on dictionary like objects.</span>
 
 <span class="sd">    This is the class that provides the fundamental feature of this layer. It</span>
 <span class="sd">    reads data files by trying to parse them though its list of known parsers</span>
-<span class="sd">    and if it succeeds, it creates MONK objects based on the configuration</span>
-<span class="sd">    given by the data file. Most likely these objects are one or more devices</span>
-<span class="sd">    that have at least one connection each. If more than one data file is read</span>
-<span class="sd">    containing the same name on the highest level, then the latest data gets</span>
-<span class="sd">    used. This does not work on lower levels of nesting, though.</span>
+<span class="sd">    and if it succeeds, it creates :term:`MONK` objects based on the</span>
+<span class="sd">    configuration given by the data file. Most likely these objects are one or</span>
+<span class="sd">    more :py:class:`~monk_tf.dev.Device` objects that have at least one</span>
+<span class="sd">    :py:class:`~monk_tf.conn.AConnection` object each. If more than one</span>
+<span class="sd">    :term:`fixture file` is read containing the same name on the highest level,</span>
+<span class="sd">    then the latest data gets used. This does not work on lower levels of</span>
+<span class="sd">    nesting, though.</span>
 
 <span class="sd">    One source of data (either a filename or a child class of</span>
 <span class="sd">    :py:class:`~monk_tf.fixture.AParser`) can be given to an object of this</span>
@@ -235,8 +239,23 @@
         <span class="n">XiniParser</span><span class="p">,</span>
     <span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">start_props</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parsers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-            <span class="n">classes</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parsers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param source: The :term:`fixture file` or</span>
+<span class="sd">                       :py:class:`~monk_tf.fixture.AParser` object to be read.</span>
+
+<span class="sd">        :param name: The name of this object.</span>
+
+<span class="sd">        :param parsers: An :python:term:`iterable` of</span>
+<span class="sd">                        :py:class:`~monk_tf.fixture.AParser` classes to be used</span>
+<span class="sd">                        for parsing a given</span>
+<span class="sd">                        :py:attr:`~monk_tf.fixture.Fixture.source`.</span>
+
+<span class="sd">        :param classes: A :py:class:`dict` of classes to class names. Used for</span>
+<span class="sd">                        parsing the type attribute in</span>
+<span class="sd">                        :term:`fixture files&lt;fixture file&gt;`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&quot;{}:{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">devs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -296,7 +315,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">props</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Create MONK objects based on self&#39;s properties.</span>
+        <span class="sd">&quot;&quot;&quot; Create :term:`MONK` objects based on self&#39;s properties.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;initialize with props: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">devs</span> <span class="o">=</span> <span class="p">[]</span>
@@ -370,7 +389,7 @@
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2012, 2013, DResearch Fahrzeugelektronik GmbH.
+        &copy; Copyright 2012, 2013, 2014, DResearch Fahrzeugelektronik GmbH.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
         <br />
         <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">

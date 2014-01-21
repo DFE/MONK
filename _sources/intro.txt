@@ -238,7 +238,8 @@ Installation
 ------------
 
 To install :term:`MONK` you need ``pip``, a tool for installing and managing
-Python packages, which you can get via your system's package manager, e.g.::
+Python packages, which you can get via your system's package manager, e.g., for
+Debian based distributions::
 
     $ sudo apt-get install python-pip
 
@@ -262,8 +263,8 @@ following way::
 If you also want to run unit tests for MONK you might want to read the
 :doc:`developer instructions <contributing>`.
 
-Sitenote: Working with Different MONK Versions
-----------------------------------------------
+Side Note: Working with Different MONK Versions
+-----------------------------------------------
 
 When using :term:`MONK` a time will come in which updating to a newer version
 of :term:`MONK` will require a lot of changes in your

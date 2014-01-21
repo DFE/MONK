@@ -1,22 +1,21 @@
-##################
 Coding Style Guide
-##################
+==================
 
-This guide summarizes how we MONK developers think the source code should be
-formatted. Consider these *guidelines* advice rather than law. Sometimes
-you might hit a point, where the current version of the document can't help
-you. In this case you can do the following:
+This guide summarizes how we :term:`MONK` developers think the source code
+should be formatted. Consider these *guidelines* advice rather than law.
+Sometimes you might hit a point, where the current version of the document
+can not help you. In this case you can do the following:
 
  #. Check whether the newest version of this document contains any
-    changes concerning your situation. Also consider building the docs
-    yourself.
+    changes concerning your situation. Also consider
+    :ref:`building the docs yourself<contrib-build>`.
 
- #. Refer to `PEP-008`_, the official style guide for Python core
-    development. The Python Core project is, of course, a lot bigger than
-    MONK, meaning you might find something there, that has not been addressed
-    in MONK yet. Place a comment in the code explaining why you were not able
-    to follow MONK's style guide. If possible, create an `Issue`_ and try to
-    get the style guide changed accordingly.
+ #. Refer to `PEP-008`_, the official style guide for Python core development.
+    The Python Core project is, of course, a lot bigger than :term:`MONK`,
+    meaning you might find something there, that has not been addressed in
+    :term:`MONK` yet. Place a comment in the code explaining why you were not
+    able to follow :term:`MONK's<MONK>` style guide. If possible, create an
+    `Issue`_ and try to get the style guide changed accordingly.
 
  #. Discuss with other developers whether there might be a way that you are not
     aware of.
@@ -26,12 +25,11 @@ you. In this case you can do the following:
     to be treated as an exception.
 
 
-**********
 In General
-**********
+----------
 
  * Avoid features specific to your python binary. That includes your language
-   version as well as the interpreter you are using, i.e. CPython, Jython or
+   version as well as the interpreter you are using, i.e., CPython, Jython or
    Pypy.
  * Every line should consist of `79 characters`_ at most.
  * No line should contain more than one statement.
@@ -65,9 +63,8 @@ In General
         if __name__ == '__main__':
             main()
 
-**********
 Whitespace
-**********
+----------
 
 In Python whitespace has meaning. Thus, treating whitespace should receive even
 more consideration than in other languages. Whitespace means:
@@ -104,9 +101,8 @@ A complete example of correct whitespacing::
         function(a=f, b=e)
 
 
-******
 Naming
-******
+------
 
 Files, folders, modules, classes, functions, and attributes are to be named
 in the following fashion:
@@ -126,9 +122,8 @@ in the following fashion:
  * Use ``self`` to reference the object calling a method.
  * Use ``cls`` to reference the class in class functions.
 
-***************
 Files - Modules
-***************
+---------------
 
  * Files are to be encoded using ``utf-8``.
  * Every file starts with the following 2 lines::
@@ -157,9 +152,8 @@ Files - Modules
         if __name__ == '__main__':
             main()
 
-********
 Comments
-********
+--------
 
 In general it is best to write code as self-explanatory as possible. Yet
 sometimes you can't get around writing comments, to make things clear. Here are
@@ -249,9 +243,8 @@ these requirements when writing a comment:
    ``__version__`` magic variable.
 
 
-******************
 Exception Handling
-******************
+------------------
 
 In most cases exception handling should be done like in any other proper Python
 project. Here are some things to consider:
@@ -274,9 +267,8 @@ project. Here are some things to consider:
            except AttributeError:
                print("The param duck can't quack.")
 
-*******
 Imports
-*******
+-------
 
 As stated above, ``import`` calls should be written below the module
 docstring, above the constant/global variable definitions, and in the
@@ -294,9 +286,8 @@ the same source. This is discouraged for other reasons, though. Instead of
 from, even though it is a little more work writing. Always remember
 `explicit is better than implicit`_.
 
-*******
 The End
-*******
+-------
 
 You've read it all. I'm so proud of you!
 

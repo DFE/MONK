@@ -84,31 +84,33 @@
 <span class="c">############</span>
 
 <div class="viewcode-block" id="DeviceException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.DeviceException">[docs]</a><span class="k">class</span> <span class="nc">DeviceException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; base class for Exceptions of the device layer</span>
+    <span class="sd">&quot;&quot;&quot; base class for Exceptions of the device layer.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 </div>
 <div class="viewcode-block" id="CantHandleException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.CantHandleException">[docs]</a><span class="k">class</span> <span class="nc">CantHandleException</span><span class="p">(</span><span class="n">DeviceException</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; a request can&#39;t be handled by the connections of a :py:class:`~monk_tf.dev.Device`.</span>
+    <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    is raised when a request ca not be handled by the connections of a</span>
+<span class="sd">    :py:class:`~monk_tf.dev.Device`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 
 
-    <span class="c">##############################</span>
+<span class="c">##############################</span>
 <span class="c">#</span>
 <span class="c"># Devices - currently just one</span>
 <span class="c">#</span>
 <span class="c">##############################</span>
 </div>
 <div class="viewcode-block" id="Device"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.Device">[docs]</a><span class="k">class</span> <span class="nc">Device</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; a :term:`target device` abstraction</span>
+    <span class="sd">&quot;&quot;&quot; is the API abstraction of a :term:`target device`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param conns: list of connections. The following works as well::</span>
 
-<span class="sd">            Device(OneConnection(...), AnotherConnection(...),...)</span>
+<span class="sd">            ``Device(OneConnection(...), AnotherConnection(...),...)``</span>
 
 <span class="sd">        :param name: Device name for logging purposes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -120,8 +122,10 @@
         <span class="p">))</span>
 
 <div class="viewcode-block" id="Device.cmd"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.Device.cmd">[docs]</a>    <span class="k">def</span> <span class="nf">cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; send a :term:`shell command` to the :term:`target device`</span>
+        <span class="sd">&quot;&quot;&quot; send a :term:`shell command` to the :term:`target device`.</span>
+
 <span class="sd">        :param msg: the :term:`shell command`.</span>
+
 <span class="sd">        :return: the standard output of the :term:`shell command`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">connection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">conns</span><span class="p">:</span>
@@ -130,13 +134,9 @@
                 <span class="n">connection</span><span class="o">.</span><span class="n">login</span><span class="p">()</span>
                 <span class="k">return</span> <span class="n">connection</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">except</span> <span class="n">conn</span><span class="o">.</span><span class="n">ConnectionException</span> <span class="k">as</span> <span class="n">excpt</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;{}:{}:{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                    <span class="n">connection</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                    <span class="n">excpt</span>
-                <span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">excpt</span><span class="p">)</span>
         <span class="c"># no connection was able to get to the return statement</span>
-        <span class="k">raise</span> <span class="n">CantHandleException</span><span class="p">(</span><span class="s">&quot;dev:&#39;{}&#39;,conns:&#39;{}&#39;:couldn&#39;t send cmd &#39;{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="k">raise</span> <span class="n">CantHandleException</span><span class="p">(</span><span class="s">&quot;dev:&#39;{}&#39;,conns:&#39;{}&#39;:could not send cmd &#39;{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">conns</span><span class="p">),</span>
             <span class="n">msg</span><span class="p">,</span>
@@ -198,7 +198,7 @@
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2012, 2013, DResearch Fahrzeugelektronik GmbH.
+        &copy; Copyright 2012, 2013, 2014, DResearch Fahrzeugelektronik GmbH.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
         <br />
         <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">

@@ -38,7 +38,7 @@ ways:
     | Germany
 
 The Development Process
-=======================
+-----------------------
 
 If you want to see your changes applied to :term:`MONK`, the best way is to
 first communicate your ideas with the other :term:`MONK` developers. You should
@@ -81,7 +81,7 @@ the same feature branch anyway.
 
 
 Branching Model
-===============
+---------------
 
 There are five different kinds of branches in :term:`MONK`:
 
@@ -105,7 +105,7 @@ There are five different kinds of branches in :term:`MONK`:
 
 
 Acceptance Criteria for the Dev Branch
-======================================
+--------------------------------------
 
 ``dev`` contains the latest changes that are considered to be working by their
 creators and at least one reviewer. To continually ensure good quality of the
@@ -133,13 +133,13 @@ Changes to this list of rules can only be achieved by acceptance at the
 Stammtisch Meeting.
 
 Acceptance Criteria for the Master Branch
-=========================================
+-----------------------------------------
 
 The ``dev`` branch may be merged into the ``master`` branch whenever the
 Stammtisch decides that :term:`MONK`'s current state warrants doing so.
 
 Commit Policy
-=============
+-------------
 
 All commits are are expected to adhere to the following requirements:
     
