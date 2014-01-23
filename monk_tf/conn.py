@@ -13,29 +13,29 @@
 
 """ Connection Layer
 
-Implements the lowest layer of interaction with a :term:`target device`. This
-means that you can use this module to create
-:py:class:`~monk_tf.conn.AConnection` objects, interact with them
+This module implements the lowest layer of interaction with a 
+:term:`target device`. This means that you can use this module to create
+:py:class:`~monk_tf.conn.AConnection` objects, interact with them,
 and manipulate their internal states.
 
-States are implemented with the State design pattern via
+States are implemented based on the state design pattern via
 :py:class:`~monk_tf.conn.AState`. Connection objects hold a
-:py:attr:`~monk_tf.conn.AConnection.current_state` attribute. Everytime a
-public method of a connection is called, the object will forward that message
-to its :py:attr:`~monk_tf.conn.AConnection.current_state` and the state will
+:py:attr:`~monk_tf.conn.AConnection.current_state` attribute. Every time a
+public method of a connection is called, the object will forward this call
+to its :py:attr:`~monk_tf.conn.AConnection.current_state`, which will
 then execute the method depending on what the task of the state is.
 
 The code of this module is split into the following parts:
     1. *Exceptions* - all exceptions that are used in this module
-    2. *AConnection* - the abstract Connection class which all other
-       connections are based on.
+    2. *AConnection* - the abstract connection class which all other
+       connections are based on
     3. *Test Connections* - a list of connections that do not really connect to
        a :term:`target device` but instead are used for debugging purposes of
-       your test cases.
+       your test cases
     4. *Real Connections* - the real connections that connect MONK to a
-       :term:`target device`.
-    5. *AState* - the abstract State class which all other states are based on.
-    6. *State Classes* - the implementation of the state machine.
+       :term:`target device`
+    5. *AState* - the abstract state class which all other states are based on.
+    6. *State Classes* - the implementation of the state machine
 
 """
 
@@ -54,17 +54,17 @@ logger = logging.getLogger(__name__)
 ############
 
 class ConnectionException(Exception):
-    """ is the baseclass for exceptions of this package.
+    """ is the base class for exceptions of this package.
     """
     pass
 
 class NotConnectedException(ConnectionException):
-    """ is raised when connection is not established, yet.
+    """ is raised when connection has not been established yet.
     """
     pass
 
 class AuthenticationRequiredException(ConnectionException):
-    """ is raised when user is not authenticated, yet.
+    """ is raised when user has not been authenticated yet.
     """
     pass
 
@@ -79,7 +79,7 @@ class UnexpectedPromptException(ConnectionException):
     pass
 
 class CommandException(ConnectionException):
-    """ is raised when there was an unidentified problem while executing a cmd.
+    """ is raised when there was an unidentified problem while executing a command.
     """
     pass
 
@@ -89,7 +89,7 @@ class EmptyResponseException(ConnectionException):
     pass
 
 class CantConnectException(ConnectionException):
-    """ is raised if a connection can't be established.
+    """ is raised if a connection cannot be established.
 
     Reasons might be that the physical connection is not established or that
     the executing user lacks privileges to use this connection, e.g., when he
@@ -105,7 +105,7 @@ class CantConnectException(ConnectionException):
 #########################################
 
 class AConnection(object):
-    """ abstract base class for other connections to extend.
+    """ Abstract base class for other connections to extend.
 
     This class preimplements the interaction between a
     :py:class:`~monk_tf.conn.AConnection` and its
@@ -125,7 +125,7 @@ class AConnection(object):
         :param start_state: the :py:class:`~monk_tf.conn.AState` object the
                             connection should start in.
 
-        :param name: a name to differentiate the connecton from others. This is
+        :param name: a name to distinguish the connection from others. This is
                      mostly used for :py:mod:`logging` output.
 
         :param user_prompt: the prompt that requests the login username.
@@ -158,7 +158,7 @@ class AConnection(object):
         self.last_cmd = ""
 
     def connect(self):
-        """ initiate connection with :term:`target device`.
+        """ Initiate connection with :term:`target device`.
 
         :return: Depends on the specific connection. Might be None.
         """
@@ -173,12 +173,12 @@ class AConnection(object):
         return out
 
     def login(self):
-        """ authenticate to :term:`target device`.
+        """ Authenticate to :term:`target device`.
 
-        It uses a tupel of ``(user, password)`` that is hopefully stored in an
+        It uses a tupel of ``(user, password)`` that is expected to be found in an
         attribute ``credentials``.
 
-        :return: Depends on the specific connection. Might be None.
+        :return: Depends on the specific connection. May be None.
         """
         self._logger.info("authenticating...")
         try:
@@ -191,11 +191,11 @@ class AConnection(object):
         return out
 
     def cmd(self, msg):
-        """ send :term:`shell command` to :term:`target device`.
+        """ Send :term:`shell command` to :term:`target device`.
 
         :param msg: the :term:`shell command`
 
-        :return: Depends on the specific connection. Might be None.
+        :return: Depends on the specific connection. May be None.
         """
         self._logger.info("sending cmd '{}'".format(msg))
         try:
@@ -208,9 +208,9 @@ class AConnection(object):
         return out
 
     def disconnect(self):
-        """ deactivate the connection to :term:`target device`.
+        """ Deactivate the connection to :term:`target device`.
 
-        :return: Depends on the specific connection. Might be None.
+        :return: Depends on the specific connection. May be None.
         """
         self._logger.info("logging out...")
         try:
@@ -223,7 +223,7 @@ class AConnection(object):
         return out
 
     def can_login(self):
-        """ checks wether the prompt is one of the login prompts.
+        """ Checks wether the prompt is one of the login prompts.
 
         :return: True if a login prompt or False otherwise.
         """
@@ -232,12 +232,12 @@ class AConnection(object):
                         self.user_prompt,))
 
     def _prompt(self):
-        """ request a prompt.
+        """ Request a prompt.
 
         This is like hitting the Return button in a shell session.
 
-        :return: the new prompt and whatever the :term:`target system` wants to
-                 respond.
+        :return: the new prompt and any response returned by the 
+                 :term:`target system`.
         """
         self._logger.info("requesting new prompt")
         return self._cmd("",returncode=False) + os.linesep + self.last_prompt
@@ -258,7 +258,7 @@ class AConnection(object):
 ###################################################
 
 class EchoConnection(AConnection):
-    """ return everything sent to this connection.
+    """ Return everything sent to this connection.
     """
 
     def __init__(self, *args, **kwargs):
@@ -279,7 +279,7 @@ class EchoConnection(AConnection):
 
 
 class DefectiveConnection(AConnection):
-    """ raise a :py:class:`~monk_tf.conn.MockConnectionException` on each call.
+    """ Raise a :py:class:`~monk_tf.conn.MockConnectionException` on each call.
     """
 
     def _connect(self):
@@ -302,7 +302,7 @@ class DefectiveConnection(AConnection):
 ###############################################
 
 class SerialConnection(AConnection):
-    """ connect to :term:`target device` via serial interface.
+    """ Connect to :term:`target device` via serial interface.
     """
 
     def __init__(self,
@@ -313,7 +313,7 @@ class SerialConnection(AConnection):
         With this class you can use all params from
         :py:class:`~monk_tf.conn.AConnection` and additionally:
 
-        :param serial_class: the class that provides the serial interace.
+        :param serial_class: the class that provides the serial interface.
         """
         self.serial_class = serial_class if serial_class else serial.Serial
         kwargs["port"] = kwargs.get("port", "/dev/ttyUSB1")
@@ -342,15 +342,15 @@ class SerialConnection(AConnection):
                     self.last_prompt))
 
     def _cmd(self,msg, returncode=True, expected_output=True):
-        """ unsafe, direct command interface.
+        """ Unsafe, direct command interface.
 
         Also updates :py:attr:`last_cmd`, :py:attr:`last_prompt` and
         :py:attr:`last_out`.
 
-        :param msg: the :term:`shell command` that should be executed remotely.
-        :param returncode: if a returncode should be checked or not
+        :param msg: the :term:`shell command` to be executed remotely.
+        :param returncode: whether a return code should be evaluated or not
         :param expected_output: is an output expected?
-        :return: the standardoutput from the command execution
+        :return: the standard output from the command execution
         """
         stripped = msg.strip()
         msg_rcd = stripped + ("; echo \"$?\"" if stripped and returncode else "")
@@ -395,12 +395,12 @@ class SerialConnection(AConnection):
 #########################################################
 
 class AState(object):
-    """ the abstract base class for all connection related states to extend.
+    """ The abstract base class for all connection related states to extend.
 
     An AState is a representation of a set of reactions in a specific state.
     Therefore it does not make sense to keep a lot of stateful information in a
-    single AState object. This makes creation of many AState objects of the
-    same type unnecessary, which is why this class makes sure that all it's
+    single AState object. This makes creation of multiple AState objects of the
+    same type unnecessary, which is why this class makes sure that all its
     child classes can only have a single instance. This design pattern is
     called Singleton.
     """
@@ -412,7 +412,7 @@ class AState(object):
     _LOGGED_OUT = "LOGGED_OUT"
 
     def __new__(cls, *args, **kwargs):
-        """ implement Singleton as default object creation of this class.
+        """ Implement Singleton as default object creation of this class.
         """
         try:
             return cls._instance
@@ -421,28 +421,28 @@ class AState(object):
             return cls._instance
 
     def next_state(self, connection):
-        """ state transition table. Must be overwritten by child classes
+        """ State transition table. Must be overwritten by child classes.
         """
         logger.warning("{}: class does not overwrite next_state() method".format(
             self.__class__.__name__))
         return self
 
     def __str__(self):
-        """ represent a state by its class name
+        """ Represent a state by its class name.
         """
         return self.__class__.__name__
 
 
 class Disconnected(AState):
-    """ Defines interaction if connection is not established yet.
+    """ Defines interaction if connection has not been established yet.
     """
 
     def connect(self, connection):
-        """ initiate connection with :term:`target device`
+        """ Initiate connection with :term:`target device`.
 
         :param connection: the connection that uses this state
         :return: depends on what the connection's protected :py:meth:`_connect`
-                 method returns. Could be None.
+                 method returns. May be None.
         """
         self.event = self._CONNECT
         connection._logger.debug("execute event '{}' in state '{}'".format(
@@ -452,7 +452,7 @@ class Disconnected(AState):
         return connection._connect()
 
     def login(self, connection):
-        """ should not be called, because not connected
+        """ Should not be called because there is no connection.
         """
         self.event = self._LOGIN
         connection._logger.debug("execute event '{}' in state '{}'".format(
@@ -462,7 +462,7 @@ class Disconnected(AState):
         raise NotConnectedException()
 
     def cmd(self, connection, msg):
-        """ should not be called, because not connected
+        """ Should not be called because there is no connection.
         """
         self.event = self._CMD
         connection._logger.debug("execute event '{}' in state '{}'".format(
@@ -472,7 +472,7 @@ class Disconnected(AState):
         raise NotConnectedException()
 
     def disconnect(self, connection):
-        """ does not do anything, because already disconnected
+        """ Does not do anything because we are already disconnected.
         """
         self.event = self._DISCONNECT
         connection._logger.debug("execute event '{}' in state '{}'".format(
@@ -494,7 +494,7 @@ class Connected(AState):
     """
 
     def connect(self, connection):
-        """ does nothing, because is already connected.
+        """ Does nothing because we are already connected.
         """
         self.event = self._CONNECT
         connection._logger.debug("execute event '{}' in state '{}'".format(
@@ -504,12 +504,13 @@ class Connected(AState):
         connection._logger.warning("tried to connect but is already connected")
 
     def login(self, connection):
-        """ authenticates at connection, if object has credentials
+        """ Authenticates at connection, if object has credentials.
 
         :param connection: the connection that uses this state.
-        :return: the result of the login. Might be None. If False then the
-                 connection object has no credentials that could be used. This
-                 can mean that no login is necessary, though.
+        :return: the result of the login. May be None. If False then the
+                 connection object has no credentials to use. This
+                 may indicate a problem but may also mean that no login 
+                 is necessary.
         """
         self.event = self._LOGIN
         connection._logger.debug("execute event '{}' in state '{}'".format(
@@ -535,10 +536,10 @@ class Connected(AState):
             return False
 
     def cmd(self, connection, msg):
-        """ sends a command if login not necessary, otherwise raises Exception
+        """ Sends a command if login not necessary, otherwise raises exception
 
         :param connection: the connection that uses this state.
-        :param msg: the shell command that should be sent via the connection.
+        :param msg: the shell command to be sent via the connection.
         :return: the standard output of the shell command.
         """
         self.event = self._CMD
@@ -553,10 +554,10 @@ class Connected(AState):
             raise AuthenticationRequiredException()
 
     def disconnect(self, connection):
-        """ deactivates the connection.
+        """ Deactivates the connection.
 
         :param connection: the connection that uses this state.
-        :return: the disconnection result. Might be None.
+        :return: the disconnection result. May be None.
         """
         self.event = self._DISCONNECT
         connection._logger.debug("execute event '{}' in state '{}'".format(
@@ -584,7 +585,7 @@ class Authenticated(AState):
     """
 
     def connect(self, connection):
-        """ does nothing, because is already connected.
+        """ Does nothing because we are already connected.
 
         :param connection: the connection that uses this state.
         """
@@ -596,7 +597,7 @@ class Authenticated(AState):
         connection._logger.warning("already connected")
 
     def login(self, connection):
-        """ does nothing, because is already logged in.
+        """ Does nothing, because we are already logged in.
 
         :param connection: the connection that uses this state.
         """
@@ -608,11 +609,11 @@ class Authenticated(AState):
         connection._logger.warning("already logged in")
 
     def cmd(self, connection, msg):
-        """ send a shell command to :term:`target device`
+        """ Send a shell command to :term:`target device`
 
         :param connection: the connection that uses this state.
-        :param msg: the shell command that should be transmitted.
-        :return: the standard output of the sehll command.
+        :param msg: the shell command to be sent.
+        :return: the standard output of the shell command.
         """
         self.event = self._CMD
         connection._logger.debug("execute event '{}' in state '{}'".format(
@@ -626,10 +627,10 @@ class Authenticated(AState):
         return out
 
     def disconnect(self, connection):
-        """ closes the connection.
+        """ Closes the connection.
 
         :param connection: the connection that uses this state.
-        :return: the disconnection result. Might be None.
+        :return: the disconnection result. May be None.
         """
         self.event = self._DISCONNECT
         connection._logger.debug("execute event '{}' in state '{}'".format(

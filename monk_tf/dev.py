@@ -14,7 +14,8 @@
 """ Device Layer
 
 This layer abstracts a complete :term:`target device` in a single object, which
-can be interacted without worries about how the actual communication is done.
+can be interacted with without worrying about how the actual communication is 
+handled.
 
 To use this module create a :py:class:`~monk_tf.dev.Device` class.
 
@@ -34,13 +35,13 @@ logger = logging.getLogger(__name__)
 ############
 
 class DeviceException(Exception):
-    """ base class for Exceptions of the device layer.
+    """ Base class for exceptions of the device layer.
     """
     pass
 
 class CantHandleException(DeviceException):
     """ 
-    is raised when a request ca not be handled by the connections of a
+    is raised when a request cannot be handled by the connections of a
     :py:class:`~monk_tf.dev.Device`.
     """
     pass
@@ -72,7 +73,7 @@ class Device(object):
         ))
 
     def cmd(self, msg):
-        """ send a :term:`shell command` to the :term:`target device`.
+        """ Send a :term:`shell command` to the :term:`target device`.
 
         :param msg: the :term:`shell command`.
 
@@ -93,7 +94,7 @@ class Device(object):
         ))
 
     def __del__(self):
-        """ make sure all connections get closed on delete
+        """ Make sure all connections get closed on delete.
         """
         for connection in self.conns:
             try:

@@ -15,7 +15,7 @@ can not help you. In this case you can do the following:
     meaning you might find something there, that has not been addressed in
     :term:`MONK` yet. Place a comment in the code explaining why you were not
     able to follow :term:`MONK's<MONK>` style guide. If possible, create an
-    `Issue`_ and try to get the style guide changed accordingly.
+    `issue`_ and try to get the style guide changed accordingly.
 
  #. Discuss with other developers whether there might be a way that you are not
     aware of.
@@ -28,8 +28,8 @@ can not help you. In this case you can do the following:
 In General
 ----------
 
- * Avoid features specific to your python binary. That includes your language
-   version as well as the interpreter you are using, i.e., CPython, Jython or
+ * Avoid features specific to your Python binary. That includes your language
+   version as well as the interpreter you are using, e.g., CPython, Jython, or
    Pypy.
  * Every line should consist of `79 characters`_ at most.
  * No line should contain more than one statement.
@@ -53,7 +53,7 @@ In General
    ``if bool_val:`` instead.
  * Callable Python scripts should always contain a ``main()`` method. This way
    your code will not only be executable by your script but can also be used by
-   other python modules which import yours. If you do not include one, and
+   other Python modules which import yours. If you do not include one, and
    instead put your code directly into the if, then only your script can make
    use of that code, which is not preferred. Example::
 
@@ -82,10 +82,10 @@ Rules:
  * New lines are ``\n`` characters.
  * Classes, functions, and blocks should be separated by 2 empty lines each.
  * *no whitespace* in params, brackets, and braces
- * *no whitespace* before commas, semicolons and colons
+ * *no whitespace* before commas, semicolons, and colons
  * *no whitespace* before ``(`` in function and class headers
- * *no whitespace* before list indexing, e.g. ``list[5], slice[3:4]``
- * *no whitespace* in default param assignments, e.g. ``def function(a=13):``
+ * *no whitespace* before list indexing, e.g., ``list[5], slice[3:4]``
+ * *no whitespace* in default param assignments, e.g., ``def function(a=13):``
  * exactly one space around assignments/operators
 
 
@@ -138,7 +138,7 @@ Files - Modules
  * Following these there is an empty line followed by the copyright and
    licensing text.
  * After this general information there is the module docstring.
- * The docstring is followed by the imports in this order:
+ * The docstring is followed by imports in this order:
     * general imports from the Python standard library
     * imports from frameworks
     * imports from your own project
@@ -156,7 +156,7 @@ Comments
 --------
 
 In general it is best to write code as self-explanatory as possible. Yet
-sometimes you can't get around writing comments, to make things clear. Here are
+sometimes you cannot get around writing comments to make things clear. Here are
 some situations in which you *should* write a comment:
 
  * Each module, class, and function needs to be accompanied by a `docstring`_.
@@ -239,7 +239,7 @@ these requirements when writing a comment:
     * They should consist of complete sentences.
     * They should contain descriptions for elements like parameters, as
       `described in the Sphinx Docs`_.
- * Comments for version control systems `should be added` to the
+ * Comments for version control systems should be added to the
    ``__version__`` magic variable.
 
 
@@ -249,8 +249,8 @@ Exception Handling
 In most cases exception handling should be done like in any other proper Python
 project. Here are some things to consider:
 
- * Use Exception objects and ``raise`` to initiate exception handling.
- * State the Exception classes explicitly in ``except`` clauses because
+ * Use exception objects and ``raise`` to initiate exception handling.
+ * State exception classes explicitly in ``except`` clauses because
    `explicit is better than implicit`.
  * Minimize the number of lines in ``try`` clauses to avoid
    `Pokemon exception handling`_.
@@ -283,7 +283,7 @@ statements like ``from abc import x,y,z``, making different imports from
 the same source. This is discouraged for other reasons, though. Instead of
 ``from abc import x,y,z`` you should use ``import abc`` and then refer to
 ``abc.x`` later on. This way it is easier to identify where something comes
-from, even though it is a little more work writing. Always remember
+from, even though it requires a little more work typing. Always remember
 `explicit is better than implicit`_.
 
 The End
@@ -295,7 +295,7 @@ You've read it all. I'm so proud of you!
 .. references
 
 .. _PEP-008: http://www.python.org/dev/peps/pep-0008
-.. _Issue: https://github.com/DFE/MONK/issues/new
+.. _issue: https://github.com/DFE/MONK/issues/new
 .. _79 characters: https://jamiecurle.co.uk/blog/79-characters-or-less/
 .. _docstring: http://www.python.org/dev/peps/pep-0257/#what-is-a-docstring
 .. _Sphinx: http://sphinx-doc.org/

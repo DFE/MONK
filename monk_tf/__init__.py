@@ -21,5 +21,5 @@
 """
 This is the package overview of :term:`MONK`.
 
-The following texts contain the three layers:
+The following texts describe the three layers:
 """
