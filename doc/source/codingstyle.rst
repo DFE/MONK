@@ -15,7 +15,7 @@ can not help you. In this case you can do the following:
     meaning you might find something there, that has not been addressed in
     :term:`MONK` yet. Place a comment in the code explaining why you were not
     able to follow :term:`MONK's<MONK>` style guide. If possible, create an
-    `issue`_ and try to get the style guide changed accordingly.
+    `Issue`_ and try to get the style guide changed accordingly.
 
  #. Discuss with other developers whether there might be a way that you are not
     aware of.
@@ -117,7 +117,7 @@ in the following fashion:
  * Naming something with two leading underscores makes it private, i.e. only
    usable inside this class (e.g. ``__only_for_me``).
  * Use of double underscores at beginning and end should be avoided, since
-   Python itself uses this convention for special names 
+   Python itself uses this convention for special names
    (e.g. ``something.__doc__``)
  * Use ``self`` to reference the object calling a method.
  * Use ``cls`` to reference the class in class functions.
@@ -189,14 +189,14 @@ these requirements when writing a comment:
 
         class Something(object):
             """This is a docstring.
-        
+
             It is put directly underneath the class definition.
             """
 
 
             def __init__(self):
                 """This is also a docstring.
-                
+
                 It is put directly underneath the method definition.
                 """
 
@@ -217,7 +217,7 @@ these requirements when writing a comment:
 
         def do_else():
         """This is the wrong way to indent a docstring.
-        
+
         It won't even be recognised as a docstring.
         """
 
@@ -239,7 +239,7 @@ these requirements when writing a comment:
     * They should consist of complete sentences.
     * They should contain descriptions for elements like parameters, as
       `described in the Sphinx Docs`_.
- * Comments for version control systems should be added to the
+ * Comments for version control systems `should be added`_ to the
    ``__version__`` magic variable.
 
 
@@ -249,9 +249,9 @@ Exception Handling
 In most cases exception handling should be done like in any other proper Python
 project. Here are some things to consider:
 
- * Use exception objects and ``raise`` to initiate exception handling.
- * State exception classes explicitly in ``except`` clauses because
-   `explicit is better than implicit`.
+ * Use Exception objects and ``raise`` to initiate exception handling.
+ * State Exception classes explicitly in ``except`` clauses because
+   `explicit is better than implicit`_.
  * Minimize the number of lines in ``try`` clauses to avoid
    `Pokemon exception handling`_.
  * In Python, it is encouraged to use function parameters as expected instead
@@ -295,11 +295,11 @@ You've read it all. I'm so proud of you!
 .. references
 
 .. _PEP-008: http://www.python.org/dev/peps/pep-0008
-.. _issue: https://github.com/DFE/MONK/issues/new
+.. _Issue: https://github.com/DFE/MONK/issues/new
 .. _79 characters: https://jamiecurle.co.uk/blog/79-characters-or-less/
 .. _docstring: http://www.python.org/dev/peps/pep-0257/#what-is-a-docstring
 .. _Sphinx: http://sphinx-doc.org/
-.. _described in the Sphinx Docs: http://sphinx-doc.org/domains.html#info-field-lists 
+.. _described in the Sphinx Docs: http://sphinx-doc.org/domains.html#info-field-lists
 .. _should be added: http://stackoverflow.com/a/459185/131120
 .. _properties: http://stackoverflow.com/questions/6618002/python-property-versus-getters-and-setters
 .. _comparing singletons: http://stackoverflow.com/questions/2209755/python-operation-vs-is-not

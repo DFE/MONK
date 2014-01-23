@@ -13,17 +13,32 @@
 
 """ Connection Layer
 
-This module implements the lowest layer of interaction with a 
+This module implements the lowest layer of interaction with a
 :term:`target device`. This means that you can use this module to create
 :py:class:`~monk_tf.conn.AConnection` objects, interact with them,
 and manipulate their internal states.
 
-States are implemented based on the state design pattern via
+States are implemented based on the State design pattern via
 :py:class:`~monk_tf.conn.AState`. Connection objects hold a
 :py:attr:`~monk_tf.conn.AConnection.current_state` attribute. Every time a
 public method of a connection is called, the object will forward this call
 to its :py:attr:`~monk_tf.conn.AConnection.current_state`, which will
 then execute the method depending on what the task of the state is.
+
+As an Example, let's take a :py:class:`~monk_tf.conn.SerialConnection`. If you
+execute its :py:meth:`~monk_tf.conn.SerialConnection.connect` method, the
+connection will delegate this task to its
+:py:attr:`~monk_tf.conn.AConnection.current_state` which is probably a
+:py:class:`~monk_tf.conn.Disconnected` object. Each State object also has a
+:py:meth:`~monk_tf.conn.Disconnected.connect` method. In it there might be some
+checks (not in this case, though) and then it will redirect the task to a
+private method of :py:class:`~monk_tf.conn.SerialConnection`, in this case
+:py:meth:`~monk_tf.conn.SerialConnection._connect`. Because this private method
+expects that all checks are done it will attempt to initiate the connection.
+
+This does not seem complicated, it actually is. The reason is that the State
+design pattern was applied here. If it is necessary to understand this better,
+please refer to this design pattern.
 
 The code of this module is split into the following parts:
     1. *Exceptions* - all exceptions that are used in this module
@@ -34,7 +49,7 @@ The code of this module is split into the following parts:
        your test cases
     4. *Real Connections* - the real connections that connect MONK to a
        :term:`target device`
-    5. *AState* - the abstract state class which all other states are based on.
+    5. *AState* - the abstract State class which all other states are based on.
     6. *State Classes* - the implementation of the state machine
 
 """
@@ -236,7 +251,7 @@ class AConnection(object):
 
         This is like hitting the Return button in a shell session.
 
-        :return: the new prompt and any response returned by the 
+        :return: the new prompt and any response returned by the
                  :term:`target system`.
         """
         self._logger.info("requesting new prompt")
@@ -509,7 +524,7 @@ class Connected(AState):
         :param connection: the connection that uses this state.
         :return: the result of the login. May be None. If False then the
                  connection object has no credentials to use. This
-                 may indicate a problem but may also mean that no login 
+                 may indicate a problem but may also mean that no login
                  is necessary.
         """
         self.event = self._LOGIN

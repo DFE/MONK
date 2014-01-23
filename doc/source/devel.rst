@@ -3,7 +3,7 @@
     (C) 2013, DResearch Fahrzeugelektronik GmbH
 
 ..  You can redistribute this file and/or modify it under the terms of the GNU
-    General Public License as published by the Free Software Foundation; 
+    General Public License as published by the Free Software Foundation;
     either version 2 of the License, or (at your option) any later version
 
 .. _chap-devel:
@@ -20,12 +20,12 @@ Communicating with the Developers
 You can communicate with other :term:`MONK` developers in one of the following
 ways:
 
- #. **The Mailing List**: You can ask questions at 
+ #. **The Mailing List**: You can ask questions at
     project-monk@dresearch-fe.de.  You can also have a look at `the archives`_
     to see old conversations.
 
  #. **The Bug Tracker**: If you have encountered a specific problem you want
-    to work on, you can create an issue `here`_. It is also possible to
+    to work on, you can create an Issue `here`_. It is also possible to
     work via GitHub pull requests.
 
  #. **The Stammtisch Meeting**: If you happen to be in Berlin on any Tuesday
@@ -47,7 +47,7 @@ work might turn out to be a waste of time.
 
 If you have write access to the repository (which is only supposed to happen if
 you are a regular member of `the DFE group`_), you should simply fork, create
-an issue and track your changes in a feature branch.
+an Issue and track your changes in a feature branch.
 
 If you do not have write access, you will have to use pull requests. Remember
 that a feature branch will automatically be generated for your pull
@@ -70,7 +70,7 @@ Step-by-step guide:
     These people should be mentioned within your commit message, as
     described later.
 
- #. **Get it merged**: If you have a pull request or issue containing your
+ #. **Get it merged**: If you have a pull request or Issue containing your
     problem, your solution, and the commits containing the two Acked-Bys,
     get one of the maintainers to merge it.
 
@@ -111,23 +111,23 @@ Acceptance Criteria For The Dev Branch
 creators and at least one reviewer. To continually ensure good quality of the
 code, some requirements must be met for a commit to be allowed into ``dev``:
 
- * All commits refer to an issue on `GitHub`_.
- * The issue contains an understandable description of the problem that enables
+ * All commits refer to an Issue on `GitHub`_.
+ * The Issue contains an understandable description of the problem that enables
    reproduction, if necessesary.
- * The issue contains an understandable and assessable description of the
+ * The Issue contains an understandable and assessable description of the
    solution.
  * All code changes are well documented, formatted according to the coding
    standards, and follow high quality standards even in areas that are not
    specifically mentioned here.
  * Code changes are unit tested with 100% statement coverage for the changes
    involved.
- * If necessary and possible: integration tests and documentation have been 
+ * If necessary and possible: integration tests and documentation have been
    adapted accordingly.
  * Two DFE team members have acknowledged the solution's successful and
    complete implementation.
 
 These requirements can be overruled only by 100% acceptance of all developers,
-reviewers, and both maintainers for a single issue, if considered necessary.
+reviewers, and both maintainers for a single Issue, if considered necessary.
 
 Changes to this list of rules can only be achieved by acceptance at the
 Stammtisch Meeting.
@@ -142,7 +142,7 @@ Commit Policy
 -------------
 
 All commits are are expected to adhere to the following requirements:
-    
+
  * **KISS principle**: Commits should contain one meaningful change and
    that one change only. This does not mean you should only put changes in one
    file or one deletion/insertion into one commit, but that all of the changes
@@ -162,8 +162,8 @@ All commits are are expected to adhere to the following requirements:
    characters per line, except for longer URLs, quotations or messages that
    would be unintelligible in some other way when split.
 
- * **Refer to an issue on GitHub**: If you have not done so already within
-   the description, this would be a good place to specify which issue on
+ * **Refer to an Issue on GitHub**: If you have not done so already within
+   the description, this would be a good place to specify which Issue on
    GitHub your commit belongs to.
 
  * **Signed-off-bys**: After the long description all developers involved in

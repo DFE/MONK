@@ -3,7 +3,7 @@
     (C) 2013, DResearch Fahrzeugelektronik GmbH
 
 ..  You can redistribute this file and/or modify it under the terms of the GNU
-    General Public License as published by the Free Software Foundation; 
+    General Public License as published by the Free Software Foundation;
     either version 2 of the License, or (at your option) any later version
 
 .. _chap-intro:
@@ -16,28 +16,43 @@ Getting Started
 What Is The Problem?
 --------------------
 
-This framework is intended for developers of :term:`embedded systems<embedded system>`
-like ourselves. We found that testing our systems manually via serial shell or
-ssh was not very convenient in the long run, because for new devices new tests
-needed to be repeated again and again. We were also aware that many 
-:term:`open source` projects use :term:`unit tests<unit test>` for writing 
-:term:`test suites<test suite>` for their :term:`regression tests<regression test>`. 
-These tests are written in test methods or functions that can be executed by 
-tools like :term:`nose` to generate a standardized output stating which tests 
-have succeeded and which have failed. 
+This framework is intended for developers of
+:term:`embedded systems<embedded system>` like ourselves. We found that testing
+our systems manually via serial shell or ssh was not very convenient in the
+long run, because for new products the tests needed to be repeated again and
+again. We were also aware that many :term:`open source` projects use
+:term:`unit tests<unit test>` for writing :term:`test suites<test suite>` for
+their :term:`regression tests<regression test>`.  These tests are written in
+test methods or functions that can be executed by tools like :term:`nose` to
+generate a standardized output stating which tests have succeeded and which
+have failed.
 
-However, writing :term:`unit tests<unit test>` for testing 
-:term:`embedded systems<embedded system>` directly is not so easy. The reason 
-is that the code which runs on your embedded system (which we will call
-:term:`target device` from now on) cannot be accessed by the test code
-directly, because the test code runs on another computer that collects the test
-results, which we will call :term:`test host`. Therefore you need to implement
-additional layers of communication between :term:`test host` and
-:term:`target device`, which is complicated and error prone.
+However, writing :term:`unit tests<unit test>` for testing
+:term:`embedded systems<embedded system>` directly is not so easy. The reason
+is, that the :term:`system under test` can not be accessed directly. It is on
+the :term:`embedded system`, while the test itself is executed on a test server
+in a :term:`Jenkins` job. This test server is called :term:`test host`.
 
-Thus the problem about writing :term:`regression<regression test>`
-:term:`test suites<test suite>` is that the matter gets complicated because the
-communication of two devices is involved.
+It would not make sense to run the :term:`system under test` on the
+:term:`test host`, because it will be executed on the :term:`embedded system`
+in the end. Therefore test success can only be determined on the
+:term:`embedded system`.
+
+It would also not make sense to run the :term:`test case` directly on the
+:term:`embedded system` because then test and :term:`system under test` could
+influence each other. Test results must also be accumulated and stored for
+future reviews. But a terror on the :term:`embedded system` might result in a
+state where files get deleted or cannot be retreived for other reasons.
+
+Therefore a separation of test environment and :term:`system under test` is not
+avoidable in :term:`embedded system` development. For future reference the
+computer that runs the tests will be called :term:`test host` and the
+:term:`embedded system` that runs the :term:`system under test` or is the
+:term:`system under test` is called :term:`target device`.
+
+To enable software developers to write tests that can be run in this complex
+setup measures of communication must be created between the :term:`test host`
+and the :term:`target device`.
 
 .. _intro-solution:
 
@@ -46,7 +61,7 @@ Our Solution: MONK
 
 :term:`MONK` comes in handy here, because it is a framework that abstracts
 communication between two devices. It is intended to be run on the
-:term:`test host` inside :term:`test suites<test suite>` and is able to
+:term:`test host` in :term:`test suites<test suite>` and is able to
 abstract communication channels or full :term:`target devices<target device>`
 into single objects that manage most of the communication for you. You define
 what commands you want to execute remotely and :term:`MONK` takes care of that.
@@ -59,51 +74,51 @@ A *hello world test* with :term:`MONK` and :term:`nose` might look like this::
         """ send an echo and receive a hello
         """
         # set up
-        h = mf.Fixture("target_device_login.cfg")
+        fixture = mf.Fixture("target_device_login.cfg")
         expected_response = "hello"
         send_msg = "echo \"{}\"".format(expected_response)
         # execute
-        response = h.devs[0].cmd(send_msg)
+        response = fixture.devs[0].cmd(send_msg)
         # assert - verify response is as expected
         nt.eq_(expected_response, response)
         # tear down
         h.tear_down()
 
-The code example contains a complete python file that should be executable with
+The code example contains a complete Python file that should be executable with
 the :term:`nose` test tooling. In the first two lines :term:`MONK` and
-:term:`nose` are imported and given shorter names for more convenient access. 
-Then a :term:`test case` is defined. The method's documentation contains a short line
-that explains what the test does. In verbose mode :term:`nose` will use this
-string for a human readable explanation of what is tested. Afterwards there are 
-four steps: set up, execute, assert, and tear down. These are the common four steps
-of a :term:`test case`. 
+:term:`nose` are imported and given shorter names for more convenient access.
+Then a :term:`test case` is defined. The method's documentation contains a
+short line that explains what the test does. In verbose mode :term:`nose` will
+use this string for a human readable explanation of what is tested. Afterwards
+there are four steps: set up, execute, assert, and tear down. These are the
+usual four steps of a :term:`test case`.
 
-In the set up phase a
-:py:class:`~monk_tf.fixture.Fixture` object is created and given the name of a
-file. This file contains the information necessary to communicate with the
-:term:`target device`, e.g., the information to access a serial connection and
-login credentials. An example file will be :ref:`discussed later<intro-cfg>`. 
-The :py:class:`~monk_tf.fixture.Fixture` object will read this file and create 
-:term:`MONK` objects for you based on the configuration. This helps to separate 
-the information necessary to communicate with a :term:`device<target device>` 
-from the information that is important for a :term:`test case`. As you can see 
-in the example it is not necessary to know the login credentials used by the 
-test to understand the test itself.
+In the set up phase a :py:class:`~monk_tf.fixture.Fixture` object is created
+and given the name of a file. This file contains the information necessary to
+communicate with the :term:`target device`, e.g., the information to access a
+serial connection and login credentials. An example file will be
+:ref:`discussed later<intro-cfg>`.  The :py:class:`~monk_tf.fixture.Fixture`
+object will read this file and create :term:`MONK` objects for you based on the
+configuration. This helps to separate the information necessary to communicate
+with a :term:`device<target device>` from the information that is important for
+a :term:`test case`. As you can see in the example it is not necessary to know
+the login credentials used by the test to understand the test itself.
 
 After the set up phase follows the execution phase. In this phase the first
-created device object is used to send a :term:`shell command` to the configured
-:term:`target device`. In this case ``echo "hello"`` is sent and the response
-is stored in a variable. Under the hood the :py:class:`~monk_tf.dev.Device`
-object creates one or more connections to the :term:`target device`, transmits
-the message in the corresponding protocol and collects the response. This is
-the central feature of :term:`MONK`. By just calling one method the whole
-complexity of the interaction gets handled by the framework and the user, in
-this case the :term:`test case`, does not need to be concerned about the
-details and can focus on which commands he wants to send to the
-:term:`target device` and what the results should be. As you can see in the API
-docs of the :py:class:`~monk_tf.dev.Device` class there is also other information
-that can be evaluated afterwards, like the last prompt or the return code of 
-the command executed.
+created device object from the :py:class:`~monk_tf.fixture.Fixture` object is
+used to send a :term:`shell command` to the configured :term:`target device`.
+In this case ``echo "hello"`` is sent and the response is stored in a variable.
+Under the hood the :py:class:`~monk_tf.dev.Device` object creates one or more
+connections to the :term:`target device`, transmits the message in the
+corresponding protocol and collects the response. This is the central feature
+of :term:`MONK`. By just calling one method the whole complexity of the
+interaction gets handled by the framework and the user, in this case the
+:term:`test case`, does not need to be concerned about the details and can
+focus on which commands he wants to send to the :term:`target device` and what
+the results should be. As you can see in the API docs of the
+:py:class:`~monk_tf.dev.Device` class there is also other information that can
+be evaluated afterwards, like the last prompt or the return code of the command
+executed.
 
 The next step in the example is the assert step. In this step all changes that
 happened in the execute step are verified to be as expected. In this case we
@@ -112,11 +127,11 @@ only check that the ``echo`` really printed a ``hello``.
 The last step is the tear down step. In this step everything that was set up
 for this test case is disconnected, removed or set back in its original state.
 High level languages do not usually bother with this step, because the garbage
-collector will take care of deleting all objects that are not needed
-anymore. However, when using :term:`MONK` communication channels to the
-:term:`target device` are connected and it might be wise to explicitly disconnect 
-when the test is finished. In future versions of :term:`MONK` it might
-also be possible that additional tear down steps might be included in the
+collector will take care of deleting all objects that are not needed anymore.
+However, when using :term:`MONK` communication channels to the
+:term:`target device` are connected and it might be wise to explicitly
+disconnect when the test is finished. In future versions of :term:`MONK` it
+might also be possible that additional tear down steps might be included in the
 :term:`fixture files<fixture file>` like shutting down the
 :term:`target device` or deleting test artifacts. Therefore it is suggested to
 always include this line.
@@ -127,7 +142,7 @@ Fixture Files
 -------------
 
 Fixture files are :term:`extended INI` (short Xini) files that contain the
-information needed to create :term:`MONK` objects. In the code example given 
+information needed to create :term:`MONK` objects. In the code example given
 in :ref:`intro-solution` you can see how they can be used together with a
 :py:class:`~monk_tf.fixture.Fixture` object to create everything necessary to
 run your tests on your :term:`target device`. To run this example the
@@ -148,16 +163,16 @@ used for clarity, meaning everything that belongs to an object is
 indented related to its owner, e.g., ``type = Device`` is indented to
 ``[dev1]``, therefore it is an attribute of the object ``[dev1]``. If you blend
 out the indentation you see a format not too different from the normal
-:term:`INI` format you can often see in Python projects. The only difference 
+:term:`INI` format you can often see in Python projects. The only difference
 is that ``serial1`` is surrounded by two pairs of squared braces (``[[]]``),
-indicating that ``serial1`` is not on the same hierarchical level as ``dev1``, 
+indicating that ``serial1`` is not on the same hierarchical level as ``dev1``,
 but is an attribute of ``dev1``. This is also reflected by the indentation.
 
 The example describes two objects, ``dev1`` and ``serial1``. ``dev1`` is the
 main object of this file. The first attribute states that it is of type
 :py:class:`~monk_tf.dev.Device`. The second attribute is ``serial1``, which is
 of type :py:class:`~monk_tf.conn.SerialConnection`. All other attributes belong
-to ``serial1`` and give information used to initialize the 
+to ``serial1`` and give information used to initialize the
 :py:class:`~monk_tf.conn.SerialConnection`.
 
 This is the minimal definition you can use in a :term:`fixture file`: a
@@ -169,8 +184,8 @@ used for tests, and decreases the amount of information a person needs to
 understand when reading a :term:`test case`. Therefore it is adviced to use
 :term:`fixture files<fixture file>` as much as possible.
 
-Sometimes, however, it is not possible. For these cases :term:`MONK` is built 
-in three layers allowing for different trade-offs between abstraction 
+Sometimes, however, it is not possible. For these cases :term:`MONK` is built
+in three layers allowing for different trade-offs between abstraction
 and control. These layers will be explained in the next section.
 
 .. _intro-layers:
@@ -178,17 +193,17 @@ and control. These layers will be explained in the next section.
 The Layers
 ----------
 
-:term:`MONK` is built in three layers, thereby allowing for different trade-offs 
-between abstraction and control. This benefits you, the user, because you can 
-choose the tradeoff that works best for your current task. It is also a helpful 
-idea in developing :term:`MONK`, because layers of higher abstraction
-make use of layers with a smaller degree of abstraction and a higher degree 
-of control. Let's look at some details.
+:term:`MONK` is built in three layers, thereby allowing for different
+trade-offs between abstraction and control. This benefits you, the user,
+because you can choose the tradeoff that works best for your current task. It
+is also a helpful idea in developing :term:`MONK`, because layers of higher
+abstraction make use of layers with a smaller degree of abstraction and a
+higher degree of control. Let's look at some details.
 
 The layer structure follows the logical structure of interaction with a
 :term:`target device`:
 
- * The direct interaction with a :term:`target device` happens via direct 
+ * The direct interaction with a :term:`target device` happens via direct
    access of connections like, e.g., serial connections.
 
  * In a more complex scenario the :term:`target device` is understood as a
@@ -201,7 +216,7 @@ The layer structure follows the logical structure of interaction with a
  * When there are many :term:`test cases<test case>` that contain similar
    :py:class:`~monk_tf.dev.Device` objects it makes sense to describe these
    objects separately in config-like files, the
-   :term:`fixture files<fixture file>`. 
+   :term:`fixture files<fixture file>`.
    :py:class:`~monk_tf.fixture.Fixture` objects read external
    :term:`fixture files<fixture file>` and contain references to
    :py:class:`~monk_tf.dev.Device` objects. The user does not create
@@ -217,10 +232,10 @@ This is represented by the following layers:
    framework.
 
  * :py:mod:`monk_tf.dev` - The device layer handles connections directly.
-   Connections can be added, removed, and changed in order. How connections
-   are handled to transfer commands to the :term:`target device` is handled by
-   the devices, though. Therefore this layer allows a balanced trade-off between
-   abstraction and control.
+   Connections can be added, removed, or get another position in the object
+   sequence. How connections are handled to transfer commands to the
+   :term:`target device` is handled by the devices, though. Therefore this
+   layer allows a balanced trade-off between abstraction and control.
 
  * :py:mod:`monk_tf.fixture` - The fixture layer is the highest level of
    abstraction, with nearly no need to name details explicitly. The user can
@@ -255,7 +270,7 @@ MONK in a ``virtualenv``. You can check whether installation was completed
 successfully the following way::
 
     $ python
-    Python 2.7.3 (default, Aug  1 2012, 05:14:39) 
+    Python 2.7.3 (default, Aug  1 2012, 05:14:39)
     [GCC 4.6.3] on linux2
     Type "help", "copyright", "credits" or "license" for more information.
     >>> import monk_tf.dev as md
@@ -268,25 +283,24 @@ If you also want to run unit tests for MONK you might want to read the
 Side Note: Working With Different MONK Versions
 -----------------------------------------------
 
-When using :term:`MONK` you might encounter the situation that updating to a 
+When using :term:`MONK` you might encounter the situation that updating to a
 newer version of :term:`MONK` will require a lot of changes in your
 :term:`test cases<test case>`. This might make you believe you
 have to choose between using a newer version of :term:`MONK` for its features
 or using an older version of :term:`MONK` to keep the maintenance costs low. We
 also faced this problem at :term:`DFE`, therefore we developed a small helper
-script that allows you to do both. If you already work well with
+script that allows you to do both. If you already have experience in using
 :term:`virtualenvs<virtualenv>` then you will have not much of a trouble.
 
-The basic idea is that for each set of requirements (contain a specific
-:term:`MONK` version) you create a separate suite. Thus if you have tests for
-``monk_tf==0.1.1`` you keep all these tests in one suite. If you are starting
-to write new tests now, you will probably write them for ``monk_tf==0.1.4``.
-Therefore your new tests go into a new suite. If you decide that you need
-to do some work on an older :term:`test case` that worked with
-``monk_tf==0.1.1``, you can choose to leave it in the old suite or make the
-required changes and move it to your new suite. If one day ``monK_tf==0.1.5``
-is released, you create a new suite, that contains all tests that work with
-this version.
+The basic idea is that for each set of requirements you create a separate
+suite. Thus if you have tests for ``monk_tf==0.1.1`` you keep all these tests
+in one suite. If you are starting to write new tests now, you will probably
+write them for ``monk_tf==0.1.4``.  Therefore your new tests go into a new
+suite. If you decide that you need to do some work on an older
+:term:`test case` that worked with ``monk_tf==0.1.1``, you can choose to leave
+it in the old suite or make the required changes and move it to your new suite.
+If one day ``monK_tf==0.1.5`` is released, you create a new suite, that
+contains all tests that work with this version.
 
-If you want to make use of this little helper, then have a look at 
+If you want to make use of this little helper, then have a look at
 `multisuite <https://pypi.python.org/pypi/multisuite/>`_.

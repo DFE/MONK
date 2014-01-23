@@ -40,10 +40,10 @@ A hello world test with it looks like this::
 
 When using this layer setting up a device only takes one line of code. The rest
 of the information is in the ``target_device.cfg`` file. Although this data
-file can have any format you want, :term:`MONK` currently only comes with one text
-format parser predefined, which is the :py:class:`~monk_tf.fixture.XiniParser`.
-``Xini`` is short for :term:`extended INI`. An example data file might look
-like this::
+file can have any format you want, :term:`MONK` currently only comes with one
+text format parser predefined, which is the
+:py:class:`~monk_tf.fixture.XiniParser`.  ``Xini`` is short for
+:term:`extended INI`. An example data file might look like this::
 
     [device1]
         type=Device
@@ -53,15 +53,15 @@ like this::
             user=example
             password=secret
 
-As you can see it looks like an :term:`INI` file. There are sections, consisting
-of a title enclosed in squared brackets (``[]``) and lists of properties,
-consisting of key-value pairs separated by equality signs (``=``). The unusual part 
-is that the section *serial1* is surrounded by two pairs of squared brackets
-(``[]``). This is the specialty of this format indicating that *serial1*
-is a subsection of *device1* and therefore is a nested section. This nesting
-can be done unlimited, by surrounding a section with more and more pairs of
-squared brackets (``[]``) according to the level of nesting intended.
-In this example *serial1* belongs to *device1* and the types indicate the 
+As you can see it looks like an :term:`INI` file. There are sections,
+consisting of a title enclosed in squared brackets (``[]``) and lists of
+properties, consisting of key-value pairs separated by equality signs (``=``).
+The unusual part is that the section *serial1* is surrounded by two pairs of
+squared brackets (``[]``). This is the specialty of this format indicating that
+*serial1* is a subsection of *device1* and therefore is a nested section. This
+nesting can be done unlimited, by surrounding a section with more and more
+pairs of squared brackets (``[]``) according to the level of nesting intended.
+In this example *serial1* belongs to *device1* and the types indicate the
 corresponding :term:`MONK` object to be created.
 
 Classes
@@ -124,7 +124,7 @@ class AParser(dict):
     that is needed by :py:class:`~monk_tf.fixture.Fixture` to interact with the
     data that is parsed. Each child class should make sure that it always
     provides its parsed data like a :py:class:`dict` would. If you require your
-    own parser, you can extend this. :py:class:`~monk_tf.fixture.XiniParser` 
+    own parser, you can extend this. :py:class:`~monk_tf.fixture.XiniParser`
     provides a very basic example.
     """
     pass
@@ -156,14 +156,17 @@ class Fixture(object):
     """ Creates :term:`MONK` objects based on dictionary like objects.
 
     This is the class that provides the fundamental feature of this layer. It
-    reads data files by trying to parse them via its list of known parsers
-    and if it succeeds, it creates :term:`MONK` objects based on the
-    configuration given by the data file. Most likely these objects are one or
-    more :py:class:`~monk_tf.dev.Device` objects that have at least one
+    reads data files by trying to parse them via its list of known parsers and
+    if it succeeds, it creates :term:`MONK` objects based on the configuration
+    given by the data file. Most likely these objects are one or more
+    :py:class:`~monk_tf.dev.Device` objects that have at least one
     :py:class:`~monk_tf.conn.AConnection` object each. If more than one
     :term:`fixture file` is read containing the same name on the highest level,
     then the latest data gets used. This does not work on lower levels of
-    nesting, though.
+    nesting, though. If you attempt to overwrite lower levels of nesting, what
+    actually happens is that the highest layer gets overwritten and you lose
+    the data that was stored in the older objects. This is simply how
+    :py:meth:`set.update` works.
 
     One source of data (either a file name or a child class of
     :py:class:`~monk_tf.fixture.AParser`) can be given to an object of this
@@ -173,7 +176,7 @@ class Fixture(object):
 
         import monk_tf.fixture as mf
 
-        h = mf.Fixture('/etc/monk_tf/default_devices.cfg')
+        fixture = mf.Fixture('/etc/monk_tf/default_devices.cfg')
                 .read('~/.monk/default_devices.cfg')
                 # can also be a parser object
                 .read(XiniParser('~/testsuite12345/suite_devices.cfg'))

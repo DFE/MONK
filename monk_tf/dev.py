@@ -14,7 +14,7 @@
 """ Device Layer
 
 This layer abstracts a complete :term:`target device` in a single object, which
-can be interacted with without worrying about how the actual communication is 
+can be interacted with without worrying about how the actual communication is
 handled.
 
 To use this module create a :py:class:`~monk_tf.dev.Device` class.
@@ -40,7 +40,7 @@ class DeviceException(Exception):
     pass
 
 class CantHandleException(DeviceException):
-    """ 
+    """
     is raised when a request cannot be handled by the connections of a
     :py:class:`~monk_tf.dev.Device`.
     """
@@ -87,10 +87,11 @@ class Device(object):
             except conn.ConnectionException as excpt:
                 self._logger.exception(excpt)
         # no connection was able to get to the return statement
-        raise CantHandleException("dev:'{}',conns:'{}':could not send cmd '{}'".format(
-            self.name,
-            map(str, self.conns),
-            msg,
+        raise CantHandleException(
+                "dev:'{}',conns:'{}':could not send cmd '{}'".format(
+                    self.name,
+                    map(str, self.conns),
+                    msg,
         ))
 
     def __del__(self):
