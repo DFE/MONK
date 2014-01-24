@@ -208,7 +208,7 @@ class AConnection(object):
     def connect(self):
         """ Initiate connection with :term:`target device`.
 
-        :return: Depends on the specific connection. Might be None.
+        :return: what the connection implemented. May be None.
         """
         self._logger.info("connecting...")
         try:
@@ -223,10 +223,11 @@ class AConnection(object):
     def login(self):
         """ Authenticate to :term:`target device`.
 
-        It uses a tupel of ``(user, password)`` that is expected to be found in an
-        attribute ``credentials``.
+        It uses a tupel of ``(user, password)`` that is expected to be found in
+        an attribute ``credentials``. If there are no ``credentials`` then it
+        is assumed that a login is not necessary and nothing happens.
 
-        :return: Depends on the specific connection. May be None.
+        :return: what the connection implemented. May be None.
         """
         self._logger.info("authenticating...")
         try:
@@ -243,7 +244,7 @@ class AConnection(object):
 
         :param msg: the :term:`shell command`
 
-        :return: Depends on the specific connection. May be None.
+        :return: what the connection implemented. May be None.
         """
         self._logger.info("sending cmd '{}'".format(msg))
         try:
@@ -258,7 +259,7 @@ class AConnection(object):
     def disconnect(self):
         """ Deactivate the connection to :term:`target device`.
 
-        :return: Depends on the specific connection. May be None.
+        :return: what the connection implemented. May be None.
         """
         self._logger.info("logging out...")
         try:
@@ -396,8 +397,13 @@ class SerialConnection(AConnection):
         :py:attr:`last_out`.
 
         :param msg: the :term:`shell command` to be executed remotely.
-        :param returncode: whether a return code should be evaluated or not
-        :param expected_output: is an output expected?
+
+        :param returncode: want a returncode? otherwise non is requested from
+                           :term:`target device`
+
+        :param expected_output: is an output expected? True might result in an
+                                :py:class:`~monk_tf.conn.EmptyResponseException`
+
         :return: the standard output from the command execution
         """
         stripped = msg.strip()
@@ -489,8 +495,7 @@ class Disconnected(AState):
         """ Initiate connection with :term:`target device`.
 
         :param connection: the connection that uses this state
-        :return: depends on what the connection's protected :py:meth:`_connect`
-                 method returns. May be None.
+        :return: what the connection implemented. May be None.
         """
         self.event = self._CONNECT
         connection._logger.debug("execute event '{}' in state '{}'".format(
@@ -605,7 +610,7 @@ class Connected(AState):
         """ Deactivates the connection.
 
         :param connection: the connection that uses this state.
-        :return: the disconnection result. May be None.
+        :return: the disconnection result from the connection. May be None.
         """
         self.event = self._DISCONNECT
         connection._logger.debug("execute event '{}' in state '{}'".format(
@@ -678,7 +683,7 @@ class Authenticated(AState):
         """ Closes the connection.
 
         :param connection: the connection that uses this state.
-        :return: the disconnection result. May be None.
+        :return: the disconnect result from the connection. May be None.
         """
         self.event = self._DISCONNECT
         connection._logger.debug("execute event '{}' in state '{}'".format(

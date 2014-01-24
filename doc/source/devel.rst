@@ -25,7 +25,7 @@ ways:
     to see old conversations.
 
  #. **The Bug Tracker**: If you have encountered a specific problem you want
-    to work on, you can create an Issue `here`_. It is also possible to
+    to work on, you can create an issue `here`_. It is also possible to
     work via GitHub pull requests.
 
  #. **The Stammtisch Meeting**: If you happen to be in Berlin on any Tuesday
@@ -47,7 +47,7 @@ work might turn out to be a waste of time.
 
 If you have write access to the repository (which is only supposed to happen if
 you are a regular member of `the DFE group`_), you should simply fork, create
-an Issue and track your changes in a feature branch.
+an issue and track your changes in a feature branch.
 
 If you do not have write access, you will have to use pull requests. Remember
 that a feature branch will automatically be generated for your pull
@@ -70,7 +70,7 @@ Step-by-step guide:
     These people should be mentioned within your commit message, as
     described later.
 
- #. **Get it merged**: If you have a pull request or Issue containing your
+ #. **Get it merged**: If you have a pull request or issue containing your
     problem, your solution, and the commits containing at least one Acked-By,
     get one of the maintainers to merge it.
 
@@ -111,10 +111,10 @@ Acceptance Criteria For The Dev Branch
 creators and at least one reviewer. To continually ensure good quality of the
 code, some requirements must be met for a commit to be allowed into ``dev``:
 
- * All commits refer to an Issue on `GitHub`_.
- * The Issue contains an understandable description of the problem that enables
+ * All commits refer to an issue on `GitHub`_.
+ * The issue contains an understandable description of the problem that enables
    reproduction, if necessesary.
- * The Issue contains an understandable and assessable description of the
+ * The issue contains an understandable and assessable description of the
    solution.
  * All code changes are well documented, formatted according to the coding
    standards, and follow high quality standards even in areas that are not
@@ -127,7 +127,7 @@ code, some requirements must be met for a commit to be allowed into ``dev``:
    complete implementation.
 
 These requirements can be overruled only by 100% acceptance of all developers,
-reviewers, and both maintainers for a single Issue, if considered necessary.
+reviewers, and both maintainers for a single issue, if considered necessary.
 
 Changes to this list of rules can only be achieved by acceptance at the
 Stammtisch Meeting.
@@ -162,8 +162,8 @@ All commits are are expected to adhere to the following requirements:
    characters per line, except for longer URLs, quotations or messages that
    would be unintelligible in some other way when split.
 
- * **Refer to an Issue on GitHub**: If you have not done so already within
-   the description, this would be a good place to specify which Issue on
+ * **Refer to an issue on GitHub**: If you have not done so already within
+   the description, this would be a good place to specify which issue on
    GitHub your commit belongs to.
 
  * **Signed-off-bys**: After the long description all developers involved in
@@ -186,7 +186,7 @@ Finally, a complete example doing everything right::
 
     The bug was fixed by changing `>0` to `>=0`.
 
-    For more details see GitHub Issue #312.
+    For more details see GitHub issue #312.
 
     Signed-off-by: Peter Parker <parker@dresearch-fe.de>
     Acked-by: Bruce Wayne <wayne@dresearch-fe.de>
@@ -205,7 +205,7 @@ Finally, a complete example doing everything right::
 .. _Travis CI: https://travis-ci.org/DFE/MONK
 .. _Sphinx: http://sphinx-doc.org/
 .. _the corresponding Github page: https://github.com/DFE/MONK/blob/dev/doc/source/contributing.rst
-.. _Devenv Issue: https://github.com/DFE/MONK/issues/36
+.. _devenv issue: https://github.com/DFE/MONK/issues/36
 .. _tut comment: https://github.com/DFE/MONK/issues/36#issuecomment-18195272
 .. _the archives: https://groups.google.com/a/dresearch-fe.de/forum/?fromgroups#!forum/project-monk
 .. _here: https://github.com/DFE/MONK/issues

@@ -15,7 +15,7 @@ can not help you. In this case you can do the following:
     meaning you might find something there, that has not been addressed in
     :term:`MONK` yet. Place a comment in the code explaining why you were not
     able to follow :term:`MONK's<MONK>` style guide. If possible, create an
-    `Issue`_ and try to get the style guide changed accordingly.
+    `issue`_ and try to get the style guide changed accordingly.
 
  #. Discuss with other developers whether there might be a way that you are not
     aware of.
@@ -296,7 +296,7 @@ You've read it all. I'm so proud of you!
 .. references
 
 .. _PEP-008: http://www.python.org/dev/peps/pep-0008
-.. _Issue: https://github.com/DFE/MONK/issues/new
+.. _issue: https://github.com/DFE/MONK/issues/new
 .. _79 characters: https://jamiecurle.co.uk/blog/79-characters-or-less/
 .. _docstring: http://www.python.org/dev/peps/pep-0257/#what-is-a-docstring
 .. _Sphinx: http://sphinx-doc.org/
