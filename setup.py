@@ -47,7 +47,7 @@ setup(
         "{} ({})".format(monk_tf.__title__, monk_tf.__version__)
     ],
     test_suite = "nose.collector",
-    classifiers=(
+    classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Other Environment",
         "Intended Audience :: Developers",
@@ -62,5 +62,5 @@ setup(
         "Topic :: Software Development",
         "Topic :: Software Development :: Testing",
         "Topic :: Terminals :: Serial",
-    ),
+    ],
 )
