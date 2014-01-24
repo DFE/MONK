@@ -1,5 +1,5 @@
-Release 0.1.4
-=============
+Release 0.1.4 (2014-01-24)
+==========================
 
  * fixed some urgent bugs
  * renamed harness to fixture
