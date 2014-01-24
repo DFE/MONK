@@ -19,7 +19,9 @@
 #
 
 """
-This is the package overview of :term:`MONK`.
+This is the package overview of :term:`MONK`. If anything is unclear, you might
+have a look into :ref:`chap-intro`.
 
-The following texts describe the three layers:
+The following texts describe the three layers that were explained in
+:ref:`intro-layers`:
 """

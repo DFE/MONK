@@ -11,12 +11,12 @@
 # 3 of the License, or (at your option) any later version.
 #
 
-""" Connection Layer
+"""
 
 This module implements the lowest layer of interaction with a
-:term:`target device`. This means that you can use this module to create
-:py:class:`~monk_tf.conn.AConnection` objects, interact with them,
-and manipulate their internal states.
+:term:`target device`, the connection layer. This means that you can use this
+module to create :py:class:`~monk_tf.conn.AConnection` objects, interact with
+them, and manipulate their internal states.
 
 States are implemented based on the State design pattern via
 :py:class:`~monk_tf.conn.AState`. Connection objects hold a
@@ -26,19 +26,52 @@ to its :py:attr:`~monk_tf.conn.AConnection.current_state`, which will
 then execute the method depending on what the task of the state is.
 
 As an Example, let's take a :py:class:`~monk_tf.conn.SerialConnection`. If you
-execute its :py:meth:`~monk_tf.conn.SerialConnection.connect` method, the
-connection will delegate this task to its
+execute its :py:meth:`~monk_tf.conn.AConnection.connect` method, the connection
+will delegate this task to its
 :py:attr:`~monk_tf.conn.AConnection.current_state` which is probably a
-:py:class:`~monk_tf.conn.Disconnected` object. Each State object also has a
-:py:meth:`~monk_tf.conn.Disconnected.connect` method. In it there might be some
-checks (not in this case, though) and then it will redirect the task to a
-private method of :py:class:`~monk_tf.conn.SerialConnection`, in this case
+:py:class:`~monk_tf.conn.Disconnected` object but might be any other state as
+well. Each State object also has a method for each public
+:py:class:`~monk_tf.conn.AConnection` method, e.g.,
+:py:meth:`~monk_tf.conn.Disconnected.connect`, which makes it clear which
+:py:class:`~monk_tf.conn.AState` method will be called from the
+:py:class:`~monk_tf.conn.AConnection`. In this
+:py:class:`~monk_tf.conn.AConnection` method there might be some checks (not in
+this case, though) and then it will redirect the task to a private method of
+:py:class:`~monk_tf.conn.SerialConnection`, in this case
 :py:meth:`~monk_tf.conn.SerialConnection._connect`. Because this private method
 expects that all checks are done it will attempt to initiate the connection.
 
-This does not seem complicated, it actually is. The reason is that the State
-design pattern was applied here. If it is necessary to understand this better,
-please refer to this design pattern.
+This does not just seem complicated, it actually is. The reason is that the
+State design pattern was applied here. To wrap your head around the idea might
+be complicated at first but it also comes with great payoff. For example, when
+you write a new child class of :py:class:`~monk_tf.conn.AConnection` you
+overwrite the methods :py:meth:`~monk_tf.conn.AConnection._connect`,
+:py:meth:`~monk_tf.conn.AConnection._login`,
+:py:meth:`~monk_tf.conn.AConnection._cmd`,
+:py:meth:`~monk_tf.conn.AConnection._disconnect` to show how your connection
+handles the different events. Because the State design pattern was chonsen you
+do not have to worry about checking if the connection is really ready for what
+you want to do in this event, e.g., in
+:py:meth:`~monk_tf.conn.AConnection._cmd` you do not need to worry if you are
+already connected or not, because this is already asserted by
+:py:class:`~monk_tf.conn.AConnection` and the State design pattern. You can
+expect to have a direct connection to the :term:`target device` and can start
+writing the code that is necessary to send a :term:`shell command` to the
+device.
+
+Something else that might be confusing about this layer is that many methds
+have undefined return behaviour. This is a disadvantage and a feature of Python
+at the same time, because in Python there is no way to ensure that a method
+only returns some specific type or result. Here we use it as a feature, because
+from the private methods like :py:meth:`~monk_tf.conn.AConnection._login` that
+you write into individual :py:class:`~monk_tf.conn.AConnection` child classes,
+you can be sure that your return results get deliverd to the publicly called
+:py:meth:`~monk_tf.conn.AConnection.login`. And because Python does not force
+us to define a specific return result you can choose in your private methods if
+you want to return something and if so what it might be. In
+:py:class:`~monk_tf.conn.SerialConnection` we decided to not return anything.
+Therefore anybody who might decide to check what gets returned basically just
+reads``None`` as the result and that is fine.
 
 The code of this module is split into the following parts:
     1. *Exceptions* - all exceptions that are used in this module
