@@ -27,7 +27,7 @@ The following texts describe the three layers that were explained in
 """
 
 __title__ = "monk_tf"
-__version__ = "0.1.4a5"
+__version__ = "0.1.4"
 __author__ = "DResearch Fahrzeugelektronik GmbH"
 __license__ = "GPLv3+"
 __copyright__ = "Copyright 2012, 2013, 2014 DResearch Fahrzeugelektronik GmbH"
