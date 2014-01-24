@@ -25,3 +25,9 @@ have a look into :ref:`chap-intro`.
 The following texts describe the three layers that were explained in
 :ref:`intro-layers`:
 """
+
+__title__ = "monk_tf"
+__version__ = "0.1.4a5"
+__author__ = "DResearch Fahrzeugelektronik GmbH"
+__license__ = "GPLv3+"
+__copyright__ = "Copyright 2012, 2013, 2014 DResearch Fahrzeugelektronik GmbH"
