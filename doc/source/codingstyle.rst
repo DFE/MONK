@@ -222,8 +222,9 @@ these requirements when writing a comment:
         """
 
  * Texts in comments are parsable by the `Sphinx`_ documentation generator.
-   This **is** a complicated issue, so do not expect to find a 1 minute solution
-   here! Seriously, start reading the Sphinx website, if you need to write more
+   This can be a complicated issue, so if you encounter any problems,
+   do not expect to find a 1 minute solution here! Seriously, start reading
+   the Sphinx website, if you need to write more
    than one or two lines of documentation!
  * Single line comments begin with a hash (``#``) character.
  * Multiline comments, including `docstring`_, adhere to the following rules:

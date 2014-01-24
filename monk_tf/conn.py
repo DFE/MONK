@@ -47,25 +47,25 @@ be complicated at first but it also comes with great payoff. For example, when
 you write a new child class of :py:class:`~monk_tf.conn.AConnection` you
 overwrite the methods :py:meth:`~monk_tf.conn.AConnection._connect`,
 :py:meth:`~monk_tf.conn.AConnection._login`,
-:py:meth:`~monk_tf.conn.AConnection._cmd`,
+:py:meth:`~monk_tf.conn.AConnection._cmd`, and
 :py:meth:`~monk_tf.conn.AConnection._disconnect` to show how your connection
-handles the different events. Because the State design pattern was chonsen you
+handles the different events. Because the State design pattern was chosen you
 do not have to worry about checking if the connection is really ready for what
 you want to do in this event, e.g., in
 :py:meth:`~monk_tf.conn.AConnection._cmd` you do not need to worry if you are
-already connected or not, because this is already asserted by
+already connected or not, because this has already been asserted by
 :py:class:`~monk_tf.conn.AConnection` and the State design pattern. You can
 expect to have a direct connection to the :term:`target device` and can start
 writing the code that is necessary to send a :term:`shell command` to the
 device.
 
-Something else that might be confusing about this layer is that many methds
+Something else that might be confusing about this layer is that many methods
 have undefined return behaviour. This is a disadvantage and a feature of Python
 at the same time, because in Python there is no way to ensure that a method
 only returns some specific type or result. Here we use it as a feature, because
-from the private methods like :py:meth:`~monk_tf.conn.AConnection._login` that
-you write into individual :py:class:`~monk_tf.conn.AConnection` child classes,
-you can be sure that your return results get deliverd to the publicly called
+from private methods like :py:meth:`~monk_tf.conn.AConnection._login` that
+you implement in individual :py:class:`~monk_tf.conn.AConnection` child classes,
+you can be sure that your return results get delivered to the publicly called
 :py:meth:`~monk_tf.conn.AConnection.login`. And because Python does not force
 us to define a specific return result you can choose in your private methods if
 you want to return something and if so what it might be. In
@@ -82,7 +82,7 @@ The code of this module is split into the following parts:
        your test cases
     4. *Real Connections* - the real connections that connect MONK to a
        :term:`target device`
-    5. *AState* - the abstract State class which all other states are based on.
+    5. *AState* - the abstract State class which all other states are based on
     6. *State Classes* - the implementation of the state machine
 
 """

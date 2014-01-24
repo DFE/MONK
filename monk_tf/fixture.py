@@ -39,11 +39,13 @@ A hello world test with it looks like this::
         h.tear_down()
 
 When using this layer setting up a device only takes one line of code. The rest
-of the information is in the ``target_device.cfg`` file. Although this data
-file can have any format you want, :term:`MONK` currently only comes with one
-text format parser predefined, which is the
-:py:class:`~monk_tf.fixture.XiniParser`.  ``Xini`` is short for
-:term:`extended INI`. An example data file might look like this::
+of the information is in the ``target_device.cfg`` file. :term:`MONK` currently 
+comes with one text format parser predefined, which is the
+:py:class:`~monk_tf.fixture.XiniParser`. ``Xini`` is short for
+:term:`extended INI`. You may, however, use any data format you want, if you
+extend the :py:class:`~monk_tf.fixture.AParser` class accordingly.
+
+An example ``Xini`` data file might look like this::
 
     [device1]
         type=Device

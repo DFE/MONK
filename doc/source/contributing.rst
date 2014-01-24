@@ -50,7 +50,8 @@ that works without an error message::
     >>> exit()
 
 If it worked, then you already have Python and are ready to go. If not, you
-might find information on how to get it on `the Python website`_.
+might be able to install it via your system's packet manager or find information
+on how to get it on `the Python website`_.
 
 Another requirement is the version control system used for :term:`MONK`. It is
 called **git** and you can find a lot of information about it in the
@@ -68,8 +69,9 @@ resources to get them. On Ubuntu 13.04 you can do the following::
 
     $ sudo apt-get install python-dev libssh-2-1-dev
 
-You will also need a Python tool, that helps with generalizing
-development environments. It is called :term:`virtualenv`. If your operating
+You will also need a Python tool, that helps with maintaining multiple
+development environments with different configurations. It is called 
+:term:`virtualenv`. If your operating
 system does not come with a prebuilt :term:`virtualenv`, you can follow the
 `virtualenv Installation Guide`_.
 
@@ -324,7 +326,7 @@ When finished, do not forget to deactivate your :term:`virtualenv`::
 Contribution Example: Creation Of This Tutorial
 -----------------------------------------------
 
-This torial is a contribution like the ones we were discribing to make until
+This tutorial is a contribution like the ones we were describing to make until
 now. Therefore as a last step we will use this contribution as an example. This
 section is of course only for reading because the contribution was already done
 in the past.
@@ -427,8 +429,9 @@ them::
 Then a maintainer will close the issue and merge the feature branch with the
 ``dev`` branch, thereby solving the issue.
 
-As you might have noticed, the last steps were explained more broadly. They
-require a deeper understanding of git and by that point, a :term:`MONK`
+As you might have noticed, the last steps were explained in less detail than
+the previous ones. They require a deeper understanding of git which is beyond
+the scope of this documentation. By that point, a :term:`MONK`
 developer will probably already help you, anyway.
 
 .. _contrib-final:

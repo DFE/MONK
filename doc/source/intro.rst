@@ -19,8 +19,9 @@ What Is The Problem?
 This framework is intended for developers of
 :term:`embedded systems<embedded system>` like ourselves. We found that testing
 our systems manually via serial shell or ssh was not very convenient in the
-long run, because for new products the tests needed to be repeated again and
-again. We were also aware that many :term:`open source` projects use
+long run because tests needed to be repeated again and again during routine 
+software development, even more so when introducing entirely new products. We 
+were also aware that many :term:`open source` projects use
 :term:`unit tests<unit test>` for writing :term:`test suites<test suite>` for
 their :term:`regression tests<regression test>`.  These tests are written in
 test methods or functions that can be executed by tools like :term:`nose` to
@@ -29,26 +30,26 @@ have failed.
 
 However, writing :term:`unit tests<unit test>` for testing
 :term:`embedded systems<embedded system>` directly is not so easy. The reason
-is, that the :term:`system under test` can not be accessed directly. It is on
+is, that the :term:`system under test` cannot be accessed directly. It is on
 the :term:`embedded system`, while the test itself is executed on a test server
 in a :term:`Jenkins` job. This test server is called :term:`test host`.
 
-It would not make sense to run the :term:`system under test` on the
-:term:`test host`, because it will be executed on the :term:`embedded system`
-in the end. Therefore test success can only be determined on the
+It is not feasible to run the :term:`system under test` on the
+:term:`test host`, because in the end it will be executed on the 
+:term:`embedded system`. Therefore test success can only be determined on the
 :term:`embedded system`.
 
 It would also not make sense to run the :term:`test case` directly on the
 :term:`embedded system` because then test and :term:`system under test` could
 influence each other. Test results must also be accumulated and stored for
-future reviews. But a terror on the :term:`embedded system` might result in a
+future reviews. But an error on the :term:`embedded system` might result in a
 state where files get deleted or cannot be retreived for other reasons.
 
 Therefore a separation of test environment and :term:`system under test` is not
 avoidable in :term:`embedded system` development. For future reference the
 computer that runs the tests will be called :term:`test host` and the
-:term:`embedded system` that runs the :term:`system under test` or is the
-:term:`system under test` is called :term:`target device`.
+:term:`embedded system` that is the :term:`system under test` is called 
+:term:`target device`.
 
 To enable software developers to write tests that can be run in this complex
 setup measures of communication must be created between the :term:`test host`
@@ -60,12 +61,12 @@ Our Solution: MONK
 ------------------
 
 :term:`MONK` comes in handy here, because it is a framework that abstracts
-communication between two devices. It is intended to be run on the
-:term:`test host` in :term:`test suites<test suite>` and is able to
-abstract communication channels or full :term:`target devices<target device>`
-into single objects that manage most of the communication for you. You define
-what commands you want to execute remotely and :term:`MONK` takes care of that.
-A *hello world test* with :term:`MONK` and :term:`nose` might look like this::
+communication between two devices by creating single objects that manage
+most of the communication for you. It is intended to be run on the
+:term:`test host` from within :term:`test suites<test suite>`. 
+You define what commands you want to execute remotely and :term:`MONK` 
+takes care of that. A *hello world test* with :term:`MONK` and :term:`nose` 
+might look like this::
 
     import nose.tools as nt
     import monk_tf.fixture as mf
@@ -98,22 +99,25 @@ and given the name of a file. This file contains the information necessary to
 communicate with the :term:`target device`, e.g., the information to access a
 serial connection and login credentials. An example file will be
 :ref:`discussed later<intro-cfg>`.  The :py:class:`~monk_tf.fixture.Fixture`
-object will read this file and create :term:`MONK` objects for you based on the
+object will read this file and create :term:`MONK` objects (e.g. devices, 
+communication channels) for you based on the
 configuration. This helps to separate the information necessary to communicate
 with a :term:`device<target device>` from the information that is important for
 a :term:`test case`. As you can see in the example it is not necessary to know
 the login credentials used by the test to understand the test itself.
+Additionally, two variables are initialized with the command that will be sent
+and the response that is expected.
 
-After the set up phase follows the execution phase. In this phase the first
-created device object from the :py:class:`~monk_tf.fixture.Fixture` object is
+After the set up phase follows the execution phase. In this phase device object 
+created by the :py:class:`~monk_tf.fixture.Fixture` object is
 used to send a :term:`shell command` to the configured :term:`target device`.
 In this case ``echo "hello"`` is sent and the response is stored in a variable.
 Under the hood the :py:class:`~monk_tf.dev.Device` object creates one or more
 connections to the :term:`target device`, transmits the message in the
 corresponding protocol and collects the response. This is the central feature
 of :term:`MONK`. By just calling one method the whole complexity of the
-interaction gets handled by the framework and the user, in this case the
-:term:`test case`, does not need to be concerned about the details and can
+interaction gets handled by the framework and the user does not need to be 
+concerned about the details and can
 focus on which commands he wants to send to the :term:`target device` and what
 the results should be. As you can see in the API docs of the
 :py:class:`~monk_tf.dev.Device` class there is also other information that can
@@ -232,7 +236,7 @@ This is represented by the following layers:
    framework.
 
  * :py:mod:`monk_tf.dev` - The device layer handles connections directly.
-   Connections can be added, removed, or get another position in the object
+   Connections can be added, removed, or assigned another position in the object
    sequence. How connections are handled to transfer commands to the
    :term:`target device` is handled by the devices, though. Therefore this
    layer allows a balanced trade-off between abstraction and control.
@@ -290,7 +294,7 @@ have to choose between using a newer version of :term:`MONK` for its features
 or using an older version of :term:`MONK` to keep the maintenance costs low. We
 also faced this problem at :term:`DFE`, therefore we developed a small helper
 script that allows you to do both. If you already have experience in using
-:term:`virtualenvs<virtualenv>` then you will have not much of a trouble.
+:term:`virtualenvs<virtualenv>` then you should not encounter any difficulties.
 
 The basic idea is that for each set of requirements you create a separate
 suite. Thus if you have tests for ``monk_tf==0.1.1`` you keep all these tests

@@ -71,7 +71,7 @@ Step-by-step guide:
     described later.
 
  #. **Get it merged**: If you have a pull request or Issue containing your
-    problem, your solution, and the commits containing the two Acked-Bys,
+    problem, your solution, and the commits containing at least one Acked-By,
     get one of the maintainers to merge it.
 
 If you need to change anything on your commits, e.g., to add some ``Acked-by``
