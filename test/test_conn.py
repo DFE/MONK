@@ -5,8 +5,7 @@
 # Copyright (C) 2013 DResearch Fahrzeugelektronik GmbH
 # Written and maintained by MONK Developers <project-monk@dresearch-fe.de>
 #
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
+# This program is free software; you can redistribute it and/or # modify it under the terms of the GNU General Public License
 # as published by the Free Software Foundation; either version
 # 3 of the License, or (at your option) any later version.
 #
@@ -71,6 +70,51 @@ def test_wrong_state():
     # execute
     sut.cmd("")
     # finished, because cmd should raise exception
+
+def test_cmd_returncode():
+    """ conn: test connections can handle additional parameters
+    """
+    # set up
+    sut = conn.EchoConnection()
+    sut2 = conn.DefectiveConnection()
+    # execute + assert (raises Error if params can't be parsed)
+    sut._cmd("hello", returncode=True, expected_output=True)
+    try:
+        sut2._cmd("hello", returncode=True, expected_output=True)
+    except conn.MockConnectionException as e:
+        pass
+
+def test_connected_login():
+    """ conn: connection's _login is not called if already logged in
+    """
+    # set up
+    sut = MockConnection(start_state=conn.Connected())
+    # execute
+    sut.login()
+    sut.login()
+    sut.login()
+    # assert
+    nt.ok_("_login" not in sut.calls)
+
+class MockConnection(conn.AConnection):
+
+    def __init__(self, *args, **kwargs):
+        self.calls = []
+        self.logged_in = kwargs.pop("logged_in", False)
+        super(MockConnection, self).__init__(*args, **kwargs)
+
+    def _connect(self):
+        self.calls.add("_connect")
+
+    def _login(self):
+        self.calls.add("_login")
+        self.logged_in = True
+
+    def _cmd(self, *args, **kwargs):
+        self.calls.add("_cmd")
+
+    def _disconnect(self):
+        self.calls.add("_disconnect")
 
 class MockState(conn.AState):
     calls = []

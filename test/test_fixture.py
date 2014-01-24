@@ -19,17 +19,17 @@ from nose import tools as nt
 
 from monk_tf import dev
 from monk_tf import conn
-from monk_tf import harness
+from monk_tf import fixture
 
 logger = logging.getLogger(__name__)
 here = dirname(abspath(inspect.getfile(inspect.currentframe())))
 
 def test_simple_xiniparser():
-    """ harness: use Xiniparser directly to create simple device
+    """ fixture: use Xiniparser directly to create simple device
     """
     # set up
-    sut = harness.Harness()
-    props = harness.XiniParser(here + "/example_harness.cfg")
+    sut = fixture.Fixture()
+    props = fixture.XiniParser(here + "/example_fixture.cfg")
     expected_dev = dev.Device(conn.SerialConnection(
         name="serial1",
         port="/dev/ttyUSB0",
@@ -50,8 +50,8 @@ def test_simple_xiniparser():
     nt.eq_(expected_conn._args, sut_conn._args)
     nt.eq_(expected_conn._kwargs, sut_conn._kwargs)
 
-def test_simple_harness():
-    """ harness: use Harness directly to create simple device
+def test_simple_fixture():
+    """ fixture: use Fixture directly to create simple device
     """
     # set up
     expected_dev = dev.Device(conn.SerialConnection(
@@ -62,7 +62,7 @@ def test_simple_harness():
     ))
     expected_dev.name = "dev1"
     # execute
-    sut = harness.Harness(here + "/example_harness.cfg")
+    sut = fixture.Fixture(here + "/example_fixture.cfg")
     # assert
     # check again like previous test case
     logger.debug("sut: " + str(sut))
@@ -73,8 +73,8 @@ def test_simple_harness():
     nt.eq_(expected_conn._args, sut_conn._args)
     nt.eq_(expected_conn._kwargs, sut_conn._kwargs)
 
-def test_update_harness():
-    """ harness: update a Harness with a second file
+def test_update_fixture():
+    """ fixture: update a Fixture with a second file
     """
     # set up
     expected_dev = dev.Device(conn.SerialConnection(
@@ -84,9 +84,9 @@ def test_update_harness():
         password="secret2",
     ))
     expected_dev.name = "dev1"
-    sut = harness.Harness(here + "/example_harness.cfg")
+    sut = fixture.Fixture(here + "/example_fixture.cfg")
     # execute
-    sut.read(here + "/example_harness_update.cfg")
+    sut.read(here + "/example_fixture_update.cfg")
     # assert
     # check again like previous test case
     logger.debug("sut: " + str(sut))
@@ -98,7 +98,7 @@ def test_update_harness():
     nt.eq_(expected_conn._kwargs, sut_conn._kwargs)
 
 def test_add_second_dev_update():
-    """ harness: update a second dev into Harness
+    """ fixture: update a second dev into Fixture
     """
     # set up
     expected_dev1 = dev.Device(conn.SerialConnection(
@@ -115,10 +115,10 @@ def test_add_second_dev_update():
     ))
     expected_dev1.name = "dev1"
     expected_dev2.name = "dev2"
-    sut = harness.Harness(here + "/example_harness.cfg")
+    sut = fixture.Fixture(here + "/example_fixture.cfg")
     logger.debug("sut-props-before:" + str(sut.props))
     # execute
-    sut.read(here + "/example_harness_dev2.cfg")
+    sut.read(here + "/example_fixture_dev2.cfg")
     # assert
     logger.debug("sut: " + str(sut))
     sut_dev1 = sut.devs[0] if sut.devs[0].name == "dev1" else sut.devs[1]
@@ -138,11 +138,11 @@ def test_add_second_dev_update():
     nt.eq_(expected_conn._args, sut_conn._args)
     nt.eq_(expected_conn._kwargs, sut_conn._kwargs)
 
-@nt.raises(harness.CantParseException)
+@nt.raises(fixture.CantParseException)
 def test_cant_parse_exception():
-    """ harness: reading a file without appropriate parser raises exception
+    """ fixture: reading a file without appropriate parser raises exception
     """
     # set up
     false_cfg_file = abspath(inspect.getfile(inspect.currentframe()))
     # execute
-    sut = harness.Harness(false_cfg_file)
+    sut = fixture.Fixture(false_cfg_file)
