@@ -1,22 +1,21 @@
-##################
 Coding Style Guide
-##################
+==================
 
-This guide summarizes how we MONK developers think the source code should be
-formatted. Consider these *guidelines* advice rather than law. Sometimes
-you might hit a point, where the current version of the document can't help
-you. In this case you can do the following:
+This guide summarizes how we :term:`MONK` developers think the source code
+should be formatted. Consider these *guidelines* advice rather than law.
+Sometimes you might hit a point, where the current version of the document
+can not help you. In this case you can do the following:
 
  #. Check whether the newest version of this document contains any
-    changes concerning your situation. Also consider building the docs
-    yourself.
+    changes concerning your situation. Also consider
+    :ref:`building the docs yourself<contrib-build>`.
 
- #. Refer to `PEP-008`_, the official style guide for Python core
-    development. The Python Core project is, of course, a lot bigger than
-    MONK, meaning you might find something there, that has not been addressed
-    in MONK yet. Place a comment in the code explaining why you were not able
-    to follow MONK's style guide. If possible, create an `Issue`_ and try to
-    get the style guide changed accordingly.
+ #. Refer to `PEP-008`_, the official style guide for Python core development.
+    The Python Core project is, of course, a lot bigger than :term:`MONK`,
+    meaning you might find something there, that has not been addressed in
+    :term:`MONK` yet. Place a comment in the code explaining why you were not
+    able to follow :term:`MONK's<MONK>` style guide. If possible, create an
+    `issue`_ and try to get the style guide changed accordingly.
 
  #. Discuss with other developers whether there might be a way that you are not
     aware of.
@@ -26,12 +25,11 @@ you. In this case you can do the following:
     to be treated as an exception.
 
 
-**********
 In General
-**********
+----------
 
- * Avoid features specific to your python binary. That includes your language
-   version as well as the interpreter you are using, i.e. CPython, Jython or
+ * Avoid features specific to your Python binary. That includes your language
+   version as well as the interpreter you are using, e.g., CPython, Jython, or
    Pypy.
  * Every line should consist of `79 characters`_ at most.
  * No line should contain more than one statement.
@@ -55,7 +53,7 @@ In General
    ``if bool_val:`` instead.
  * Callable Python scripts should always contain a ``main()`` method. This way
    your code will not only be executable by your script but can also be used by
-   other python modules which import yours. If you do not include one, and
+   other Python modules which import yours. If you do not include one, and
    instead put your code directly into the if, then only your script can make
    use of that code, which is not preferred. Example::
 
@@ -65,9 +63,8 @@ In General
         if __name__ == '__main__':
             main()
 
-**********
 Whitespace
-**********
+----------
 
 In Python whitespace has meaning. Thus, treating whitespace should receive even
 more consideration than in other languages. Whitespace means:
@@ -85,10 +82,10 @@ Rules:
  * New lines are ``\n`` characters.
  * Classes, functions, and blocks should be separated by 2 empty lines each.
  * *no whitespace* in params, brackets, and braces
- * *no whitespace* before commas, semicolons and colons
+ * *no whitespace* before commas, semicolons, and colons
  * *no whitespace* before ``(`` in function and class headers
- * *no whitespace* before list indexing, e.g. ``list[5], slice[3:4]``
- * *no whitespace* in default param assignments, e.g. ``def function(a=13):``
+ * *no whitespace* before list indexing, e.g., ``list[5], slice[3:4]``
+ * *no whitespace* in default param assignments, e.g., ``def function(a=13):``
  * exactly one space around assignments/operators
 
 
@@ -104,9 +101,8 @@ A complete example of correct whitespacing::
         function(a=f, b=e)
 
 
-******
 Naming
-******
+------
 
 Files, folders, modules, classes, functions, and attributes are to be named
 in the following fashion:
@@ -121,14 +117,13 @@ in the following fashion:
  * Naming something with two leading underscores makes it private, i.e. only
    usable inside this class (e.g. ``__only_for_me``).
  * Use of double underscores at beginning and end should be avoided, since
-   Python itself uses this convention for special names 
+   Python itself uses this convention for special names
    (e.g. ``something.__doc__``)
  * Use ``self`` to reference the object calling a method.
  * Use ``cls`` to reference the class in class functions.
 
-***************
 Files - Modules
-***************
+---------------
 
  * Files are to be encoded using ``utf-8``.
  * Every file starts with the following 2 lines::
@@ -143,7 +138,7 @@ Files - Modules
  * Following these there is an empty line followed by the copyright and
    licensing text.
  * After this general information there is the module docstring.
- * The docstring is followed by the imports in this order:
+ * The docstring is followed by imports in this order:
     * general imports from the Python standard library
     * imports from frameworks
     * imports from your own project
@@ -157,12 +152,11 @@ Files - Modules
         if __name__ == '__main__':
             main()
 
-********
 Comments
-********
+--------
 
 In general it is best to write code as self-explanatory as possible. Yet
-sometimes you can't get around writing comments, to make things clear. Here are
+sometimes you cannot get around writing comments to make things clear. Here are
 some situations in which you *should* write a comment:
 
  * Each module, class, and function needs to be accompanied by a `docstring`_.
@@ -195,14 +189,14 @@ these requirements when writing a comment:
 
         class Something(object):
             """This is a docstring.
-        
+
             It is put directly underneath the class definition.
             """
 
 
             def __init__(self):
                 """This is also a docstring.
-                
+
                 It is put directly underneath the method definition.
                 """
 
@@ -223,13 +217,14 @@ these requirements when writing a comment:
 
         def do_else():
         """This is the wrong way to indent a docstring.
-        
+
         It won't even be recognised as a docstring.
         """
 
  * Texts in comments are parsable by the `Sphinx`_ documentation generator.
-   This **is** a complicated issue, so do not expect to find a 1 minute solution
-   here! Seriously, start reading the Sphinx website, if you need to write more
+   This can be a complicated issue, so if you encounter any problems,
+   do not expect to find a 1 minute solution here! Seriously, start reading
+   the Sphinx website, if you need to write more
    than one or two lines of documentation!
  * Single line comments begin with a hash (``#``) character.
  * Multiline comments, including `docstring`_, adhere to the following rules:
@@ -245,20 +240,19 @@ these requirements when writing a comment:
     * They should consist of complete sentences.
     * They should contain descriptions for elements like parameters, as
       `described in the Sphinx Docs`_.
- * Comments for version control systems `should be added` to the
+ * Comments for version control systems `should be added`_ to the
    ``__version__`` magic variable.
 
 
-******************
 Exception Handling
-******************
+------------------
 
 In most cases exception handling should be done like in any other proper Python
 project. Here are some things to consider:
 
  * Use Exception objects and ``raise`` to initiate exception handling.
- * State the Exception classes explicitly in ``except`` clauses because
-   `explicit is better than implicit`.
+ * State Exception classes explicitly in ``except`` clauses because
+   `explicit is better than implicit`_.
  * Minimize the number of lines in ``try`` clauses to avoid
    `Pokemon exception handling`_.
  * In Python, it is encouraged to use function parameters as expected instead
@@ -274,9 +268,8 @@ project. Here are some things to consider:
            except AttributeError:
                print("The param duck can't quack.")
 
-*******
 Imports
-*******
+-------
 
 As stated above, ``import`` calls should be written below the module
 docstring, above the constant/global variable definitions, and in the
@@ -291,12 +284,11 @@ statements like ``from abc import x,y,z``, making different imports from
 the same source. This is discouraged for other reasons, though. Instead of
 ``from abc import x,y,z`` you should use ``import abc`` and then refer to
 ``abc.x`` later on. This way it is easier to identify where something comes
-from, even though it is a little more work writing. Always remember
+from, even though it requires a little more work typing. Always remember
 `explicit is better than implicit`_.
 
-*******
 The End
-*******
+-------
 
 You've read it all. I'm so proud of you!
 
@@ -304,11 +296,11 @@ You've read it all. I'm so proud of you!
 .. references
 
 .. _PEP-008: http://www.python.org/dev/peps/pep-0008
-.. _Issue: https://github.com/DFE/MONK/issues/new
+.. _issue: https://github.com/DFE/MONK/issues/new
 .. _79 characters: https://jamiecurle.co.uk/blog/79-characters-or-less/
 .. _docstring: http://www.python.org/dev/peps/pep-0257/#what-is-a-docstring
 .. _Sphinx: http://sphinx-doc.org/
-.. _described in the Sphinx Docs: http://sphinx-doc.org/domains.html#info-field-lists 
+.. _described in the Sphinx Docs: http://sphinx-doc.org/domains.html#info-field-lists
 .. _should be added: http://stackoverflow.com/a/459185/131120
 .. _properties: http://stackoverflow.com/questions/6618002/python-property-versus-getters-and-setters
 .. _comparing singletons: http://stackoverflow.com/questions/2209755/python-operation-vs-is-not

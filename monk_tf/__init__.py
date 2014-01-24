@@ -17,3 +17,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+
+"""
+This is the package overview of :term:`MONK`. If anything is unclear, you might
+have a look into :ref:`chap-intro`.
+
+The following texts describe the three layers that were explained in
+:ref:`intro-layers`:
+"""
