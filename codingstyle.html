@@ -81,8 +81,8 @@ to be treated as an exception.</li>
 <h2>In General<a class="headerlink" href="#in-general" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><ul>
-<li><p class="first">Avoid features specific to your python binary. That includes your language
-version as well as the interpreter you are using, i.e., CPython, Jython or
+<li><p class="first">Avoid features specific to your Python binary. That includes your language
+version as well as the interpreter you are using, e.g., CPython, Jython, or
 Pypy.</p>
 </li>
 <li><p class="first">Every line should consist of <a class="reference external" href="https://jamiecurle.co.uk/blog/79-characters-or-less/">79 characters</a> at most.</p>
@@ -119,7 +119,7 @@ because it also <a class="reference external" href="http://stackoverflow.com/a/1
 </li>
 <li><p class="first">Callable Python scripts should always contain a <tt class="docutils literal"><span class="pre">main()</span></tt> method. This way
 your code will not only be executable by your script but can also be used by
-other python modules which import yours. If you do not include one, and
+other Python modules which import yours. If you do not include one, and
 instead put your code directly into the if, then only your script can make
 use of that code, which is not preferred. Example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
@@ -154,10 +154,10 @@ typical for Windows)</li>
 <li>New lines are <tt class="docutils literal"><span class="pre">\n</span></tt> characters.</li>
 <li>Classes, functions, and blocks should be separated by 2 empty lines each.</li>
 <li><em>no whitespace</em> in params, brackets, and braces</li>
-<li><em>no whitespace</em> before commas, semicolons and colons</li>
+<li><em>no whitespace</em> before commas, semicolons, and colons</li>
 <li><em>no whitespace</em> before <tt class="docutils literal"><span class="pre">(</span></tt> in function and class headers</li>
-<li><em>no whitespace</em> before list indexing, e.g. <tt class="docutils literal"><span class="pre">list[5],</span> <span class="pre">slice[3:4]</span></tt></li>
-<li><em>no whitespace</em> in default param assignments, e.g. <tt class="docutils literal"><span class="pre">def</span> <span class="pre">function(a=13):</span></tt></li>
+<li><em>no whitespace</em> before list indexing, e.g., <tt class="docutils literal"><span class="pre">list[5],</span> <span class="pre">slice[3:4]</span></tt></li>
+<li><em>no whitespace</em> in default param assignments, e.g., <tt class="docutils literal"><span class="pre">def</span> <span class="pre">function(a=13):</span></tt></li>
 <li>exactly one space around assignments/operators</li>
 </ul>
 </div></blockquote>
@@ -218,7 +218,7 @@ licensing text.</p>
 <li><p class="first">After this general information there is the module docstring.</p>
 </li>
 <li><dl class="first docutils">
-<dt>The docstring is followed by the imports in this order:</dt>
+<dt>The docstring is followed by imports in this order:</dt>
 <dd><ul class="first last simple">
 <li>general imports from the Python standard library</li>
 <li>imports from frameworks</li>
@@ -246,7 +246,7 @@ is generally discouraged).</p>
 <div class="section" id="comments">
 <h2>Comments<a class="headerlink" href="#comments" title="Permalink to this headline">¶</a></h2>
 <p>In general it is best to write code as self-explanatory as possible. Yet
-sometimes you can&#8217;t get around writing comments, to make things clear. Here are
+sometimes you cannot get around writing comments to make things clear. Here are
 some situations in which you <em>should</em> write a comment:</p>
 <blockquote>
 <div><ul class="simple">
@@ -344,7 +344,7 @@ double quote (<tt class="docutils literal"><span class="pre">&quot;&quot;&quot;<
 </dd>
 </dl>
 </li>
-<li><p class="first">Comments for version control systems <cite>should be added</cite> to the
+<li><p class="first">Comments for version control systems <a class="reference external" href="http://stackoverflow.com/a/459185/131120">should be added</a> to the
 <tt class="docutils literal"><span class="pre">__version__</span></tt> magic variable.</p>
 </li>
 </ul>
@@ -358,8 +358,8 @@ project. Here are some things to consider:</p>
 <div><ul>
 <li><p class="first">Use Exception objects and <tt class="docutils literal"><span class="pre">raise</span></tt> to initiate exception handling.</p>
 </li>
-<li><p class="first">State the Exception classes explicitly in <tt class="docutils literal"><span class="pre">except</span></tt> clauses because
-<cite>explicit is better than implicit</cite>.</p>
+<li><p class="first">State Exception classes explicitly in <tt class="docutils literal"><span class="pre">except</span></tt> clauses because
+<a class="reference external" href="http://www.python.org/dev/peps/pep-0020/">explicit is better than implicit</a>.</p>
 </li>
 <li><p class="first">Minimize the number of lines in <tt class="docutils literal"><span class="pre">try</span></tt> clauses to avoid
 <a class="reference external" href="http://www.codinghorror.com/blog/2012/07/new-programming-jargon.html">Pokemon exception handling</a>.</p>
@@ -398,7 +398,7 @@ statements like <tt class="docutils literal"><span class="pre">from</span> <span
 the same source. This is discouraged for other reasons, though. Instead of
 <tt class="docutils literal"><span class="pre">from</span> <span class="pre">abc</span> <span class="pre">import</span> <span class="pre">x,y,z</span></tt> you should use <tt class="docutils literal"><span class="pre">import</span> <span class="pre">abc</span></tt> and then refer to
 <tt class="docutils literal"><span class="pre">abc.x</span></tt> later on. This way it is easier to identify where something comes
-from, even though it is a little more work writing. Always remember
+from, even though it requires a little more work typing. Always remember
 <a class="reference external" href="http://www.python.org/dev/peps/pep-0020/">explicit is better than implicit</a>.</p>
 </div>
 <div class="section" id="the-end">

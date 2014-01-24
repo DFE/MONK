@@ -3,7 +3,7 @@
     (C) 2013, DResearch Fahrzeugelektronik GmbH
 
 ..  You can redistribute this file and/or modify it under the terms of the GNU
-    General Public License as published by the Free Software Foundation; 
+    General Public License as published by the Free Software Foundation;
     either version 2 of the License, or (at your option) any later version
 
 .. _chap-devel:
@@ -12,7 +12,7 @@ Development Process
 ===================
 
 This page describes all the details about the development process. If you want
-an overview like tutorial, have a look at :ref:`chap-contrib`.
+a short tutorial to start, have a look at :ref:`chap-contrib`.
 
 Communicating with the Developers
 ---------------------------------
@@ -20,15 +20,15 @@ Communicating with the Developers
 You can communicate with other :term:`MONK` developers in one of the following
 ways:
 
- #. **the Mailing List**: You can ask questions at 
+ #. **The Mailing List**: You can ask questions at
     project-monk@dresearch-fe.de.  You can also have a look at `the archives`_
     to see old conversations.
 
- #. **the Bug Tracker**: If you have encountered a specific problem you want
+ #. **The Bug Tracker**: If you have encountered a specific problem you want
     to work on, you can create an Issue `here`_. It is also possible to
-    work with Github Pull Requests.
+    work via GitHub pull requests.
 
- #. **the Stammtisch Meeting**: If you happen to be in Berlin on any Tuesday
+ #. **The Stammtisch Meeting**: If you happen to be in Berlin on any Tuesday
     afternoon at 2:30 pm, you are welcome to join our regular meeting on all
     topics concerning :term:`MONK` at:
 
@@ -74,7 +74,7 @@ Step-by-step guide:
     problem, your solution, and the commits containing the two Acked-Bys,
     get one of the maintainers to merge it.
 
-If you need to change anything on your commits, e.g. to add some ``Acked-by``
+If you need to change anything on your commits, e.g., to add some ``Acked-by``
 lines, it is okay to ``rebase -i`` or ``commit --amend`` your changes on
 your feature branch or pull request as nobody else is supposed to work on
 the same feature branch anyway.
@@ -85,10 +85,10 @@ Branching Model
 
 There are five different kinds of branches in :term:`MONK`:
 
- #. **the Master Branch** is the stable branch. It should only contain
+ #. **The Master Branch** is the stable branch. It should only contain
     project states that may be distributed to users.
 
- #. **the Dev Branch** contains all currently accepted features. Changes here
+ #. **The Dev Branch** contains all currently accepted features. Changes here
     might be more unstable than in the Master Branch and might not be properly
     documented. Using this branch might sometimes break your code, but as a
     :term:`MONK` developer you will always need to start implementing your
@@ -104,7 +104,7 @@ There are five different kinds of branches in :term:`MONK`:
     get their changes merged into :term:`MONK`.
 
 
-Acceptance Criteria for the Dev Branch
+Acceptance Criteria For The Dev Branch
 --------------------------------------
 
 ``dev`` contains the latest changes that are considered to be working by their
@@ -117,17 +117,17 @@ code, some requirements must be met for a commit to be allowed into ``dev``:
  * The Issue contains an understandable and assessable description of the
    solution.
  * All code changes are well documented, formatted according to the coding
-   standards and follow high quality standards even in areas that are not
+   standards, and follow high quality standards even in areas that are not
    specifically mentioned here.
  * Code changes are unit tested with 100% statement coverage for the changes
    involved.
- * If necessary and possible: integration tests and documentation adapted
-   accordingly.
+ * If necessary and possible: integration tests and documentation have been
+   adapted accordingly.
  * Two DFE team members have acknowledged the solution's successful and
    complete implementation.
 
 These requirements can be overruled only by 100% acceptance of all developers,
-reviewers and both maintainers for a single Issue, if considered necessary.
+reviewers, and both maintainers for a single Issue, if considered necessary.
 
 Changes to this list of rules can only be achieved by acceptance at the
 Stammtisch Meeting.
@@ -142,7 +142,7 @@ Commit Policy
 -------------
 
 All commits are are expected to adhere to the following requirements:
-    
+
  * **KISS principle**: Commits should contain one meaningful change and
    that one change only. This does not mean you should only put changes in one
    file or one deletion/insertion into one commit, but that all of the changes
@@ -167,7 +167,7 @@ All commits are are expected to adhere to the following requirements:
    GitHub your commit belongs to.
 
  * **Signed-off-bys**: After the long description all developers involved in
-   creating this commit should on seperate lines beginning with
+   creating this commit should be listed on separate lines beginning with
    ``Signed-off-by:``. These lines should include their names and email
    addresses.
 

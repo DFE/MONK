@@ -57,32 +57,44 @@
 <span id="chap-intro"></span><h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="what-is-the-problem">
 <span id="intro-problem"></span><h2>What Is The Problem?<a class="headerlink" href="#what-is-the-problem" title="Permalink to this headline">¶</a></h2>
-<p>This framework is for developers of <a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;systems</em></a>
-like ourselves. We found that testing our systems manually via serial shell or
-ssh was not very convinient in the long run, because for new devices new tests
-needed to be repeated again and again. We also knew from other software
-development applications that many <a class="reference internal" href="glossary.html#term-open-source"><em class="xref std std-term">open&nbsp;source</em></a> projects use
+<p>This framework is intended for developers of
+<a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;systems</em></a> like ourselves. We found that testing
+our systems manually via serial shell or ssh was not very convenient in the
+long run, because for new products the tests needed to be repeated again and
+again. We were also aware that many <a class="reference internal" href="glossary.html#term-open-source"><em class="xref std std-term">open&nbsp;source</em></a> projects use
 <a class="reference internal" href="glossary.html#term-unit-test"><em class="xref std std-term">unit&nbsp;tests</em></a> for writing <a class="reference internal" href="glossary.html#term-test-suite"><em class="xref std std-term">test&nbsp;suites</em></a> for
-their <a class="reference internal" href="glossary.html#term-regression-test"><em class="xref std std-term">regression&nbsp;tests</em></a>. These tests are written in
+their <a class="reference internal" href="glossary.html#term-regression-test"><em class="xref std std-term">regression&nbsp;tests</em></a>.  These tests are written in
 test methods or functions that can be executed by tools like <a class="reference internal" href="glossary.html#term-nose"><em class="xref std std-term">nose</em></a> to
-generate a standardized output that states which tests could succeed and which
-failed. Writing <a class="reference internal" href="glossary.html#term-unit-test"><em class="xref std std-term">unit&nbsp;tests</em></a> directly for testing embedded
-systems is not so easy, though. The reason is that the code
-which runs on your <a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;system</em></a> (which we will call
-<a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a> from now on) can not be accessed by the test code
-directly, because the test code runs on another computer that collects the test
-results, which we will call <a class="reference internal" href="glossary.html#term-test-host"><em class="xref std std-term">test&nbsp;host</em></a>. Therefore you need to implement
-additional layers of communication between both <a class="reference internal" href="glossary.html#term-test-host"><em class="xref std std-term">test&nbsp;host</em></a> and
-<a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>, which is hard, complicated and error prone.</p>
-<p>Thus the problem about writing <a class="reference internal" href="glossary.html#term-regression-test"><em class="xref std std-term">regression</em></a>
-<a class="reference internal" href="glossary.html#term-test-suite"><em class="xref std std-term">test&nbsp;suites</em></a> is that the matter gets complicated because the
-communication of two devices is involved.</p>
+generate a standardized output stating which tests have succeeded and which
+have failed.</p>
+<p>However, writing <a class="reference internal" href="glossary.html#term-unit-test"><em class="xref std std-term">unit&nbsp;tests</em></a> for testing
+<a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;systems</em></a> directly is not so easy. The reason
+is, that the <a class="reference internal" href="glossary.html#term-system-under-test"><em class="xref std std-term">system&nbsp;under&nbsp;test</em></a> can not be accessed directly. It is on
+the <a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;system</em></a>, while the test itself is executed on a test server
+in a <em class="xref std std-term">Jenkins</em> job. This test server is called <a class="reference internal" href="glossary.html#term-test-host"><em class="xref std std-term">test&nbsp;host</em></a>.</p>
+<p>It would not make sense to run the <a class="reference internal" href="glossary.html#term-system-under-test"><em class="xref std std-term">system&nbsp;under&nbsp;test</em></a> on the
+<a class="reference internal" href="glossary.html#term-test-host"><em class="xref std std-term">test&nbsp;host</em></a>, because it will be executed on the <a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;system</em></a>
+in the end. Therefore test success can only be determined on the
+<a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;system</em></a>.</p>
+<p>It would also not make sense to run the <a class="reference internal" href="glossary.html#term-test-case"><em class="xref std std-term">test&nbsp;case</em></a> directly on the
+<a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;system</em></a> because then test and <a class="reference internal" href="glossary.html#term-system-under-test"><em class="xref std std-term">system&nbsp;under&nbsp;test</em></a> could
+influence each other. Test results must also be accumulated and stored for
+future reviews. But a terror on the <a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;system</em></a> might result in a
+state where files get deleted or cannot be retreived for other reasons.</p>
+<p>Therefore a separation of test environment and <a class="reference internal" href="glossary.html#term-system-under-test"><em class="xref std std-term">system&nbsp;under&nbsp;test</em></a> is not
+avoidable in <a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;system</em></a> development. For future reference the
+computer that runs the tests will be called <a class="reference internal" href="glossary.html#term-test-host"><em class="xref std std-term">test&nbsp;host</em></a> and the
+<a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;system</em></a> that runs the <a class="reference internal" href="glossary.html#term-system-under-test"><em class="xref std std-term">system&nbsp;under&nbsp;test</em></a> or is the
+<a class="reference internal" href="glossary.html#term-system-under-test"><em class="xref std std-term">system&nbsp;under&nbsp;test</em></a> is called <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>.</p>
+<p>To enable software developers to write tests that can be run in this complex
+setup measures of communication must be created between the <a class="reference internal" href="glossary.html#term-test-host"><em class="xref std std-term">test&nbsp;host</em></a>
+and the <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>.</p>
 </div>
 <div class="section" id="our-solution-monk">
 <span id="intro-solution"></span><h2>Our Solution: MONK<a class="headerlink" href="#our-solution-monk" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> comes in handy here, because it is a framework that abstracts
-communication between two devices. It is expected to be run on the
-<a class="reference internal" href="glossary.html#term-test-host"><em class="xref std std-term">test&nbsp;host</em></a> inside <a class="reference internal" href="glossary.html#term-test-suite"><em class="xref std std-term">test&nbsp;suites</em></a> and is able to
+communication between two devices. It is intended to be run on the
+<a class="reference internal" href="glossary.html#term-test-host"><em class="xref std std-term">test&nbsp;host</em></a> in <a class="reference internal" href="glossary.html#term-test-suite"><em class="xref std std-term">test&nbsp;suites</em></a> and is able to
 abstract communication channels or full <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;devices</em></a>
 into single objects that manage most of the communication for you. You define
 what commands you want to execute remotely and <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> takes care of that.
@@ -94,60 +106,61 @@ A <em>hello world test</em> with <a class="reference internal" href="glossary.ht
     <span class="sd">&quot;&quot;&quot; send an echo and receive a hello</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c"># set up</span>
-    <span class="n">h</span> <span class="o">=</span> <span class="n">mf</span><span class="o">.</span><span class="n">Fixture</span><span class="p">(</span><span class="s">&quot;target_device_login.cfg&quot;</span><span class="p">)</span>
+    <span class="n">fixture</span> <span class="o">=</span> <span class="n">mf</span><span class="o">.</span><span class="n">Fixture</span><span class="p">(</span><span class="s">&quot;target_device_login.cfg&quot;</span><span class="p">)</span>
     <span class="n">expected_response</span> <span class="o">=</span> <span class="s">&quot;hello&quot;</span>
     <span class="n">send_msg</span> <span class="o">=</span> <span class="s">&quot;echo </span><span class="se">\&quot;</span><span class="s">{}</span><span class="se">\&quot;</span><span class="s">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">expected_response</span><span class="p">)</span>
     <span class="c"># execute</span>
-    <span class="n">response</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">devs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="n">send_msg</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">fixture</span><span class="o">.</span><span class="n">devs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="n">send_msg</span><span class="p">)</span>
     <span class="c"># assert - verify response is as expected</span>
     <span class="n">nt</span><span class="o">.</span><span class="n">eq_</span><span class="p">(</span><span class="n">expected_response</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
     <span class="c"># tear down</span>
     <span class="n">h</span><span class="o">.</span><span class="n">tear_down</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>The code example contains a complete python file that should be executable with
+<p>The code example contains a complete Python file that should be executable with
 the <a class="reference internal" href="glossary.html#term-nose"><em class="xref std std-term">nose</em></a> test tooling. In the first two lines <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> and
-<a class="reference internal" href="glossary.html#term-nose"><em class="xref std std-term">nose</em></a> are imported and given shorter names for faster access. Then a
-<a class="reference internal" href="glossary.html#term-test-case"><em class="xref std std-term">test&nbsp;case</em></a> is defined. The method&#8217;s documentation contains a short line
-that explains what the test does. In verbose mode <a class="reference internal" href="glossary.html#term-nose"><em class="xref std std-term">nose</em></a> will use this
-string for a human readable explanation of what is tested. Afterwards follow
-four steps: set up, execute, assert, tear down. These are the common four steps
-of a <a class="reference internal" href="glossary.html#term-test-case"><em class="xref std std-term">test&nbsp;case</em></a>. In the set up phase a
-<a class="reference internal" href="monk_tf.html#monk_tf.fixture.Fixture" title="monk_tf.fixture.Fixture"><tt class="xref py py-class docutils literal"><span class="pre">Fixture</span></tt></a> object is created and given the name of a
-file. This file contains the information necessary to communicate with the
-<a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>, e.g., the information to access a serial connection and
-login credentials. An example content will be
-<a class="reference internal" href="#intro-cfg"><em>discussed&nbsp;later</em></a>. The <a class="reference internal" href="monk_tf.html#monk_tf.fixture.Fixture" title="monk_tf.fixture.Fixture"><tt class="xref py py-class docutils literal"><span class="pre">Fixture</span></tt></a>
+<a class="reference internal" href="glossary.html#term-nose"><em class="xref std std-term">nose</em></a> are imported and given shorter names for more convenient access.
+Then a <a class="reference internal" href="glossary.html#term-test-case"><em class="xref std std-term">test&nbsp;case</em></a> is defined. The method&#8217;s documentation contains a
+short line that explains what the test does. In verbose mode <a class="reference internal" href="glossary.html#term-nose"><em class="xref std std-term">nose</em></a> will
+use this string for a human readable explanation of what is tested. Afterwards
+there are four steps: set up, execute, assert, and tear down. These are the
+usual four steps of a <a class="reference internal" href="glossary.html#term-test-case"><em class="xref std std-term">test&nbsp;case</em></a>.</p>
+<p>In the set up phase a <a class="reference internal" href="monk_tf.html#monk_tf.fixture.Fixture" title="monk_tf.fixture.Fixture"><tt class="xref py py-class docutils literal"><span class="pre">Fixture</span></tt></a> object is created
+and given the name of a file. This file contains the information necessary to
+communicate with the <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>, e.g., the information to access a
+serial connection and login credentials. An example file will be
+<a class="reference internal" href="#intro-cfg"><em>discussed&nbsp;later</em></a>.  The <a class="reference internal" href="monk_tf.html#monk_tf.fixture.Fixture" title="monk_tf.fixture.Fixture"><tt class="xref py py-class docutils literal"><span class="pre">Fixture</span></tt></a>
 object will read this file and create <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> objects for you based on the
 configuration. This helps to separate the information necessary to communicate
 with a <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">device</em></a> from the information that is important for
-a <a class="reference internal" href="glossary.html#term-test-case"><em class="xref std std-term">test&nbsp;case</em></a>. As you see in the example it is not necessary to know the
-login credentials used by the test to understand the test itself.</p>
+a <a class="reference internal" href="glossary.html#term-test-case"><em class="xref std std-term">test&nbsp;case</em></a>. As you can see in the example it is not necessary to know
+the login credentials used by the test to understand the test itself.</p>
 <p>After the set up phase follows the execution phase. In this phase the first
-created device object is used to send a <a class="reference internal" href="glossary.html#term-shell-command"><em class="xref std std-term">shell&nbsp;command</em></a> to the configured
-<a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>. In this case a <tt class="docutils literal"><span class="pre">echo</span> <span class="pre">&quot;hello&quot;</span></tt> is sent and the response
-is stored in a variable. Under the hood the <a class="reference internal" href="monk_tf.html#monk_tf.dev.Device" title="monk_tf.dev.Device"><tt class="xref py py-class docutils literal"><span class="pre">Device</span></tt></a>
-object creates one or more connections to the <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>, transmits
-the message in the corresponding protocol and collects the response. This is
-the central feature of <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>. Just by calling one method the whole
-complexity of the interaction gets handled by the framework and the user, in
-this case the <a class="reference internal" href="glossary.html#term-test-case"><em class="xref std std-term">test&nbsp;case</em></a>, does not need to be concerned about the
-details and can focus on which commands he wants to send to the
-<a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a> and what the results should be. As you can see in the API
-docs of the <a class="reference internal" href="monk_tf.html#monk_tf.dev.Device" title="monk_tf.dev.Device"><tt class="xref py py-class docutils literal"><span class="pre">Device</span></tt></a> class there are also other infos
-that can be used after the communication happened, like the last prompt or the
-return code of the command executed.</p>
+created device object from the <a class="reference internal" href="monk_tf.html#monk_tf.fixture.Fixture" title="monk_tf.fixture.Fixture"><tt class="xref py py-class docutils literal"><span class="pre">Fixture</span></tt></a> object is
+used to send a <a class="reference internal" href="glossary.html#term-shell-command"><em class="xref std std-term">shell&nbsp;command</em></a> to the configured <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>.
+In this case <tt class="docutils literal"><span class="pre">echo</span> <span class="pre">&quot;hello&quot;</span></tt> is sent and the response is stored in a variable.
+Under the hood the <a class="reference internal" href="monk_tf.html#monk_tf.dev.Device" title="monk_tf.dev.Device"><tt class="xref py py-class docutils literal"><span class="pre">Device</span></tt></a> object creates one or more
+connections to the <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>, transmits the message in the
+corresponding protocol and collects the response. This is the central feature
+of <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>. By just calling one method the whole complexity of the
+interaction gets handled by the framework and the user, in this case the
+<a class="reference internal" href="glossary.html#term-test-case"><em class="xref std std-term">test&nbsp;case</em></a>, does not need to be concerned about the details and can
+focus on which commands he wants to send to the <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a> and what
+the results should be. As you can see in the API docs of the
+<a class="reference internal" href="monk_tf.html#monk_tf.dev.Device" title="monk_tf.dev.Device"><tt class="xref py py-class docutils literal"><span class="pre">Device</span></tt></a> class there is also other information that can
+be evaluated afterwards, like the last prompt or the return code of the command
+executed.</p>
 <p>The next step in the example is the assert step. In this step all changes that
 happened in the execute step are verified to be as expected. In this case we
 only check that the <tt class="docutils literal"><span class="pre">echo</span></tt> really printed a <tt class="docutils literal"><span class="pre">hello</span></tt>.</p>
 <p>The last step is the tear down step. In this step everything that was set up
 for this test case is disconnected, removed or set back in its original state.
-Usually high level languages do not bother about this step, because the garbage
-collector will take care of deleting all the objects that are not needed
-anymore. However when using <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> communication channels to the
-<a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a> are connected and it might be wise to disconnect them on
-purpose when the test is finished. In future versions of <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> it might
-also be possible that additional tear down steps might be included in the
+High level languages do not usually bother with this step, because the garbage
+collector will take care of deleting all objects that are not needed anymore.
+However, when using <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> communication channels to the
+<a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a> are connected and it might be wise to explicitly
+disconnect when the test is finished. In future versions of <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> it
+might also be possible that additional tear down steps might be included in the
 <a class="reference internal" href="glossary.html#term-fixture-file"><em class="xref std std-term">fixture&nbsp;files</em></a> like shutting down the
 <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a> or deleting test artifacts. Therefore it is suggested to
 always include this line.</p>
@@ -155,10 +168,10 @@ always include this line.</p>
 <div class="section" id="fixture-files">
 <span id="intro-cfg"></span><h2>Fixture Files<a class="headerlink" href="#fixture-files" title="Permalink to this headline">¶</a></h2>
 <p>Fixture files are <a class="reference internal" href="glossary.html#term-extended-ini"><em class="xref std std-term">extended&nbsp;INI</em></a> (short Xini) files that contain the
-information to create <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> objects. In the code object in
-<a class="reference internal" href="#intro-solution"><em>Our Solution: MONK</em></a> you see how they can be used together with a
+information needed to create <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> objects. In the code example given
+in <a class="reference internal" href="#intro-solution"><em>Our Solution: MONK</em></a> you can see how they can be used together with a
 <a class="reference internal" href="monk_tf.html#monk_tf.fixture.Fixture" title="monk_tf.fixture.Fixture"><tt class="xref py py-class docutils literal"><span class="pre">Fixture</span></tt></a> object to create everything necessary to
-run your tests with your <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>. To run this example the
+run your tests on your <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>. To run this example the
 following <a class="reference internal" href="glossary.html#term-fixture-file"><em class="xref std std-term">fixture&nbsp;file</em></a> could be used:</p>
 <div class="highlight-python"><pre>[dev1]
     type = Device
@@ -170,81 +183,80 @@ following <a class="reference internal" href="glossary.html#term-fixture-file"><
         baudrate = 115200
         timeout = 1.5</pre>
 </div>
-<p>First it should be said that the indentation is optional. It is basically only
-used for a better overview, meaning everything that belongs to an object is
+<p>First, it should be said that the indentation is optional. It is only
+used for clarity, meaning everything that belongs to an object is
 indented related to its owner, e.g., <tt class="docutils literal"><span class="pre">type</span> <span class="pre">=</span> <span class="pre">Device</span></tt> is indented to
 <tt class="docutils literal"><span class="pre">[dev1]</span></tt>, therefore it is an attribute of the object <tt class="docutils literal"><span class="pre">[dev1]</span></tt>. If you blend
 out the indentation you see a format not too different from the normal
-<a class="reference internal" href="glossary.html#term-ini"><em class="xref std std-term">INI</em></a> format you can often see in Python projects. The only difference to
-normal <a class="reference internal" href="glossary.html#term-ini"><em class="xref std std-term">INI</em></a> files is that <tt class="docutils literal"><span class="pre">serial1</span></tt> is surrounded by two pairs of
-squared braces (<tt class="docutils literal"><span class="pre">[[]]</span></tt>). This means that <tt class="docutils literal"><span class="pre">serial1</span></tt> is not on the same
-hierarchical level as <tt class="docutils literal"><span class="pre">dev1</span></tt>, but is actually an attribute of <tt class="docutils literal"><span class="pre">dev1</span></tt>.  You
-can also see that from the indentation.</p>
+<a class="reference internal" href="glossary.html#term-ini"><em class="xref std std-term">INI</em></a> format you can often see in Python projects. The only difference
+is that <tt class="docutils literal"><span class="pre">serial1</span></tt> is surrounded by two pairs of squared braces (<tt class="docutils literal"><span class="pre">[[]]</span></tt>),
+indicating that <tt class="docutils literal"><span class="pre">serial1</span></tt> is not on the same hierarchical level as <tt class="docutils literal"><span class="pre">dev1</span></tt>,
+but is an attribute of <tt class="docutils literal"><span class="pre">dev1</span></tt>. This is also reflected by the indentation.</p>
 <p>The example describes two objects, <tt class="docutils literal"><span class="pre">dev1</span></tt> and <tt class="docutils literal"><span class="pre">serial1</span></tt>. <tt class="docutils literal"><span class="pre">dev1</span></tt> is the
-main object of this file. The first attribute shows that it is of type
+main object of this file. The first attribute states that it is of type
 <a class="reference internal" href="monk_tf.html#monk_tf.dev.Device" title="monk_tf.dev.Device"><tt class="xref py py-class docutils literal"><span class="pre">Device</span></tt></a>. The second attribute is <tt class="docutils literal"><span class="pre">serial1</span></tt>, which is
 of type <a class="reference internal" href="monk_tf.html#monk_tf.conn.SerialConnection" title="monk_tf.conn.SerialConnection"><tt class="xref py py-class docutils literal"><span class="pre">SerialConnection</span></tt></a>. All other attributes belong
-to <tt class="docutils literal"><span class="pre">serial1</span></tt> and describe what the <a class="reference internal" href="monk_tf.html#monk_tf.conn.SerialConnection" title="monk_tf.conn.SerialConnection"><tt class="xref py py-class docutils literal"><span class="pre">SerialConnection</span></tt></a>
-should be initialized with.</p>
+to <tt class="docutils literal"><span class="pre">serial1</span></tt> and give information used to initialize the
+<a class="reference internal" href="monk_tf.html#monk_tf.conn.SerialConnection" title="monk_tf.conn.SerialConnection"><tt class="xref py py-class docutils literal"><span class="pre">SerialConnection</span></tt></a>.</p>
 <p>This is the minimal definition you can use in a <a class="reference internal" href="glossary.html#term-fixture-file"><em class="xref std std-term">fixture&nbsp;file</em></a>: a
 <a class="reference internal" href="monk_tf.html#monk_tf.dev.Device" title="monk_tf.dev.Device"><tt class="xref py py-class docutils literal"><span class="pre">Device</span></tt></a> and any implementation of an
 <a class="reference internal" href="monk_tf.html#monk_tf.conn.AConnection" title="monk_tf.conn.AConnection"><tt class="xref py py-class docutils literal"><span class="pre">AConnection</span></tt></a>. Describing objects in
-<a class="reference internal" href="glossary.html#term-fixture-file"><em class="xref std std-term">fixture&nbsp;files</em></a> allows you to reuse a definition, allows
+<a class="reference internal" href="glossary.html#term-fixture-file"><em class="xref std std-term">fixture&nbsp;files</em></a> allows you to reuse a definition, enables
 non-programmers to change some configuration data like the username that is
-used for tests, and it also decreases the information a person needs to
+used for tests, and decreases the amount of information a person needs to
 understand when reading a <a class="reference internal" href="glossary.html#term-test-case"><em class="xref std std-term">test&nbsp;case</em></a>. Therefore it is adviced to use
 <a class="reference internal" href="glossary.html#term-fixture-file"><em class="xref std std-term">fixture&nbsp;files</em></a> as much as possible.</p>
-<p>Sometimes it is not possible, though. In that case <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> is built in 3
-layers that allow you different tradeoffs between abstraction and control. More
-about that in the next section.</p>
+<p>Sometimes, however, it is not possible. For these cases <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> is built
+in three layers allowing for different trade-offs between abstraction
+and control. These layers will be explained in the next section.</p>
 </div>
 <div class="section" id="the-layers">
 <span id="intro-layers"></span><h2>The Layers<a class="headerlink" href="#the-layers" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> is built in 3 layers, thereby allowing different tradeoffs between
-abstraction and control. This is good for you, the user, because you can choose
-the tradeoff that works best for your current task. It is also a helpful idea
-in developing <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>, because always when a layer of higher abstraction
-is created or manipulated it makes use of a layer with a smaller degree of
-abstraction and a higher degree of control. Let&#8217;s look at some details.</p>
+<p><a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> is built in three layers, thereby allowing for different
+trade-offs between abstraction and control. This benefits you, the user,
+because you can choose the tradeoff that works best for your current task. It
+is also a helpful idea in developing <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>, because layers of higher
+abstraction make use of layers with a smaller degree of abstraction and a
+higher degree of control. Let&#8217;s look at some details.</p>
 <p>The layer structure follows the logical structure of interaction with a
 <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>:</p>
 <blockquote>
 <div><ul class="simple">
-<li>The direct interaction to a <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a> happens via direct access
-of connections like serial connections.</li>
+<li>The direct interaction with a <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a> happens via direct
+access of connections like, e.g., serial connections.</li>
 <li>In a more complex scenario the <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a> is understood as a
-whole and it is not so important what the different connections might be.
-Therefore <a class="reference internal" href="monk_tf.html#monk_tf.dev.Device" title="monk_tf.dev.Device"><tt class="xref py py-class docutils literal"><span class="pre">Device</span></tt></a> objects contain
+whole and it is not important what kinds of connections might be used for
+communicating. Therefore <a class="reference internal" href="monk_tf.html#monk_tf.dev.Device" title="monk_tf.dev.Device"><tt class="xref py py-class docutils literal"><span class="pre">Device</span></tt></a> objects contain
 <a class="reference internal" href="monk_tf.html#monk_tf.conn.AConnection" title="monk_tf.conn.AConnection"><tt class="xref py py-class docutils literal"><span class="pre">AConnection</span></tt></a> objects. Instead of using the
 connections directly, the user mainly interacts with a
 <a class="reference internal" href="monk_tf.html#monk_tf.dev.Device" title="monk_tf.dev.Device"><tt class="xref py py-class docutils literal"><span class="pre">Device</span></tt></a> object.</li>
 <li>When there are many <a class="reference internal" href="glossary.html#term-test-case"><em class="xref std std-term">test&nbsp;cases</em></a> that contain similar
-<a class="reference internal" href="monk_tf.html#monk_tf.dev.Device" title="monk_tf.dev.Device"><tt class="xref py py-class docutils literal"><span class="pre">Device</span></tt></a> objects then it makes sense to describe the
-<a class="reference internal" href="monk_tf.html#monk_tf.dev.Device" title="monk_tf.dev.Device"><tt class="xref py py-class docutils literal"><span class="pre">Device</span></tt></a> objects separately in config-like files, the
-<a class="reference internal" href="glossary.html#term-fixture-file"><em class="xref std std-term">fixture&nbsp;files</em></a>. Therefore the
+<a class="reference internal" href="monk_tf.html#monk_tf.dev.Device" title="monk_tf.dev.Device"><tt class="xref py py-class docutils literal"><span class="pre">Device</span></tt></a> objects it makes sense to describe these
+objects separately in config-like files, the
+<a class="reference internal" href="glossary.html#term-fixture-file"><em class="xref std std-term">fixture&nbsp;files</em></a>.
 <a class="reference internal" href="monk_tf.html#monk_tf.fixture.Fixture" title="monk_tf.fixture.Fixture"><tt class="xref py py-class docutils literal"><span class="pre">Fixture</span></tt></a> objects read external
 <a class="reference internal" href="glossary.html#term-fixture-file"><em class="xref std std-term">fixture&nbsp;files</em></a> and contain references to
 <a class="reference internal" href="monk_tf.html#monk_tf.dev.Device" title="monk_tf.dev.Device"><tt class="xref py py-class docutils literal"><span class="pre">Device</span></tt></a> objects. The user does not create
 <a class="reference internal" href="monk_tf.html#monk_tf.dev.Device" title="monk_tf.dev.Device"><tt class="xref py py-class docutils literal"><span class="pre">Device</span></tt></a> objects himself.</li>
 </ul>
 </div></blockquote>
-<p>In layers it looks like this:</p>
+<p>This is represented by the following layers:</p>
 <blockquote>
 <div><ul class="simple">
 <li><a class="reference internal" href="monk_tf.html#module-monk_tf.conn" title="monk_tf.conn"><tt class="xref py py-mod docutils literal"><span class="pre">monk_tf.conn</span></tt></a> - The connection layer has the highest level of
-control in exchange for basically no abstraction. Every Exception needs to
+control in exchange for basically no abstraction. Every exception needs to
 be handled by the user and every step of the connection workflow must be
-followed manually. In exchange everything that is done with the connections
+followed manually. In exchange, everything that is done with the connections
 can be seen and influenced directly and no exceptions are ignored by the
 framework.</li>
 <li><a class="reference internal" href="monk_tf.html#module-monk_tf.dev" title="monk_tf.dev"><tt class="xref py py-mod docutils literal"><span class="pre">monk_tf.dev</span></tt></a> - The device layer handles connections directly.
-Connections can be added, removed and changed in order. How each connection
-is handled to transfer commands to the <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a> is handled by
-the devices, though. Therefore this layer allows a balanced tradeoff between
-abstraction and control.</li>
+Connections can be added, removed, or get another position in the object
+sequence. How connections are handled to transfer commands to the
+<a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a> is handled by the devices, though. Therefore this
+layer allows a balanced trade-off between abstraction and control.</li>
 <li><a class="reference internal" href="monk_tf.html#module-monk_tf.fixture" title="monk_tf.fixture"><tt class="xref py py-mod docutils literal"><span class="pre">monk_tf.fixture</span></tt></a> - The fixture layer is the highest level of
-abstraction, with nearly no need to name details explicitely. The user can
-focus on writing the test without worrying how the data is transfered
+abstraction, with nearly no need to name details explicitly. The user can
+focus on writing tests without worrying about how the data is transferred
 between <a class="reference internal" href="glossary.html#term-test-host"><em class="xref std std-term">test&nbsp;host</em></a> and <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>.</li>
 </ul>
 </div></blockquote>
@@ -269,8 +281,8 @@ Debian based distributions:</p>
 <div class="highlight-python"><pre>$ pip install monk_tf</pre>
 </div>
 <p>This step might require <tt class="docutils literal"><span class="pre">sudo</span></tt> rights. You might also consider setting up
-MONK in a <tt class="docutils literal"><span class="pre">virtualenv</span></tt>. You can check that the installation worked the
-following way:</p>
+MONK in a <tt class="docutils literal"><span class="pre">virtualenv</span></tt>. You can check whether installation was completed
+successfully the following way:</p>
 <div class="highlight-python"><pre>$ python
 Python 2.7.3 (default, Aug  1 2012, 05:14:39)
 [GCC 4.6.3] on linux2
@@ -283,26 +295,25 @@ Type "help", "copyright", "credits" or "license" for more information.
 <a class="reference internal" href="contributing.html"><em>developer instructions</em></a>.</p>
 </div>
 <div class="section" id="side-note-working-with-different-monk-versions">
-<h2>Side Note: Working with Different MONK Versions<a class="headerlink" href="#side-note-working-with-different-monk-versions" title="Permalink to this headline">¶</a></h2>
-<p>When using <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> a time will come in which updating to a newer version
-of <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> will require a lot of changes in your
-<a class="reference internal" href="glossary.html#term-test-case"><em class="xref std std-term">test&nbsp;cases</em></a>. This leads to a situation in which you think you
+<h2>Side Note: Working With Different MONK Versions<a class="headerlink" href="#side-note-working-with-different-monk-versions" title="Permalink to this headline">¶</a></h2>
+<p>When using <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> you might encounter the situation that updating to a
+newer version of <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> will require a lot of changes in your
+<a class="reference internal" href="glossary.html#term-test-case"><em class="xref std std-term">test&nbsp;cases</em></a>. This might make you believe you
 have to choose between using a newer version of <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> for its features
 or using an older version of <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> to keep the maintenance costs low. We
-also faced this problem ad <a class="reference internal" href="glossary.html#term-dfe"><em class="xref std std-term">DFE</em></a>, therefore we developed a small helper
-script that allows you to do both. If you already work well with
+also faced this problem at <a class="reference internal" href="glossary.html#term-dfe"><em class="xref std std-term">DFE</em></a>, therefore we developed a small helper
+script that allows you to do both. If you already have experience in using
 <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenvs</em></a> then you will have not much of a trouble.</p>
-<p>The basic idea is that for each set of requirements (contain a specific
-<a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> version) you create a separate suite. Thus if you have tests for
-<tt class="docutils literal"><span class="pre">monk_tf==0.1.1</span></tt> you keep all these tests in one suite. If you are starting
-to write new tests now, you will probably write them for <tt class="docutils literal"><span class="pre">monk_tf==0.1.4</span></tt>.
-Therefore your new tests go into a new suite. If you decide now that you need
-to do some work on an older <a class="reference internal" href="glossary.html#term-test-case"><em class="xref std std-term">test&nbsp;case</em></a> that worked with
-<tt class="docutils literal"><span class="pre">monk_tf==0.1.1</span></tt>, you can also choose to leave it in the old suite or do the
-required changes and move it to your new suite. If one day a <tt class="docutils literal"><span class="pre">monK_tf==0.1.5</span></tt>
-is released, you create a new suite, that contains all tests that work with
-this version.</p>
-<p>If you want to make use of a little helper, then have a look at
+<p>The basic idea is that for each set of requirements you create a separate
+suite. Thus if you have tests for <tt class="docutils literal"><span class="pre">monk_tf==0.1.1</span></tt> you keep all these tests
+in one suite. If you are starting to write new tests now, you will probably
+write them for <tt class="docutils literal"><span class="pre">monk_tf==0.1.4</span></tt>.  Therefore your new tests go into a new
+suite. If you decide that you need to do some work on an older
+<a class="reference internal" href="glossary.html#term-test-case"><em class="xref std std-term">test&nbsp;case</em></a> that worked with <tt class="docutils literal"><span class="pre">monk_tf==0.1.1</span></tt>, you can choose to leave
+it in the old suite or make the required changes and move it to your new suite.
+If one day <tt class="docutils literal"><span class="pre">monK_tf==0.1.5</span></tt> is released, you create a new suite, that
+contains all tests that work with this version.</p>
+<p>If you want to make use of this little helper, then have a look at
 <a class="reference external" href="https://pypi.python.org/pypi/multisuite/">multisuite</a>.</p>
 </div>
 </div>
@@ -324,7 +335,7 @@ this version.</p>
 <li><a class="reference internal" href="#fixture-files">Fixture Files</a></li>
 <li><a class="reference internal" href="#the-layers">The Layers</a></li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
-<li><a class="reference internal" href="#side-note-working-with-different-monk-versions">Side Note: Working with Different MONK Versions</a></li>
+<li><a class="reference internal" href="#side-note-working-with-different-monk-versions">Side Note: Working With Different MONK Versions</a></li>
 </ul>
 </li>
 </ul>

@@ -56,22 +56,22 @@
   <div class="section" id="development-process">
 <span id="chap-devel"></span><h1>Development Process<a class="headerlink" href="#development-process" title="Permalink to this headline">¶</a></h1>
 <p>This page describes all the details about the development process. If you want
-an overview like tutorial, have a look at <a class="reference internal" href="contributing.html#chap-contrib"><em>Contributing</em></a>.</p>
+a short tutorial to start, have a look at <a class="reference internal" href="contributing.html#chap-contrib"><em>Contributing</em></a>.</p>
 <div class="section" id="communicating-with-the-developers">
 <h2>Communicating with the Developers<a class="headerlink" href="#communicating-with-the-developers" title="Permalink to this headline">¶</a></h2>
 <p>You can communicate with other <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> developers in one of the following
 ways:</p>
 <blockquote>
 <div><ol class="arabic">
-<li><p class="first"><strong>the Mailing List</strong>: You can ask questions at
+<li><p class="first"><strong>The Mailing List</strong>: You can ask questions at
 <a class="reference external" href="mailto:project-monk&#37;&#52;&#48;dresearch-fe&#46;de">project-monk<span>&#64;</span>dresearch-fe<span>&#46;</span>de</a>.  You can also have a look at <a class="reference external" href="https://groups.google.com/a/dresearch-fe.de/forum/?fromgroups#!forum/project-monk">the archives</a>
 to see old conversations.</p>
 </li>
-<li><p class="first"><strong>the Bug Tracker</strong>: If you have encountered a specific problem you want
+<li><p class="first"><strong>The Bug Tracker</strong>: If you have encountered a specific problem you want
 to work on, you can create an Issue <a class="reference external" href="https://github.com/DFE/MONK/issues">here</a>. It is also possible to
-work with Github Pull Requests.</p>
+work via GitHub pull requests.</p>
 </li>
-<li><p class="first"><strong>the Stammtisch Meeting</strong>: If you happen to be in Berlin on any Tuesday
+<li><p class="first"><strong>The Stammtisch Meeting</strong>: If you happen to be in Berlin on any Tuesday
 afternoon at 2:30 pm, you are welcome to join our regular meeting on all
 topics concerning <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> at:</p>
 <div class="line-block">
@@ -115,7 +115,7 @@ problem, your solution, and the commits containing the two Acked-Bys,
 get one of the maintainers to merge it.</li>
 </ol>
 </div></blockquote>
-<p>If you need to change anything on your commits, e.g. to add some <tt class="docutils literal"><span class="pre">Acked-by</span></tt>
+<p>If you need to change anything on your commits, e.g., to add some <tt class="docutils literal"><span class="pre">Acked-by</span></tt>
 lines, it is okay to <tt class="docutils literal"><span class="pre">rebase</span> <span class="pre">-i</span></tt> or <tt class="docutils literal"><span class="pre">commit</span> <span class="pre">--amend</span></tt> your changes on
 your feature branch or pull request as nobody else is supposed to work on
 the same feature branch anyway.</p>
@@ -125,9 +125,9 @@ the same feature branch anyway.</p>
 <p>There are five different kinds of branches in <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>:</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li><strong>the Master Branch</strong> is the stable branch. It should only contain
+<li><strong>The Master Branch</strong> is the stable branch. It should only contain
 project states that may be distributed to users.</li>
-<li><strong>the Dev Branch</strong> contains all currently accepted features. Changes here
+<li><strong>The Dev Branch</strong> contains all currently accepted features. Changes here
 might be more unstable than in the Master Branch and might not be properly
 documented. Using this branch might sometimes break your code, but as a
 <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> developer you will always need to start implementing your
@@ -142,7 +142,7 @@ get their changes merged into <a class="reference internal" href="glossary.html#
 </div></blockquote>
 </div>
 <div class="section" id="acceptance-criteria-for-the-dev-branch">
-<h2>Acceptance Criteria for the Dev Branch<a class="headerlink" href="#acceptance-criteria-for-the-dev-branch" title="Permalink to this headline">¶</a></h2>
+<h2>Acceptance Criteria For The Dev Branch<a class="headerlink" href="#acceptance-criteria-for-the-dev-branch" title="Permalink to this headline">¶</a></h2>
 <p><tt class="docutils literal"><span class="pre">dev</span></tt> contains the latest changes that are considered to be working by their
 creators and at least one reviewer. To continually ensure good quality of the
 code, some requirements must be met for a commit to be allowed into <tt class="docutils literal"><span class="pre">dev</span></tt>:</p>
@@ -154,18 +154,18 @@ reproduction, if necessesary.</li>
 <li>The Issue contains an understandable and assessable description of the
 solution.</li>
 <li>All code changes are well documented, formatted according to the coding
-standards and follow high quality standards even in areas that are not
+standards, and follow high quality standards even in areas that are not
 specifically mentioned here.</li>
 <li>Code changes are unit tested with 100% statement coverage for the changes
 involved.</li>
-<li>If necessary and possible: integration tests and documentation adapted
-accordingly.</li>
+<li>If necessary and possible: integration tests and documentation have been
+adapted accordingly.</li>
 <li>Two DFE team members have acknowledged the solution&#8217;s successful and
 complete implementation.</li>
 </ul>
 </div></blockquote>
 <p>These requirements can be overruled only by 100% acceptance of all developers,
-reviewers and both maintainers for a single Issue, if considered necessary.</p>
+reviewers, and both maintainers for a single Issue, if considered necessary.</p>
 <p>Changes to this list of rules can only be achieved by acceptance at the
 Stammtisch Meeting.</p>
 </div>
@@ -197,7 +197,7 @@ would be unintelligible in some other way when split.</li>
 the description, this would be a good place to specify which Issue on
 GitHub your commit belongs to.</li>
 <li><strong>Signed-off-bys</strong>: After the long description all developers involved in
-creating this commit should on seperate lines beginning with
+creating this commit should be listed on separate lines beginning with
 <tt class="docutils literal"><span class="pre">Signed-off-by:</span></tt>. These lines should include their names and email
 addresses.</li>
 <li><strong>Acked-bys</strong>: Afterwards all people who checked the quality of the
@@ -238,7 +238,7 @@ Acked-by: Clark Kent &lt;kent@dresearch-fe.de&gt;</pre>
 <li><a class="reference internal" href="#communicating-with-the-developers">Communicating with the Developers</a></li>
 <li><a class="reference internal" href="#the-development-process">The Development Process</a></li>
 <li><a class="reference internal" href="#branching-model">Branching Model</a></li>
-<li><a class="reference internal" href="#acceptance-criteria-for-the-dev-branch">Acceptance Criteria for the Dev Branch</a></li>
+<li><a class="reference internal" href="#acceptance-criteria-for-the-dev-branch">Acceptance Criteria For The Dev Branch</a></li>
 <li><a class="reference internal" href="#acceptance-criteria-for-the-master-branch">Acceptance Criteria for the Master Branch</a></li>
 <li><a class="reference internal" href="#commit-policy">Commit Policy</a></li>
 </ul>

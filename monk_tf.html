@@ -59,35 +59,81 @@
 <h1>monk_tf Package<a class="headerlink" href="#monk-tf-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
 <h2><tt class="xref py py-mod docutils literal"><span class="pre">monk_tf</span></tt> Package<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="module-monk_tf.__init__"></span><p>This is the package overview of <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>.</p>
-<p>The following texts contain the three layers:</p>
+<span class="target" id="module-monk_tf.__init__"></span><p>This is the package overview of <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>. If anything is unclear, you might
+have a look into <a class="reference internal" href="intro.html#chap-intro"><em>Getting Started</em></a>.</p>
+<p>The following texts describe the three layers that were explained in
+<a class="reference internal" href="intro.html#intro-layers"><em>The Layers</em></a>:</p>
 </div>
 <div class="section" id="module-monk_tf.conn">
 <span id="conn-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">conn</span></tt> Module<a class="headerlink" href="#module-monk_tf.conn" title="Permalink to this headline">¶</a></h2>
-<p>Connection Layer</p>
-<p>Implements the lowest layer of interaction with a <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>. This
-means that you can use this module to create
-<a class="reference internal" href="#monk_tf.conn.AConnection" title="monk_tf.conn.AConnection"><tt class="xref py py-class docutils literal"><span class="pre">AConnection</span></tt></a> objects, interact with them
-and manipulate their internal states.</p>
-<p>States are implemented with the State design pattern via
+<p>This module implements the lowest layer of interaction with a
+<a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>, the connection layer. This means that you can use this
+module to create <a class="reference internal" href="#monk_tf.conn.AConnection" title="monk_tf.conn.AConnection"><tt class="xref py py-class docutils literal"><span class="pre">AConnection</span></tt></a> objects, interact with
+them, and manipulate their internal states.</p>
+<p>States are implemented based on the State design pattern via
 <a class="reference internal" href="#monk_tf.conn.AState" title="monk_tf.conn.AState"><tt class="xref py py-class docutils literal"><span class="pre">AState</span></tt></a>. Connection objects hold a
-<tt class="xref py py-attr docutils literal"><span class="pre">current_state</span></tt> attribute. Everytime a
-public method of a connection is called, the object will forward that message
-to its <tt class="xref py py-attr docutils literal"><span class="pre">current_state</span></tt> and the state will
+<tt class="xref py py-attr docutils literal"><span class="pre">current_state</span></tt> attribute. Every time a
+public method of a connection is called, the object will forward this call
+to its <tt class="xref py py-attr docutils literal"><span class="pre">current_state</span></tt>, which will
 then execute the method depending on what the task of the state is.</p>
+<p>As an Example, let&#8217;s take a <a class="reference internal" href="#monk_tf.conn.SerialConnection" title="monk_tf.conn.SerialConnection"><tt class="xref py py-class docutils literal"><span class="pre">SerialConnection</span></tt></a>. If you
+execute its <a class="reference internal" href="#monk_tf.conn.AConnection.connect" title="monk_tf.conn.AConnection.connect"><tt class="xref py py-meth docutils literal"><span class="pre">connect()</span></tt></a> method, the connection
+will delegate this task to its
+<tt class="xref py py-attr docutils literal"><span class="pre">current_state</span></tt> which is probably a
+<a class="reference internal" href="#monk_tf.conn.Disconnected" title="monk_tf.conn.Disconnected"><tt class="xref py py-class docutils literal"><span class="pre">Disconnected</span></tt></a> object but might be any other state as
+well. Each State object also has a method for each public
+<a class="reference internal" href="#monk_tf.conn.AConnection" title="monk_tf.conn.AConnection"><tt class="xref py py-class docutils literal"><span class="pre">AConnection</span></tt></a> method, e.g.,
+<a class="reference internal" href="#monk_tf.conn.Disconnected.connect" title="monk_tf.conn.Disconnected.connect"><tt class="xref py py-meth docutils literal"><span class="pre">connect()</span></tt></a>, which makes it clear which
+<a class="reference internal" href="#monk_tf.conn.AState" title="monk_tf.conn.AState"><tt class="xref py py-class docutils literal"><span class="pre">AState</span></tt></a> method will be called from the
+<a class="reference internal" href="#monk_tf.conn.AConnection" title="monk_tf.conn.AConnection"><tt class="xref py py-class docutils literal"><span class="pre">AConnection</span></tt></a>. In this
+<a class="reference internal" href="#monk_tf.conn.AConnection" title="monk_tf.conn.AConnection"><tt class="xref py py-class docutils literal"><span class="pre">AConnection</span></tt></a> method there might be some checks (not in
+this case, though) and then it will redirect the task to a private method of
+<a class="reference internal" href="#monk_tf.conn.SerialConnection" title="monk_tf.conn.SerialConnection"><tt class="xref py py-class docutils literal"><span class="pre">SerialConnection</span></tt></a>, in this case
+<tt class="xref py py-meth docutils literal"><span class="pre">_connect()</span></tt>. Because this private method
+expects that all checks are done it will attempt to initiate the connection.</p>
+<p>This does not just seem complicated, it actually is. The reason is that the
+State design pattern was applied here. To wrap your head around the idea might
+be complicated at first but it also comes with great payoff. For example, when
+you write a new child class of <a class="reference internal" href="#monk_tf.conn.AConnection" title="monk_tf.conn.AConnection"><tt class="xref py py-class docutils literal"><span class="pre">AConnection</span></tt></a> you
+overwrite the methods <tt class="xref py py-meth docutils literal"><span class="pre">_connect()</span></tt>,
+<tt class="xref py py-meth docutils literal"><span class="pre">_login()</span></tt>,
+<tt class="xref py py-meth docutils literal"><span class="pre">_cmd()</span></tt>,
+<tt class="xref py py-meth docutils literal"><span class="pre">_disconnect()</span></tt> to show how your connection
+handles the different events. Because the State design pattern was chonsen you
+do not have to worry about checking if the connection is really ready for what
+you want to do in this event, e.g., in
+<tt class="xref py py-meth docutils literal"><span class="pre">_cmd()</span></tt> you do not need to worry if you are
+already connected or not, because this is already asserted by
+<a class="reference internal" href="#monk_tf.conn.AConnection" title="monk_tf.conn.AConnection"><tt class="xref py py-class docutils literal"><span class="pre">AConnection</span></tt></a> and the State design pattern. You can
+expect to have a direct connection to the <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a> and can start
+writing the code that is necessary to send a <a class="reference internal" href="glossary.html#term-shell-command"><em class="xref std std-term">shell&nbsp;command</em></a> to the
+device.</p>
+<p>Something else that might be confusing about this layer is that many methds
+have undefined return behaviour. This is a disadvantage and a feature of Python
+at the same time, because in Python there is no way to ensure that a method
+only returns some specific type or result. Here we use it as a feature, because
+from the private methods like <tt class="xref py py-meth docutils literal"><span class="pre">_login()</span></tt> that
+you write into individual <a class="reference internal" href="#monk_tf.conn.AConnection" title="monk_tf.conn.AConnection"><tt class="xref py py-class docutils literal"><span class="pre">AConnection</span></tt></a> child classes,
+you can be sure that your return results get deliverd to the publicly called
+<a class="reference internal" href="#monk_tf.conn.AConnection.login" title="monk_tf.conn.AConnection.login"><tt class="xref py py-meth docutils literal"><span class="pre">login()</span></tt></a>. And because Python does not force
+us to define a specific return result you can choose in your private methods if
+you want to return something and if so what it might be. In
+<a class="reference internal" href="#monk_tf.conn.SerialConnection" title="monk_tf.conn.SerialConnection"><tt class="xref py py-class docutils literal"><span class="pre">SerialConnection</span></tt></a> we decided to not return anything.
+Therefore anybody who might decide to check what gets returned basically just
+reads``None`` as the result and that is fine.</p>
 <dl class="docutils">
 <dt>The code of this module is split into the following parts:</dt>
 <dd><ol class="first last arabic simple">
 <li><em>Exceptions</em> - all exceptions that are used in this module</li>
-<li><em>AConnection</em> - the abstract Connection class which all other
-connections are based on.</li>
+<li><em>AConnection</em> - the abstract connection class which all other
+connections are based on</li>
 <li><em>Test Connections</em> - a list of connections that do not really connect to
 a <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a> but instead are used for debugging purposes of
-your test cases.</li>
+your test cases</li>
 <li><em>Real Connections</em> - the real connections that connect MONK to a
-<a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>.</li>
+<a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a></li>
 <li><em>AState</em> - the abstract State class which all other states are based on.</li>
-<li><em>State Classes</em> - the implementation of the state machine.</li>
+<li><em>State Classes</em> - the implementation of the state machine</li>
 </ol>
 </dd>
 </dl>
@@ -95,7 +141,7 @@ your test cases.</li>
 <dt id="monk_tf.conn.AConnection">
 <em class="property">class </em><tt class="descclassname">monk_tf.conn.</tt><tt class="descname">AConnection</tt><big>(</big><em>start_state=None</em>, <em>name=None</em>, <em>user_prompt='login: '</em>, <em>pw_prompt='Password: '</em>, <em>credentials=None</em>, <em>linesep=None</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#AConnection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.AConnection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
-<p>abstract base class for other connections to extend.</p>
+<p>Abstract base class for other connections to extend.</p>
 <p>This class preimplements the interaction between a
 <a class="reference internal" href="#monk_tf.conn.AConnection" title="monk_tf.conn.AConnection"><tt class="xref py py-class docutils literal"><span class="pre">AConnection</span></tt></a> and its
 <a class="reference internal" href="#monk_tf.conn.AState" title="monk_tf.conn.AState"><tt class="xref py py-class docutils literal"><span class="pre">AState</span></tt></a>.</p>
@@ -106,7 +152,7 @@ your test cases.</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>start_state</strong> &#8211; the <a class="reference internal" href="#monk_tf.conn.AState" title="monk_tf.conn.AState"><tt class="xref py py-class docutils literal"><span class="pre">AState</span></tt></a> object the
 connection should start in.</li>
-<li><strong>name</strong> &#8211; a name to differentiate the connecton from others. This is
+<li><strong>name</strong> &#8211; a name to distinguish the connection from others. This is
 mostly used for <a class="reference external" href="http://docs.python.org/library/logging.html#logging" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">logging</span></tt></a> output.</li>
 <li><strong>user_prompt</strong> &#8211; the prompt that requests the login username.</li>
 <li><strong>pw_prompt</strong> &#8211; the prompt that requests the login password.</li>
@@ -124,7 +170,7 @@ mostly on your TermIOs configuration and the
 <dl class="method">
 <dt id="monk_tf.conn.AConnection.can_login">
 <tt class="descname">can_login</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#AConnection.can_login"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.AConnection.can_login" title="Permalink to this definition">¶</a></dt>
-<dd><p>checks wether the prompt is one of the login prompts.</p>
+<dd><p>Checks wether the prompt is one of the login prompts.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -138,14 +184,14 @@ mostly on your TermIOs configuration and the
 <dl class="method">
 <dt id="monk_tf.conn.AConnection.cmd">
 <tt class="descname">cmd</tt><big>(</big><em>msg</em><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#AConnection.cmd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.AConnection.cmd" title="Permalink to this definition">¶</a></dt>
-<dd><p>send <a class="reference internal" href="glossary.html#term-shell-command"><em class="xref std std-term">shell&nbsp;command</em></a> to <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>.</p>
+<dd><p>Send <a class="reference internal" href="glossary.html#term-shell-command"><em class="xref std std-term">shell&nbsp;command</em></a> to <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>msg</strong> &#8211; the <a class="reference internal" href="glossary.html#term-shell-command"><em class="xref std std-term">shell&nbsp;command</em></a></td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Depends on the specific connection. Might be None.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Depends on the specific connection. May be None.</td>
 </tr>
 </tbody>
 </table>
@@ -154,7 +200,7 @@ mostly on your TermIOs configuration and the
 <dl class="method">
 <dt id="monk_tf.conn.AConnection.connect">
 <tt class="descname">connect</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#AConnection.connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.AConnection.connect" title="Permalink to this definition">¶</a></dt>
-<dd><p>initiate connection with <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>.</p>
+<dd><p>Initiate connection with <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -168,12 +214,12 @@ mostly on your TermIOs configuration and the
 <dl class="method">
 <dt id="monk_tf.conn.AConnection.disconnect">
 <tt class="descname">disconnect</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#AConnection.disconnect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.AConnection.disconnect" title="Permalink to this definition">¶</a></dt>
-<dd><p>deactivate the connection to <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>.</p>
+<dd><p>Deactivate the connection to <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Depends on the specific connection. Might be None.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Depends on the specific connection. May be None.</td>
 </tr>
 </tbody>
 </table>
@@ -182,14 +228,14 @@ mostly on your TermIOs configuration and the
 <dl class="method">
 <dt id="monk_tf.conn.AConnection.login">
 <tt class="descname">login</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#AConnection.login"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.AConnection.login" title="Permalink to this definition">¶</a></dt>
-<dd><p>authenticate to <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>.</p>
-<p>It uses a tupel of <tt class="docutils literal"><span class="pre">(user,</span> <span class="pre">password)</span></tt> that is hopefully stored in an
+<dd><p>Authenticate to <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>.</p>
+<p>It uses a tupel of <tt class="docutils literal"><span class="pre">(user,</span> <span class="pre">password)</span></tt> that is expected to be found in an
 attribute <tt class="docutils literal"><span class="pre">credentials</span></tt>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Depends on the specific connection. Might be None.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Depends on the specific connection. May be None.</td>
 </tr>
 </tbody>
 </table>
@@ -201,17 +247,17 @@ attribute <tt class="docutils literal"><span class="pre">credentials</span></tt>
 <dt id="monk_tf.conn.AState">
 <em class="property">class </em><tt class="descclassname">monk_tf.conn.</tt><tt class="descname">AState</tt><a class="reference internal" href="_modules/monk_tf/conn.html#AState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.AState" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
-<p>the abstract base class for all connection related states to extend.</p>
+<p>The abstract base class for all connection related states to extend.</p>
 <p>An AState is a representation of a set of reactions in a specific state.
 Therefore it does not make sense to keep a lot of stateful information in a
-single AState object. This makes creation of many AState objects of the
-same type unnecessary, which is why this class makes sure that all it&#8217;s
+single AState object. This makes creation of multiple AState objects of the
+same type unnecessary, which is why this class makes sure that all its
 child classes can only have a single instance. This design pattern is
 called Singleton.</p>
 <dl class="method">
 <dt id="monk_tf.conn.AState.next_state">
 <tt class="descname">next_state</tt><big>(</big><em>connection</em><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#AState.next_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.AState.next_state" title="Permalink to this definition">¶</a></dt>
-<dd><p>state transition table. Must be overwritten by child classes</p>
+<dd><p>State transition table. Must be overwritten by child classes.</p>
 </dd></dl>
 
 </dd></dl>
@@ -224,18 +270,18 @@ called Singleton.</p>
 <dl class="method">
 <dt id="monk_tf.conn.Authenticated.cmd">
 <tt class="descname">cmd</tt><big>(</big><em>connection</em>, <em>msg</em><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#Authenticated.cmd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.Authenticated.cmd" title="Permalink to this definition">¶</a></dt>
-<dd><p>send a shell command to <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a></p>
+<dd><p>Send a shell command to <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>connection</strong> &#8211; the connection that uses this state.</li>
-<li><strong>msg</strong> &#8211; the shell command that should be transmitted.</li>
+<li><strong>msg</strong> &#8211; the shell command to be sent.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the standard output of the sehll command.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the standard output of the shell command.</p>
 </td>
 </tr>
 </tbody>
@@ -245,7 +291,7 @@ called Singleton.</p>
 <dl class="method">
 <dt id="monk_tf.conn.Authenticated.connect">
 <tt class="descname">connect</tt><big>(</big><em>connection</em><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#Authenticated.connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.Authenticated.connect" title="Permalink to this definition">¶</a></dt>
-<dd><p>does nothing, because is already connected.</p>
+<dd><p>Does nothing because we are already connected.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -259,14 +305,14 @@ called Singleton.</p>
 <dl class="method">
 <dt id="monk_tf.conn.Authenticated.disconnect">
 <tt class="descname">disconnect</tt><big>(</big><em>connection</em><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#Authenticated.disconnect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.Authenticated.disconnect" title="Permalink to this definition">¶</a></dt>
-<dd><p>closes the connection.</p>
+<dd><p>Closes the connection.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>connection</strong> &#8211; the connection that uses this state.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the disconnection result. Might be None.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the disconnection result. May be None.</td>
 </tr>
 </tbody>
 </table>
@@ -275,7 +321,7 @@ called Singleton.</p>
 <dl class="method">
 <dt id="monk_tf.conn.Authenticated.login">
 <tt class="descname">login</tt><big>(</big><em>connection</em><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#Authenticated.login"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.Authenticated.login" title="Permalink to this definition">¶</a></dt>
-<dd><p>does nothing, because is already logged in.</p>
+<dd><p>Does nothing, because we are already logged in.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -297,14 +343,14 @@ called Singleton.</p>
 <dt id="monk_tf.conn.AuthenticationRequiredException">
 <em class="property">exception </em><tt class="descclassname">monk_tf.conn.</tt><tt class="descname">AuthenticationRequiredException</tt><a class="reference internal" href="_modules/monk_tf/conn.html#AuthenticationRequiredException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.AuthenticationRequiredException" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#monk_tf.conn.ConnectionException" title="monk_tf.conn.ConnectionException"><tt class="xref py py-class docutils literal"><span class="pre">monk_tf.conn.ConnectionException</span></tt></a></p>
-<p>is raised when user is not authenticated, yet.</p>
+<p>is raised when user has not been authenticated yet.</p>
 </dd></dl>
 
 <dl class="exception">
 <dt id="monk_tf.conn.CantConnectException">
 <em class="property">exception </em><tt class="descclassname">monk_tf.conn.</tt><tt class="descname">CantConnectException</tt><a class="reference internal" href="_modules/monk_tf/conn.html#CantConnectException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.CantConnectException" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#monk_tf.conn.ConnectionException" title="monk_tf.conn.ConnectionException"><tt class="xref py py-class docutils literal"><span class="pre">monk_tf.conn.ConnectionException</span></tt></a></p>
-<p>is raised if a connection can&#8217;t be established.</p>
+<p>is raised if a connection cannot be established.</p>
 <p>Reasons might be that the physical connection is not established or that
 the executing user lacks privileges to use this connection, e.g., when he
 is not in the <em>dialout</em> group on a Linux machine.</p>
@@ -314,7 +360,7 @@ is not in the <em>dialout</em> group on a Linux machine.</p>
 <dt id="monk_tf.conn.CommandException">
 <em class="property">exception </em><tt class="descclassname">monk_tf.conn.</tt><tt class="descname">CommandException</tt><a class="reference internal" href="_modules/monk_tf/conn.html#CommandException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.CommandException" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#monk_tf.conn.ConnectionException" title="monk_tf.conn.ConnectionException"><tt class="xref py py-class docutils literal"><span class="pre">monk_tf.conn.ConnectionException</span></tt></a></p>
-<p>is raised when there was an unidentified problem while executing a cmd.</p>
+<p>is raised when there was an unidentified problem while executing a command.</p>
 </dd></dl>
 
 <dl class="class">
@@ -325,14 +371,14 @@ is not in the <em>dialout</em> group on a Linux machine.</p>
 <dl class="method">
 <dt id="monk_tf.conn.Connected.cmd">
 <tt class="descname">cmd</tt><big>(</big><em>connection</em>, <em>msg</em><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#Connected.cmd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.Connected.cmd" title="Permalink to this definition">¶</a></dt>
-<dd><p>sends a command if login not necessary, otherwise raises Exception</p>
+<dd><p>Sends a command if login not necessary, otherwise raises exception</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>connection</strong> &#8211; the connection that uses this state.</li>
-<li><strong>msg</strong> &#8211; the shell command that should be sent via the connection.</li>
+<li><strong>msg</strong> &#8211; the shell command to be sent via the connection.</li>
 </ul>
 </td>
 </tr>
@@ -346,20 +392,20 @@ is not in the <em>dialout</em> group on a Linux machine.</p>
 <dl class="method">
 <dt id="monk_tf.conn.Connected.connect">
 <tt class="descname">connect</tt><big>(</big><em>connection</em><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#Connected.connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.Connected.connect" title="Permalink to this definition">¶</a></dt>
-<dd><p>does nothing, because is already connected.</p>
+<dd><p>Does nothing because we are already connected.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="monk_tf.conn.Connected.disconnect">
 <tt class="descname">disconnect</tt><big>(</big><em>connection</em><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#Connected.disconnect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.Connected.disconnect" title="Permalink to this definition">¶</a></dt>
-<dd><p>deactivates the connection.</p>
+<dd><p>Deactivates the connection.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>connection</strong> &#8211; the connection that uses this state.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the disconnection result. Might be None.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the disconnection result. May be None.</td>
 </tr>
 </tbody>
 </table>
@@ -368,16 +414,17 @@ is not in the <em>dialout</em> group on a Linux machine.</p>
 <dl class="method">
 <dt id="monk_tf.conn.Connected.login">
 <tt class="descname">login</tt><big>(</big><em>connection</em><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#Connected.login"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.Connected.login" title="Permalink to this definition">¶</a></dt>
-<dd><p>authenticates at connection, if object has credentials</p>
+<dd><p>Authenticates at connection, if object has credentials.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>connection</strong> &#8211; the connection that uses this state.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the result of the login. Might be None. If False then the
-connection object has no credentials that could be used. This
-can mean that no login is necessary, though.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the result of the login. May be None. If False then the
+connection object has no credentials to use. This
+may indicate a problem but may also mean that no login
+is necessary.</td>
 </tr>
 </tbody>
 </table>
@@ -394,14 +441,14 @@ can mean that no login is necessary, though.</td>
 <dt id="monk_tf.conn.ConnectionException">
 <em class="property">exception </em><tt class="descclassname">monk_tf.conn.</tt><tt class="descname">ConnectionException</tt><a class="reference internal" href="_modules/monk_tf/conn.html#ConnectionException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.ConnectionException" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></tt></p>
-<p>is the baseclass for exceptions of this package.</p>
+<p>is the base class for exceptions of this package.</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="monk_tf.conn.DefectiveConnection">
 <em class="property">class </em><tt class="descclassname">monk_tf.conn.</tt><tt class="descname">DefectiveConnection</tt><big>(</big><em>start_state=None</em>, <em>name=None</em>, <em>user_prompt='login: '</em>, <em>pw_prompt='Password: '</em>, <em>credentials=None</em>, <em>linesep=None</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#DefectiveConnection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.DefectiveConnection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#monk_tf.conn.AConnection" title="monk_tf.conn.AConnection"><tt class="xref py py-class docutils literal"><span class="pre">monk_tf.conn.AConnection</span></tt></a></p>
-<p>raise a <a class="reference internal" href="#monk_tf.conn.MockConnectionException" title="monk_tf.conn.MockConnectionException"><tt class="xref py py-class docutils literal"><span class="pre">MockConnectionException</span></tt></a> on each call.</p>
+<p>Raise a <a class="reference internal" href="#monk_tf.conn.MockConnectionException" title="monk_tf.conn.MockConnectionException"><tt class="xref py py-class docutils literal"><span class="pre">MockConnectionException</span></tt></a> on each call.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -409,7 +456,7 @@ can mean that no login is necessary, though.</td>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>start_state</strong> &#8211; the <a class="reference internal" href="#monk_tf.conn.AState" title="monk_tf.conn.AState"><tt class="xref py py-class docutils literal"><span class="pre">AState</span></tt></a> object the
 connection should start in.</li>
-<li><strong>name</strong> &#8211; a name to differentiate the connecton from others. This is
+<li><strong>name</strong> &#8211; a name to distinguish the connection from others. This is
 mostly used for <a class="reference external" href="http://docs.python.org/library/logging.html#logging" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">logging</span></tt></a> output.</li>
 <li><strong>user_prompt</strong> &#8211; the prompt that requests the login username.</li>
 <li><strong>pw_prompt</strong> &#8211; the prompt that requests the login password.</li>
@@ -430,17 +477,17 @@ mostly on your TermIOs configuration and the
 <dt id="monk_tf.conn.Disconnected">
 <em class="property">class </em><tt class="descclassname">monk_tf.conn.</tt><tt class="descname">Disconnected</tt><a class="reference internal" href="_modules/monk_tf/conn.html#Disconnected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.Disconnected" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#monk_tf.conn.AState" title="monk_tf.conn.AState"><tt class="xref py py-class docutils literal"><span class="pre">monk_tf.conn.AState</span></tt></a></p>
-<p>Defines interaction if connection is not established yet.</p>
+<p>Defines interaction if connection has not been established yet.</p>
 <dl class="method">
 <dt id="monk_tf.conn.Disconnected.cmd">
 <tt class="descname">cmd</tt><big>(</big><em>connection</em>, <em>msg</em><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#Disconnected.cmd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.Disconnected.cmd" title="Permalink to this definition">¶</a></dt>
-<dd><p>should not be called, because not connected</p>
+<dd><p>Should not be called because there is no connection.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="monk_tf.conn.Disconnected.connect">
 <tt class="descname">connect</tt><big>(</big><em>connection</em><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#Disconnected.connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.Disconnected.connect" title="Permalink to this definition">¶</a></dt>
-<dd><p>initiate connection with <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a></p>
+<dd><p>Initiate connection with <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -448,7 +495,7 @@ mostly on your TermIOs configuration and the
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>connection</strong> &#8211; the connection that uses this state</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">depends on what the connection&#8217;s protected <tt class="xref py py-meth docutils literal"><span class="pre">_connect()</span></tt>
-method returns. Could be None.</td>
+method returns. May be None.</td>
 </tr>
 </tbody>
 </table>
@@ -457,13 +504,13 @@ method returns. Could be None.</td>
 <dl class="method">
 <dt id="monk_tf.conn.Disconnected.disconnect">
 <tt class="descname">disconnect</tt><big>(</big><em>connection</em><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#Disconnected.disconnect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.Disconnected.disconnect" title="Permalink to this definition">¶</a></dt>
-<dd><p>does not do anything, because already disconnected</p>
+<dd><p>Does not do anything because we are already disconnected.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="monk_tf.conn.Disconnected.login">
 <tt class="descname">login</tt><big>(</big><em>connection</em><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#Disconnected.login"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.Disconnected.login" title="Permalink to this definition">¶</a></dt>
-<dd><p>should not be called, because not connected</p>
+<dd><p>Should not be called because there is no connection.</p>
 </dd></dl>
 
 <dl class="method">
@@ -477,7 +524,7 @@ method returns. Could be None.</td>
 <dt id="monk_tf.conn.EchoConnection">
 <em class="property">class </em><tt class="descclassname">monk_tf.conn.</tt><tt class="descname">EchoConnection</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#EchoConnection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.EchoConnection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#monk_tf.conn.AConnection" title="monk_tf.conn.AConnection"><tt class="xref py py-class docutils literal"><span class="pre">monk_tf.conn.AConnection</span></tt></a></p>
-<p>return everything sent to this connection.</p>
+<p>Return everything sent to this connection.</p>
 </dd></dl>
 
 <dl class="exception">
@@ -498,21 +545,21 @@ method returns. Could be None.</td>
 <dt id="monk_tf.conn.NotConnectedException">
 <em class="property">exception </em><tt class="descclassname">monk_tf.conn.</tt><tt class="descname">NotConnectedException</tt><a class="reference internal" href="_modules/monk_tf/conn.html#NotConnectedException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.NotConnectedException" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#monk_tf.conn.ConnectionException" title="monk_tf.conn.ConnectionException"><tt class="xref py py-class docutils literal"><span class="pre">monk_tf.conn.ConnectionException</span></tt></a></p>
-<p>is raised when connection is not established, yet.</p>
+<p>is raised when connection has not been established yet.</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="monk_tf.conn.SerialConnection">
 <em class="property">class </em><tt class="descclassname">monk_tf.conn.</tt><tt class="descname">SerialConnection</tt><big>(</big><em>serial_class=None</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#SerialConnection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.SerialConnection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#monk_tf.conn.AConnection" title="monk_tf.conn.AConnection"><tt class="xref py py-class docutils literal"><span class="pre">monk_tf.conn.AConnection</span></tt></a></p>
-<p>connect to <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a> via serial interface.</p>
+<p>Connect to <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a> via serial interface.</p>
 <p>With this class you can use all params from
 <a class="reference internal" href="#monk_tf.conn.AConnection" title="monk_tf.conn.AConnection"><tt class="xref py py-class docutils literal"><span class="pre">AConnection</span></tt></a> and additionally:</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>serial_class</strong> &#8211; the class that provides the serial interace.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>serial_class</strong> &#8211; the class that provides the serial interface.</td>
 </tr>
 </tbody>
 </table>
@@ -530,14 +577,15 @@ method returns. Could be None.</td>
 <span id="dev-module"></span><h2><tt class="xref py py-mod docutils literal"><span class="pre">dev</span></tt> Module<a class="headerlink" href="#module-monk_tf.dev" title="Permalink to this headline">¶</a></h2>
 <p>Device Layer</p>
 <p>This layer abstracts a complete <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a> in a single object, which
-can be interacted without worries about how the actual communication is done.</p>
+can be interacted with without worrying about how the actual communication is
+handled.</p>
 <p>To use this module create a <a class="reference internal" href="#monk_tf.dev.Device" title="monk_tf.dev.Device"><tt class="xref py py-class docutils literal"><span class="pre">Device</span></tt></a> class.</p>
 <p>The package is separated into module exceptions and the device classes.</p>
 <dl class="exception">
 <dt id="monk_tf.dev.CantHandleException">
 <em class="property">exception </em><tt class="descclassname">monk_tf.dev.</tt><tt class="descname">CantHandleException</tt><a class="reference internal" href="_modules/monk_tf/dev.html#CantHandleException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.dev.CantHandleException" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#monk_tf.dev.DeviceException" title="monk_tf.dev.DeviceException"><tt class="xref py py-class docutils literal"><span class="pre">monk_tf.dev.DeviceException</span></tt></a></p>
-<p>is raised when a request ca not be handled by the connections of a
+<p>is raised when a request cannot be handled by the connections of a
 <a class="reference internal" href="#monk_tf.dev.Device" title="monk_tf.dev.Device"><tt class="xref py py-class docutils literal"><span class="pre">Device</span></tt></a>.</p>
 </dd></dl>
 
@@ -565,7 +613,7 @@ can be interacted without worries about how the actual communication is done.</p
 <dl class="method">
 <dt id="monk_tf.dev.Device.cmd">
 <tt class="descname">cmd</tt><big>(</big><em>msg</em><big>)</big><a class="reference internal" href="_modules/monk_tf/dev.html#Device.cmd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.dev.Device.cmd" title="Permalink to this definition">¶</a></dt>
-<dd><p>send a <a class="reference internal" href="glossary.html#term-shell-command"><em class="xref std std-term">shell&nbsp;command</em></a> to the <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>.</p>
+<dd><p>Send a <a class="reference internal" href="glossary.html#term-shell-command"><em class="xref std std-term">shell&nbsp;command</em></a> to the <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -584,7 +632,7 @@ can be interacted without worries about how the actual communication is done.</p
 <dt id="monk_tf.dev.DeviceException">
 <em class="property">exception </em><tt class="descclassname">monk_tf.dev.</tt><tt class="descname">DeviceException</tt><a class="reference internal" href="_modules/monk_tf/dev.html#DeviceException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.dev.DeviceException" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></tt></p>
-<p>base class for Exceptions of the device layer.</p>
+<p>Base class for exceptions of the device layer.</p>
 </dd></dl>
 
 </div>
@@ -594,7 +642,7 @@ can be interacted without worries about how the actual communication is done.</p
 <a class="reference internal" href="#monk_tf.conn.AConnection" title="monk_tf.conn.AConnection"><tt class="xref py py-class docutils literal"><span class="pre">AConnection</span></tt></a> objects by yourself, you can also choose
 to put corresponding data in a separate file and let this layer handle the
 object concstruction and destruction for you. Doing this will probably make
-your test code look more clean, keep the amount of places where you need to
+your test code look more clean, keep the number of places where you need to
 change something as small as possible, and lets you reuse data that you already
 have described.</p>
 <p>A hello world test with it looks like this:</p>
@@ -615,12 +663,12 @@ have described.</p>
     <span class="n">h</span><span class="o">.</span><span class="n">tear_down</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>So using this layer setting up a device only takes one line of code. The rest
-of the information is in that <tt class="docutils literal"><span class="pre">target_device.cfg</span></tt> file. Although this data
-file can have any format you want, <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> currently only comes with one text
-format parser predefined, which is the <a class="reference internal" href="#monk_tf.fixture.XiniParser" title="monk_tf.fixture.XiniParser"><tt class="xref py py-class docutils literal"><span class="pre">XiniParser</span></tt></a>.
-The <tt class="docutils literal"><span class="pre">Xini</span></tt> is short for <a class="reference internal" href="glossary.html#term-extended-ini"><em class="xref std std-term">extended&nbsp;INI</em></a>. An example data file might look
-like this:</p>
+<p>When using this layer setting up a device only takes one line of code. The rest
+of the information is in the <tt class="docutils literal"><span class="pre">target_device.cfg</span></tt> file. Although this data
+file can have any format you want, <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> currently only comes with one
+text format parser predefined, which is the
+<a class="reference internal" href="#monk_tf.fixture.XiniParser" title="monk_tf.fixture.XiniParser"><tt class="xref py py-class docutils literal"><span class="pre">XiniParser</span></tt></a>.  <tt class="docutils literal"><span class="pre">Xini</span></tt> is short for
+<a class="reference internal" href="glossary.html#term-extended-ini"><em class="xref std std-term">extended&nbsp;INI</em></a>. An example data file might look like this:</p>
 <div class="highlight-python"><pre>[device1]
     type=Device
     [[serial1]]
@@ -629,25 +677,25 @@ like this:</p>
         user=example
         password=secret</pre>
 </div>
-<p>As you can see it looks like a <a class="reference internal" href="glossary.html#term-ini"><em class="xref std std-term">INI</em></a> file. There are sections, consisting
-of a title enclosed in squared brackets (<tt class="docutils literal"><span class="pre">[]</span></tt>) and lists of properties,
-consisting of equal-sign (<tt class="docutils literal"><span class="pre">=</span></tt>) separated key-value pairs. The unusual part is
-that the section <em>serial1</em> is surrounded by two pairs of squared brackets
-(<tt class="docutils literal"><span class="pre">[]</span></tt>). This is the specialty of this format, because it means that <em>serial1</em>
-is a subsection of <em>device1</em> and is therefore a nested section. This nesting
-can be done unlimited, by surrounding a section with more and more pairs of
-squared brackets (<tt class="docutils literal"><span class="pre">[]</span></tt>) according to the level of nesting that should be
-achieved. Thus in this example <em>serial1</em> belongs to <em>device1</em> and the types
-show which corresponding <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> object should be created.</p>
+<p>As you can see it looks like an <a class="reference internal" href="glossary.html#term-ini"><em class="xref std std-term">INI</em></a> file. There are sections,
+consisting of a title enclosed in squared brackets (<tt class="docutils literal"><span class="pre">[]</span></tt>) and lists of
+properties, consisting of key-value pairs separated by equality signs (<tt class="docutils literal"><span class="pre">=</span></tt>).
+The unusual part is that the section <em>serial1</em> is surrounded by two pairs of
+squared brackets (<tt class="docutils literal"><span class="pre">[]</span></tt>). This is the specialty of this format indicating that
+<em>serial1</em> is a subsection of <em>device1</em> and therefore is a nested section. This
+nesting can be done unlimited, by surrounding a section with more and more
+pairs of squared brackets (<tt class="docutils literal"><span class="pre">[]</span></tt>) according to the level of nesting intended.
+In this example <em>serial1</em> belongs to <em>device1</em> and the types indicate the
+corresponding <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> object to be created.</p>
 <div class="section" id="classes">
 <h3>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h3>
 <dl class="exception">
 <dt id="monk_tf.fixture.ADeviceException">
 <em class="property">exception </em><tt class="descclassname">monk_tf.fixture.</tt><tt class="descname">ADeviceException</tt><a class="reference internal" href="_modules/monk_tf/fixture.html#ADeviceException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.fixture.ADeviceException" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></tt></p>
-<p>Base class for Exceptions of the device layer.</p>
-<p>If you want to make sure that you catch all Exceptions that are related
-with this layer, then you should catch <em>ADeviceExceptions</em>. This also means
+<p>Base class for exceptions of the device layer.</p>
+<p>If you want to make sure that you catch all exceptions that are related
+to this layer, you should catch <em>ADeviceExceptions</em>. This also means
 that if you extend this list of exceptions you should inherit from this
 exception and not from <a class="reference external" href="http://docs.python.org/library/exceptions.html#exceptions.Exception" title="(in Python v2.7)"><tt class="xref py py-exc docutils literal"><span class="pre">Exception</span></tt></a>.</p>
 </dd></dl>
@@ -656,27 +704,27 @@ exception and not from <a class="reference external" href="http://docs.python.or
 <dt id="monk_tf.fixture.AParseException">
 <em class="property">exception </em><tt class="descclassname">monk_tf.fixture.</tt><tt class="descname">AParseException</tt><a class="reference internal" href="_modules/monk_tf/fixture.html#AParseException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.fixture.AParseException" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#monk_tf.fixture.ADeviceException" title="monk_tf.fixture.ADeviceException"><tt class="xref py py-class docutils literal"><span class="pre">monk_tf.fixture.ADeviceException</span></tt></a></p>
-<p>Base class for exceptions when a parsing error occurs.</p>
+<p>Base class for exceptions concerning parsing errors.</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="monk_tf.fixture.AParser">
 <em class="property">class </em><tt class="descclassname">monk_tf.fixture.</tt><tt class="descname">AParser</tt><a class="reference internal" href="_modules/monk_tf/fixture.html#AParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.fixture.AParser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">dict</span></tt></a></p>
-<p>Base class for all Parsers.</p>
+<p>Base class for all parsers.</p>
 <p>Do not instantiate this class! This basically just provides the <a class="reference internal" href="glossary.html#term-api"><em class="xref std std-term">API</em></a>
 that is needed by <a class="reference internal" href="#monk_tf.fixture.Fixture" title="monk_tf.fixture.Fixture"><tt class="xref py py-class docutils literal"><span class="pre">Fixture</span></tt></a> to interact with the
 data that is parsed. Each child class should make sure that it always
 provides its parsed data like a <a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><tt class="xref py py-class docutils literal"><span class="pre">dict</span></tt></a> would. If you require your
-own parser, you can extend this and look at
-<a class="reference internal" href="#monk_tf.fixture.XiniParser" title="monk_tf.fixture.XiniParser"><tt class="xref py py-class docutils literal"><span class="pre">XiniParser</span></tt></a> for a very basic example.</p>
+own parser, you can extend this. <a class="reference internal" href="#monk_tf.fixture.XiniParser" title="monk_tf.fixture.XiniParser"><tt class="xref py py-class docutils literal"><span class="pre">XiniParser</span></tt></a>
+provides a very basic example.</p>
 </dd></dl>
 
 <dl class="exception">
 <dt id="monk_tf.fixture.CantParseException">
 <em class="property">exception </em><tt class="descclassname">monk_tf.fixture.</tt><tt class="descname">CantParseException</tt><a class="reference internal" href="_modules/monk_tf/fixture.html#CantParseException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.fixture.CantParseException" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#monk_tf.fixture.ADeviceException" title="monk_tf.fixture.ADeviceException"><tt class="xref py py-class docutils literal"><span class="pre">monk_tf.fixture.ADeviceException</span></tt></a></p>
-<p>is raised when a Fixture can not parse a given file.</p>
+<p>is raised when a Fixture cannot parse a given file.</p>
 </dd></dl>
 
 <dl class="class">
@@ -685,22 +733,25 @@ own parser, you can extend this and look at
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>Creates <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> objects based on dictionary like objects.</p>
 <p>This is the class that provides the fundamental feature of this layer. It
-reads data files by trying to parse them though its list of known parsers
-and if it succeeds, it creates <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> objects based on the
-configuration given by the data file. Most likely these objects are one or
-more <a class="reference internal" href="#monk_tf.dev.Device" title="monk_tf.dev.Device"><tt class="xref py py-class docutils literal"><span class="pre">Device</span></tt></a> objects that have at least one
+reads data files by trying to parse them via its list of known parsers and
+if it succeeds, it creates <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> objects based on the configuration
+given by the data file. Most likely these objects are one or more
+<a class="reference internal" href="#monk_tf.dev.Device" title="monk_tf.dev.Device"><tt class="xref py py-class docutils literal"><span class="pre">Device</span></tt></a> objects that have at least one
 <a class="reference internal" href="#monk_tf.conn.AConnection" title="monk_tf.conn.AConnection"><tt class="xref py py-class docutils literal"><span class="pre">AConnection</span></tt></a> object each. If more than one
 <a class="reference internal" href="glossary.html#term-fixture-file"><em class="xref std std-term">fixture&nbsp;file</em></a> is read containing the same name on the highest level,
 then the latest data gets used. This does not work on lower levels of
-nesting, though.</p>
-<p>One source of data (either a filename or a child class of
+nesting, though. If you attempt to overwrite lower levels of nesting, what
+actually happens is that the highest layer gets overwritten and you lose
+the data that was stored in the older objects. This is simply how
+<a class="reference external" href="http://docs.python.org/library/stdtypes.html#set.update" title="(in Python v2.7)"><tt class="xref py py-meth docutils literal"><span class="pre">set.update()</span></tt></a> works.</p>
+<p>One source of data (either a file name or a child class of
 <a class="reference internal" href="#monk_tf.fixture.AParser" title="monk_tf.fixture.AParser"><tt class="xref py py-class docutils literal"><span class="pre">AParser</span></tt></a>) can be given to an object of this
 class by its constructer, others can be added afterwards with the
 <a class="reference internal" href="#monk_tf.fixture.Fixture.read" title="monk_tf.fixture.Fixture.read"><tt class="xref py py-meth docutils literal"><span class="pre">read()</span></tt></a> method. An example looks like
 this:</p>
 <div class="highlight-python"><pre>import monk_tf.fixture as mf
 
-h = mf.Fixture('/etc/monk_tf/default_devices.cfg')
+fixture = mf.Fixture('/etc/monk_tf/default_devices.cfg')
         .read('~/.monk/default_devices.cfg')
         # can also be a parser object
         .read(XiniParser('~/testsuite12345/suite_devices.cfg'))</pre>
@@ -728,12 +779,12 @@ parsing the type attribute in
 <dl class="method">
 <dt id="monk_tf.fixture.Fixture.read">
 <tt class="descname">read</tt><big>(</big><em>source</em><big>)</big><a class="reference internal" href="_modules/monk_tf/fixture.html#Fixture.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.fixture.Fixture.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read more data, either as a filename or as a parser.</p>
+<dd><p>Read more data, either as a file name or as a parser.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>source</strong> &#8211; the data source; either a filename or a
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>source</strong> &#8211; the data source; either a file name or a
 <a class="reference internal" href="#monk_tf.fixture.AParser" title="monk_tf.fixture.AParser"><tt class="xref py py-class docutils literal"><span class="pre">AParser</span></tt></a> child class
 instance.</td>
 </tr>
