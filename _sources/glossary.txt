@@ -44,6 +44,10 @@ Glossary
         key-value pairs of data. Used often for configuration files and
         description of relational data.
 
+    Jenkins
+        A CI server that continuously builds your software projects, runs
+        :term:`test suites<test suite>` and builds documentation from source.
+
     MONK
         This is the framework you are reading the documentaion from, right now!
 

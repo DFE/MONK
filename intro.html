@@ -60,8 +60,9 @@
 <p>This framework is intended for developers of
 <a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;systems</em></a> like ourselves. We found that testing
 our systems manually via serial shell or ssh was not very convenient in the
-long run, because for new products the tests needed to be repeated again and
-again. We were also aware that many <a class="reference internal" href="glossary.html#term-open-source"><em class="xref std std-term">open&nbsp;source</em></a> projects use
+long run because tests needed to be repeated again and again during routine
+software development, even more so when introducing entirely new products. We
+were also aware that many <a class="reference internal" href="glossary.html#term-open-source"><em class="xref std std-term">open&nbsp;source</em></a> projects use
 <a class="reference internal" href="glossary.html#term-unit-test"><em class="xref std std-term">unit&nbsp;tests</em></a> for writing <a class="reference internal" href="glossary.html#term-test-suite"><em class="xref std std-term">test&nbsp;suites</em></a> for
 their <a class="reference internal" href="glossary.html#term-regression-test"><em class="xref std std-term">regression&nbsp;tests</em></a>.  These tests are written in
 test methods or functions that can be executed by tools like <a class="reference internal" href="glossary.html#term-nose"><em class="xref std std-term">nose</em></a> to
@@ -69,23 +70,23 @@ generate a standardized output stating which tests have succeeded and which
 have failed.</p>
 <p>However, writing <a class="reference internal" href="glossary.html#term-unit-test"><em class="xref std std-term">unit&nbsp;tests</em></a> for testing
 <a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;systems</em></a> directly is not so easy. The reason
-is, that the <a class="reference internal" href="glossary.html#term-system-under-test"><em class="xref std std-term">system&nbsp;under&nbsp;test</em></a> can not be accessed directly. It is on
+is, that the <a class="reference internal" href="glossary.html#term-system-under-test"><em class="xref std std-term">system&nbsp;under&nbsp;test</em></a> cannot be accessed directly. It is on
 the <a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;system</em></a>, while the test itself is executed on a test server
-in a <em class="xref std std-term">Jenkins</em> job. This test server is called <a class="reference internal" href="glossary.html#term-test-host"><em class="xref std std-term">test&nbsp;host</em></a>.</p>
-<p>It would not make sense to run the <a class="reference internal" href="glossary.html#term-system-under-test"><em class="xref std std-term">system&nbsp;under&nbsp;test</em></a> on the
-<a class="reference internal" href="glossary.html#term-test-host"><em class="xref std std-term">test&nbsp;host</em></a>, because it will be executed on the <a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;system</em></a>
-in the end. Therefore test success can only be determined on the
+in a <a class="reference internal" href="glossary.html#term-jenkins"><em class="xref std std-term">Jenkins</em></a> job. This test server is called <a class="reference internal" href="glossary.html#term-test-host"><em class="xref std std-term">test&nbsp;host</em></a>.</p>
+<p>It is not feasible to run the <a class="reference internal" href="glossary.html#term-system-under-test"><em class="xref std std-term">system&nbsp;under&nbsp;test</em></a> on the
+<a class="reference internal" href="glossary.html#term-test-host"><em class="xref std std-term">test&nbsp;host</em></a>, because in the end it will be executed on the
+<a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;system</em></a>. Therefore test success can only be determined on the
 <a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;system</em></a>.</p>
 <p>It would also not make sense to run the <a class="reference internal" href="glossary.html#term-test-case"><em class="xref std std-term">test&nbsp;case</em></a> directly on the
 <a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;system</em></a> because then test and <a class="reference internal" href="glossary.html#term-system-under-test"><em class="xref std std-term">system&nbsp;under&nbsp;test</em></a> could
 influence each other. Test results must also be accumulated and stored for
-future reviews. But a terror on the <a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;system</em></a> might result in a
+future reviews. But an error on the <a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;system</em></a> might result in a
 state where files get deleted or cannot be retreived for other reasons.</p>
 <p>Therefore a separation of test environment and <a class="reference internal" href="glossary.html#term-system-under-test"><em class="xref std std-term">system&nbsp;under&nbsp;test</em></a> is not
 avoidable in <a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;system</em></a> development. For future reference the
 computer that runs the tests will be called <a class="reference internal" href="glossary.html#term-test-host"><em class="xref std std-term">test&nbsp;host</em></a> and the
-<a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;system</em></a> that runs the <a class="reference internal" href="glossary.html#term-system-under-test"><em class="xref std std-term">system&nbsp;under&nbsp;test</em></a> or is the
-<a class="reference internal" href="glossary.html#term-system-under-test"><em class="xref std std-term">system&nbsp;under&nbsp;test</em></a> is called <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>.</p>
+<a class="reference internal" href="glossary.html#term-embedded-system"><em class="xref std std-term">embedded&nbsp;system</em></a> that is the <a class="reference internal" href="glossary.html#term-system-under-test"><em class="xref std std-term">system&nbsp;under&nbsp;test</em></a> is called
+<a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>.</p>
 <p>To enable software developers to write tests that can be run in this complex
 setup measures of communication must be created between the <a class="reference internal" href="glossary.html#term-test-host"><em class="xref std std-term">test&nbsp;host</em></a>
 and the <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>.</p>
@@ -93,12 +94,12 @@ and the <a class="reference internal" href="glossary.html#term-target-device"><e
 <div class="section" id="our-solution-monk">
 <span id="intro-solution"></span><h2>Our Solution: MONK<a class="headerlink" href="#our-solution-monk" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> comes in handy here, because it is a framework that abstracts
-communication between two devices. It is intended to be run on the
-<a class="reference internal" href="glossary.html#term-test-host"><em class="xref std std-term">test&nbsp;host</em></a> in <a class="reference internal" href="glossary.html#term-test-suite"><em class="xref std std-term">test&nbsp;suites</em></a> and is able to
-abstract communication channels or full <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;devices</em></a>
-into single objects that manage most of the communication for you. You define
-what commands you want to execute remotely and <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> takes care of that.
-A <em>hello world test</em> with <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> and <a class="reference internal" href="glossary.html#term-nose"><em class="xref std std-term">nose</em></a> might look like this:</p>
+communication between two devices by creating single objects that manage
+most of the communication for you. It is intended to be run on the
+<a class="reference internal" href="glossary.html#term-test-host"><em class="xref std std-term">test&nbsp;host</em></a> from within <a class="reference internal" href="glossary.html#term-test-suite"><em class="xref std std-term">test&nbsp;suites</em></a>.
+You define what commands you want to execute remotely and <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>
+takes care of that. A <em>hello world test</em> with <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> and <a class="reference internal" href="glossary.html#term-nose"><em class="xref std std-term">nose</em></a>
+might look like this:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nose.tools</span> <span class="kn">as</span> <span class="nn">nt</span>
 <span class="kn">import</span> <span class="nn">monk_tf.fixture</span> <span class="kn">as</span> <span class="nn">mf</span>
 
@@ -130,21 +131,24 @@ and given the name of a file. This file contains the information necessary to
 communicate with the <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>, e.g., the information to access a
 serial connection and login credentials. An example file will be
 <a class="reference internal" href="#intro-cfg"><em>discussed&nbsp;later</em></a>.  The <a class="reference internal" href="monk_tf.html#monk_tf.fixture.Fixture" title="monk_tf.fixture.Fixture"><tt class="xref py py-class docutils literal"><span class="pre">Fixture</span></tt></a>
-object will read this file and create <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> objects for you based on the
+object will read this file and create <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> objects (e.g. devices,
+communication channels) for you based on the
 configuration. This helps to separate the information necessary to communicate
 with a <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">device</em></a> from the information that is important for
 a <a class="reference internal" href="glossary.html#term-test-case"><em class="xref std std-term">test&nbsp;case</em></a>. As you can see in the example it is not necessary to know
-the login credentials used by the test to understand the test itself.</p>
-<p>After the set up phase follows the execution phase. In this phase the first
-created device object from the <a class="reference internal" href="monk_tf.html#monk_tf.fixture.Fixture" title="monk_tf.fixture.Fixture"><tt class="xref py py-class docutils literal"><span class="pre">Fixture</span></tt></a> object is
+the login credentials used by the test to understand the test itself.
+Additionally, two variables are initialized with the command that will be sent
+and the response that is expected.</p>
+<p>After the set up phase follows the execution phase. In this phase device object
+created by the <a class="reference internal" href="monk_tf.html#monk_tf.fixture.Fixture" title="monk_tf.fixture.Fixture"><tt class="xref py py-class docutils literal"><span class="pre">Fixture</span></tt></a> object is
 used to send a <a class="reference internal" href="glossary.html#term-shell-command"><em class="xref std std-term">shell&nbsp;command</em></a> to the configured <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>.
 In this case <tt class="docutils literal"><span class="pre">echo</span> <span class="pre">&quot;hello&quot;</span></tt> is sent and the response is stored in a variable.
 Under the hood the <a class="reference internal" href="monk_tf.html#monk_tf.dev.Device" title="monk_tf.dev.Device"><tt class="xref py py-class docutils literal"><span class="pre">Device</span></tt></a> object creates one or more
 connections to the <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>, transmits the message in the
 corresponding protocol and collects the response. This is the central feature
 of <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>. By just calling one method the whole complexity of the
-interaction gets handled by the framework and the user, in this case the
-<a class="reference internal" href="glossary.html#term-test-case"><em class="xref std std-term">test&nbsp;case</em></a>, does not need to be concerned about the details and can
+interaction gets handled by the framework and the user does not need to be
+concerned about the details and can
 focus on which commands he wants to send to the <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a> and what
 the results should be. As you can see in the API docs of the
 <a class="reference internal" href="monk_tf.html#monk_tf.dev.Device" title="monk_tf.dev.Device"><tt class="xref py py-class docutils literal"><span class="pre">Device</span></tt></a> class there is also other information that can
@@ -250,8 +254,8 @@ followed manually. In exchange, everything that is done with the connections
 can be seen and influenced directly and no exceptions are ignored by the
 framework.</li>
 <li><a class="reference internal" href="monk_tf.html#module-monk_tf.dev" title="monk_tf.dev"><tt class="xref py py-mod docutils literal"><span class="pre">monk_tf.dev</span></tt></a> - The device layer handles connections directly.
-Connections can be added, removed, or get another position in the object
-sequence. How connections are handled to transfer commands to the
+Connections can be added, removed, or assigned another position in the
+object sequence. How connections are handled to transfer commands to the
 <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a> is handled by the devices, though. Therefore this
 layer allows a balanced trade-off between abstraction and control.</li>
 <li><a class="reference internal" href="monk_tf.html#module-monk_tf.fixture" title="monk_tf.fixture"><tt class="xref py py-mod docutils literal"><span class="pre">monk_tf.fixture</span></tt></a> - The fixture layer is the highest level of
@@ -303,7 +307,7 @@ have to choose between using a newer version of <a class="reference internal" hr
 or using an older version of <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> to keep the maintenance costs low. We
 also faced this problem at <a class="reference internal" href="glossary.html#term-dfe"><em class="xref std std-term">DFE</em></a>, therefore we developed a small helper
 script that allows you to do both. If you already have experience in using
-<a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenvs</em></a> then you will have not much of a trouble.</p>
+<a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenvs</em></a> then you should not encounter any difficulties.</p>
 <p>The basic idea is that for each set of requirements you create a separate
 suite. Thus if you have tests for <tt class="docutils literal"><span class="pre">monk_tf==0.1.1</span></tt> you keep all these tests
 in one suite. If you are starting to write new tests now, you will probably

@@ -97,24 +97,24 @@ be complicated at first but it also comes with great payoff. For example, when
 you write a new child class of <a class="reference internal" href="#monk_tf.conn.AConnection" title="monk_tf.conn.AConnection"><tt class="xref py py-class docutils literal"><span class="pre">AConnection</span></tt></a> you
 overwrite the methods <tt class="xref py py-meth docutils literal"><span class="pre">_connect()</span></tt>,
 <tt class="xref py py-meth docutils literal"><span class="pre">_login()</span></tt>,
-<tt class="xref py py-meth docutils literal"><span class="pre">_cmd()</span></tt>,
+<tt class="xref py py-meth docutils literal"><span class="pre">_cmd()</span></tt>, and
 <tt class="xref py py-meth docutils literal"><span class="pre">_disconnect()</span></tt> to show how your connection
-handles the different events. Because the State design pattern was chonsen you
+handles the different events. Because the State design pattern was chosen you
 do not have to worry about checking if the connection is really ready for what
 you want to do in this event, e.g., in
 <tt class="xref py py-meth docutils literal"><span class="pre">_cmd()</span></tt> you do not need to worry if you are
-already connected or not, because this is already asserted by
+already connected or not, because this has already been asserted by
 <a class="reference internal" href="#monk_tf.conn.AConnection" title="monk_tf.conn.AConnection"><tt class="xref py py-class docutils literal"><span class="pre">AConnection</span></tt></a> and the State design pattern. You can
 expect to have a direct connection to the <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a> and can start
 writing the code that is necessary to send a <a class="reference internal" href="glossary.html#term-shell-command"><em class="xref std std-term">shell&nbsp;command</em></a> to the
 device.</p>
-<p>Something else that might be confusing about this layer is that many methds
+<p>Something else that might be confusing about this layer is that many methods
 have undefined return behaviour. This is a disadvantage and a feature of Python
 at the same time, because in Python there is no way to ensure that a method
 only returns some specific type or result. Here we use it as a feature, because
-from the private methods like <tt class="xref py py-meth docutils literal"><span class="pre">_login()</span></tt> that
-you write into individual <a class="reference internal" href="#monk_tf.conn.AConnection" title="monk_tf.conn.AConnection"><tt class="xref py py-class docutils literal"><span class="pre">AConnection</span></tt></a> child classes,
-you can be sure that your return results get deliverd to the publicly called
+from private methods like <tt class="xref py py-meth docutils literal"><span class="pre">_login()</span></tt> that
+you implement in individual <a class="reference internal" href="#monk_tf.conn.AConnection" title="monk_tf.conn.AConnection"><tt class="xref py py-class docutils literal"><span class="pre">AConnection</span></tt></a> child classes,
+you can be sure that your return results get delivered to the publicly called
 <a class="reference internal" href="#monk_tf.conn.AConnection.login" title="monk_tf.conn.AConnection.login"><tt class="xref py py-meth docutils literal"><span class="pre">login()</span></tt></a>. And because Python does not force
 us to define a specific return result you can choose in your private methods if
 you want to return something and if so what it might be. In
@@ -132,7 +132,7 @@ a <a class="reference internal" href="glossary.html#term-target-device"><em clas
 your test cases</li>
 <li><em>Real Connections</em> - the real connections that connect MONK to a
 <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a></li>
-<li><em>AState</em> - the abstract State class which all other states are based on.</li>
+<li><em>AState</em> - the abstract State class which all other states are based on</li>
 <li><em>State Classes</em> - the implementation of the state machine</li>
 </ol>
 </dd>
@@ -191,7 +191,7 @@ mostly on your TermIOs configuration and the
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>msg</strong> &#8211; the <a class="reference internal" href="glossary.html#term-shell-command"><em class="xref std std-term">shell&nbsp;command</em></a></td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Depends on the specific connection. May be None.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">what the connection implemented. May be None.</td>
 </tr>
 </tbody>
 </table>
@@ -205,7 +205,7 @@ mostly on your TermIOs configuration and the
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Depends on the specific connection. Might be None.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">what the connection implemented. May be None.</td>
 </tr>
 </tbody>
 </table>
@@ -219,7 +219,7 @@ mostly on your TermIOs configuration and the
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Depends on the specific connection. May be None.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">what the connection implemented. May be None.</td>
 </tr>
 </tbody>
 </table>
@@ -229,13 +229,14 @@ mostly on your TermIOs configuration and the
 <dt id="monk_tf.conn.AConnection.login">
 <tt class="descname">login</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/monk_tf/conn.html#AConnection.login"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.conn.AConnection.login" title="Permalink to this definition">¶</a></dt>
 <dd><p>Authenticate to <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a>.</p>
-<p>It uses a tupel of <tt class="docutils literal"><span class="pre">(user,</span> <span class="pre">password)</span></tt> that is expected to be found in an
-attribute <tt class="docutils literal"><span class="pre">credentials</span></tt>.</p>
+<p>It uses a tupel of <tt class="docutils literal"><span class="pre">(user,</span> <span class="pre">password)</span></tt> that is expected to be found in
+an attribute <tt class="docutils literal"><span class="pre">credentials</span></tt>. If there are no <tt class="docutils literal"><span class="pre">credentials</span></tt> then it
+is assumed that a login is not necessary and nothing happens.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Depends on the specific connection. May be None.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">what the connection implemented. May be None.</td>
 </tr>
 </tbody>
 </table>
@@ -312,7 +313,7 @@ called Singleton.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>connection</strong> &#8211; the connection that uses this state.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the disconnection result. May be None.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the disconnect result from the connection. May be None.</td>
 </tr>
 </tbody>
 </table>
@@ -405,7 +406,7 @@ is not in the <em>dialout</em> group on a Linux machine.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>connection</strong> &#8211; the connection that uses this state.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the disconnection result. May be None.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the disconnection result from the connection. May be None.</td>
 </tr>
 </tbody>
 </table>
@@ -494,8 +495,7 @@ mostly on your TermIOs configuration and the
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>connection</strong> &#8211; the connection that uses this state</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">depends on what the connection&#8217;s protected <tt class="xref py py-meth docutils literal"><span class="pre">_connect()</span></tt>
-method returns. May be None.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">what the connection implemented. May be None.</td>
 </tr>
 </tbody>
 </table>
@@ -664,11 +664,12 @@ have described.</p>
 </pre></div>
 </div>
 <p>When using this layer setting up a device only takes one line of code. The rest
-of the information is in the <tt class="docutils literal"><span class="pre">target_device.cfg</span></tt> file. Although this data
-file can have any format you want, <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> currently only comes with one
-text format parser predefined, which is the
-<a class="reference internal" href="#monk_tf.fixture.XiniParser" title="monk_tf.fixture.XiniParser"><tt class="xref py py-class docutils literal"><span class="pre">XiniParser</span></tt></a>.  <tt class="docutils literal"><span class="pre">Xini</span></tt> is short for
-<a class="reference internal" href="glossary.html#term-extended-ini"><em class="xref std std-term">extended&nbsp;INI</em></a>. An example data file might look like this:</p>
+of the information is in the <tt class="docutils literal"><span class="pre">target_device.cfg</span></tt> file. <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> currently 
+comes with one text format parser predefined, which is the
+<a class="reference internal" href="#monk_tf.fixture.XiniParser" title="monk_tf.fixture.XiniParser"><tt class="xref py py-class docutils literal"><span class="pre">XiniParser</span></tt></a>. <tt class="docutils literal"><span class="pre">Xini</span></tt> is short for
+<a class="reference internal" href="glossary.html#term-extended-ini"><em class="xref std std-term">extended&nbsp;INI</em></a>. You may, however, use any data format you want, if you
+extend the <a class="reference internal" href="#monk_tf.fixture.AParser" title="monk_tf.fixture.AParser"><tt class="xref py py-class docutils literal"><span class="pre">AParser</span></tt></a> class accordingly.</p>
+<p>An example <tt class="docutils literal"><span class="pre">Xini</span></tt> data file might look like this:</p>
 <div class="highlight-python"><pre>[device1]
     type=Device
     [[serial1]]

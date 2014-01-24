@@ -50,7 +50,8 @@ that works without an error message::
     >>> exit()
 
 If it worked, then you already have Python and are ready to go. If not, you
-might find information on how to get it on `the Python website`_.
+might be able to install it via your system's packet manager or find
+information on how to get it on `the Python website`_.
 
 Another requirement is the version control system used for :term:`MONK`. It is
 called **git** and you can find a lot of information about it in the
@@ -68,8 +69,9 @@ resources to get them. On Ubuntu 13.04 you can do the following::
 
     $ sudo apt-get install python-dev libssh-2-1-dev
 
-You will also need a Python tool, that helps with generalizing
-development environments. It is called :term:`virtualenv`. If your operating
+You will also need a Python tool, that helps with maintaining multiple
+development environments with different configurations. It is called
+:term:`virtualenv`. If your operating
 system does not come with a prebuilt :term:`virtualenv`, you can follow the
 `virtualenv Installation Guide`_.
 
@@ -111,7 +113,7 @@ Working with :term:`virtualenv` requires the following steps:
 
   #. Create a :term:`virtualenv` (only once).
   #. Initialize the :term:`virtualenv` (every time before you work).
-  #. Install the requirements (once in the beginning, and updated when changed).
+  #. Install the requirements (once in the beginning, updated when changed).
   #. Develop, test and do whatever you need to do.
   #. Deactivate the :term:`virtualenv` (every time after you are finished with
      your work).
@@ -142,9 +144,9 @@ install both now::
     (MONK)MONK$ pip install -r requirements-test.txt
     (MONK)MONK$ pip install -r requirements-develop.txt
 
-Remember that this step only needs to be done once in the beginning and whenever
-these file got updated. If there are no changes it does not hurt to call them
-again as it should not change anything.
+Remember that this step only needs to be done once in the beginning and
+whenever these file got updated. If there are no changes it does not hurt to
+call them again as it should not change anything.
 
 Next you want to install :term:`MONK` inside of your :term:`virtualenv` in a
 way, that makes it possible to test and to develop it. This is achieved with
@@ -250,12 +252,12 @@ HTML for you and you can even edit the text there. This might be a suitable way
 to handle changes in the documentation, although we have not tested
 this so far.
 
-The more advanced way is to build the documentation's PDF or HTML files yourself.
-This will be explained in the next section. The advantages offered by this
-approach are that you may read all the warnings and error messages and have
-full control over every part of your documentation. If you want to be a
-successful :term:`MONK` developer this is definitely the way to go.
-It is not the easiest, but we trust you can handle it!
+The more advanced way is to build the documentation's PDF or HTML files
+yourself.  This will be explained in the next section. The advantages offered
+by this approach are that you may read all the warnings and error messages and
+have full control over every part of your documentation. If you want to be a
+successful :term:`MONK` developer this is definitely the way to go.  It is not
+the easiest, but we trust you can handle it!
 
 .. _contrib-build:
 
@@ -324,7 +326,7 @@ When finished, do not forget to deactivate your :term:`virtualenv`::
 Contribution Example: Creation Of This Tutorial
 -----------------------------------------------
 
-This torial is a contribution like the ones we were discribing to make until
+This tutorial is a contribution like the ones we were describing to make until
 now. Therefore as a last step we will use this contribution as an example. This
 section is of course only for reading because the contribution was already done
 in the past.
@@ -384,7 +386,7 @@ to check his results::
     # repeat until happy or time runs out
 
 Whenever he left work, he committed his changes in form of a WIP commit, always
-mentioning the GitHub Issue with ``#36``. This way GitHub always knew which
+mentioning the GitHub issue with ``#36``. This way GitHub always knew which
 issue the commits belonged to and could list them accordingly::
 
     (MONK)doc$ git add source/contributing.rst
@@ -402,10 +404,10 @@ issue the commits belonged to and could list them accordingly::
 
 This ensures the most up-to-date version is always available at GitHub and all
 commits are listed in the GitHub issue. Some major decisions are also added as
-comments to the issue. One example is `the comment`_, which
-discusses changes to the issue topic, which seemed meaningful at some point
-while working on solving it. The comments also are a place for reviewers,
-interested users, and other developers to discuss their ideas about the problem.
+comments to the issue. One example is `the comment`_, which discusses changes
+to the issue topic, which seemed meaningful at some point while working on
+solving it. The comments also are a place for reviewers, interested users, and
+other developers to discuss their ideas about the problem.
 
 After this tutorial was finished, it was the labelled *reviewable* and other
 developers took a closer look at it. A reviewer will checkout the same branch
@@ -420,15 +422,16 @@ the developer he or a maintainer will amend all commits by adding a line for
 each reviewer to the commit message, stating that this commit was checked by
 them::
 
-    TODO: add Acked-by line according to Issues #36 reviewers. If you are a
+    TODO: add Acked-by line according to issues #36 reviewers. If you are a
     reviewer and read this, add an Acked-by example with your name here,
     please.
 
 Then a maintainer will close the issue and merge the feature branch with the
 ``dev`` branch, thereby solving the issue.
 
-As you might have noticed, the last steps were explained more broadly. They
-require a deeper understanding of git and by that point, a :term:`MONK`
+As you might have noticed, the last steps were explained in less detail than
+the previous ones. They require a deeper understanding of git which is beyond
+the scope of this documentation. By that point, a :term:`MONK`
 developer will probably already help you, anyway.
 
 .. _contrib-final:

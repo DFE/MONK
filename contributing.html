@@ -88,7 +88,8 @@ hi
 &gt;&gt;&gt; exit()</pre>
 </div>
 <p>If it worked, then you already have Python and are ready to go. If not, you
-might find information on how to get it on <a class="reference external" href="http://www.python.org/getit/">the Python website</a>.</p>
+might be able to install it via your system&#8217;s packet manager or find
+information on how to get it on <a class="reference external" href="http://www.python.org/getit/">the Python website</a>.</p>
 <p>Another requirement is the version control system used for <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>. It is
 called <strong>git</strong> and you can find a lot of information about it in the
 <a class="reference external" href="http://git-scm.com/book">git&nbsp;book</a>. To follow this guide it is not necessary to know everything about
@@ -103,8 +104,9 @@ packages created by your operating system vendor and you should use his
 resources to get them. On Ubuntu 13.04 you can do the following:</p>
 <div class="highlight-python"><pre>$ sudo apt-get install python-dev libssh-2-1-dev</pre>
 </div>
-<p>You will also need a Python tool, that helps with generalizing
-development environments. It is called <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a>. If your operating
+<p>You will also need a Python tool, that helps with maintaining multiple
+development environments with different configurations. It is called
+<a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a>. If your operating
 system does not come with a prebuilt <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a>, you can follow the
 <a class="reference external" href="http://www.virtualenv.org/en/latest/#installation">virtualenv Installation Guide</a>.</p>
 <p>And, of course, you will need <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK&#8217;s</em></a> source code. If you have
@@ -140,7 +142,7 @@ python packages.</li>
 <div><ol class="arabic simple">
 <li>Create a <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a> (only once).</li>
 <li>Initialize the <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a> (every time before you work).</li>
-<li>Install the requirements (once in the beginning, and updated when changed).</li>
+<li>Install the requirements (once in the beginning, updated when changed).</li>
 <li>Develop, test and do whatever you need to do.</li>
 <li>Deactivate the <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a> (every time after you are finished with
 your work).</li>
@@ -167,9 +169,9 @@ install both now:</p>
 <div class="highlight-python"><pre>(MONK)MONK$ pip install -r requirements-test.txt
 (MONK)MONK$ pip install -r requirements-develop.txt</pre>
 </div>
-<p>Remember that this step only needs to be done once in the beginning and whenever
-these file got updated. If there are no changes it does not hurt to call them
-again as it should not change anything.</p>
+<p>Remember that this step only needs to be done once in the beginning and
+whenever these file got updated. If there are no changes it does not hurt to
+call them again as it should not change anything.</p>
 <p>Next you want to install <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> inside of your <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a> in a
 way, that makes it possible to test and to develop it. This is achieved with
 the following command:</p>
@@ -254,12 +256,12 @@ you do not need any environment for reading it, GitHub already parses it to
 HTML for you and you can even edit the text there. This might be a suitable way
 to handle changes in the documentation, although we have not tested
 this so far.</p>
-<p>The more advanced way is to build the documentation&#8217;s PDF or HTML files yourself.
-This will be explained in the next section. The advantages offered by this
-approach are that you may read all the warnings and error messages and have
-full control over every part of your documentation. If you want to be a
-successful <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> developer this is definitely the way to go.
-It is not the easiest, but we trust you can handle it!</p>
+<p>The more advanced way is to build the documentation&#8217;s PDF or HTML files
+yourself.  This will be explained in the next section. The advantages offered
+by this approach are that you may read all the warnings and error messages and
+have full control over every part of your documentation. If you want to be a
+successful <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> developer this is definitely the way to go.  It is not
+the easiest, but we trust you can handle it!</p>
 </div>
 <div class="section" id="building-the-documentation">
 <span id="contrib-build"></span><h2>Building the Documentation<a class="headerlink" href="#building-the-documentation" title="Permalink to this headline">¶</a></h2>
@@ -313,7 +315,7 @@ doc$</pre>
 </div>
 <div class="section" id="contribution-example-creation-of-this-tutorial">
 <span id="contrib-example"></span><h2>Contribution Example: Creation Of This Tutorial<a class="headerlink" href="#contribution-example-creation-of-this-tutorial" title="Permalink to this headline">¶</a></h2>
-<p>This torial is a contribution like the ones we were discribing to make until
+<p>This tutorial is a contribution like the ones we were describing to make until
 now. Therefore as a last step we will use this contribution as an example. This
 section is of course only for reading because the contribution was already done
 in the past.</p>
@@ -362,7 +364,7 @@ to check his results:</p>
 # repeat until happy or time runs out</pre>
 </div>
 <p>Whenever he left work, he committed his changes in form of a WIP commit, always
-mentioning the GitHub Issue with <tt class="docutils literal"><span class="pre">#36</span></tt>. This way GitHub always knew which
+mentioning the GitHub issue with <tt class="docutils literal"><span class="pre">#36</span></tt>. This way GitHub always knew which
 issue the commits belonged to and could list them accordingly:</p>
 <div class="highlight-python"><pre>(MONK)doc$ git add source/contributing.rst
 (MONK)doc$ git commit -s
@@ -379,10 +381,10 @@ Signed-off-by: Erik Bernoth &lt;erik.bernoth@gmail.com&gt;
 </div>
 <p>This ensures the most up-to-date version is always available at GitHub and all
 commits are listed in the GitHub issue. Some major decisions are also added as
-comments to the issue. One example is <a class="reference external" href="https://github.com/DFE/MONK/issues/36#issuecomment-18195272">the comment</a>, which
-discusses changes to the issue topic, which seemed meaningful at some point
-while working on solving it. The comments also are a place for reviewers,
-interested users, and other developers to discuss their ideas about the problem.</p>
+comments to the issue. One example is <a class="reference external" href="https://github.com/DFE/MONK/issues/36#issuecomment-18195272">the comment</a>, which discusses changes
+to the issue topic, which seemed meaningful at some point while working on
+solving it. The comments also are a place for reviewers, interested users, and
+other developers to discuss their ideas about the problem.</p>
 <p>After this tutorial was finished, it was the labelled <em>reviewable</em> and other
 developers took a closer look at it. A reviewer will checkout the same branch
 (not a specific commit) and evaluate the results. If code was changed he will
@@ -395,14 +397,15 @@ developer himself. If two reviewers give an <tt class="docutils literal"><span c
 the developer he or a maintainer will amend all commits by adding a line for
 each reviewer to the commit message, stating that this commit was checked by
 them:</p>
-<div class="highlight-python"><pre>TODO: add Acked-by line according to Issues #36 reviewers. If you are a
+<div class="highlight-python"><pre>TODO: add Acked-by line according to issues #36 reviewers. If you are a
 reviewer and read this, add an Acked-by example with your name here,
 please.</pre>
 </div>
 <p>Then a maintainer will close the issue and merge the feature branch with the
 <tt class="docutils literal"><span class="pre">dev</span></tt> branch, thereby solving the issue.</p>
-<p>As you might have noticed, the last steps were explained more broadly. They
-require a deeper understanding of git and by that point, a <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>
+<p>As you might have noticed, the last steps were explained in less detail than
+the previous ones. They require a deeper understanding of git which is beyond
+the scope of this documentation. By that point, a <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>
 developer will probably already help you, anyway.</p>
 </div>
 </div>
