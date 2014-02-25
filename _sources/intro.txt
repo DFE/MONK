@@ -74,16 +74,18 @@ might look like this::
     def test_hi():
         """ send an echo and receive a hello
         """
-        # set up
-        fixture = mf.Fixture("target_device_login.cfg")
-        expected_response = "hello"
-        send_msg = "echo \"{}\"".format(expected_response)
-        # execute
-        response = fixture.devs[0].cmd(send_msg)
-        # assert - verify response is as expected
-        nt.eq_(expected_response, response)
-        # tear down
-        h.tear_down()
+        try:
+            # set up
+            fixture = mf.Fixture("target_device_login.cfg")
+            expected_response = "hello"
+            send_msg = "echo \"{}\"".format(expected_response)
+            # execute
+            response = fixture.devs[0].cmd(send_msg)
+            # assert - verify response is as expected
+            nt.eq_(expected_response, response)
+        finally:
+            # tear down
+            fixture.tear_down()
 
 The code example contains a complete Python file that should be executable with
 the :term:`nose` test tooling. In the first two lines :term:`MONK` and
@@ -139,6 +141,12 @@ might also be possible that additional tear down steps might be included in the
 :term:`fixture files<fixture file>` like shutting down the
 :term:`target device` or deleting test artifacts. Therefore it is suggested to
 always include this line.
+
+.. note::
+
+    Because you need to make sure that the teardown phase always gets executed,
+    the code that might raise exceptions must be surrounded by a try-finally
+    block.
 
 .. _intro-cfg:
 

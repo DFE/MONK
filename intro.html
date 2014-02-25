@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Getting Started &mdash; MONK 0.1.4 documentation</title>
+    <title>Getting Started &mdash; MONK 0.1.5 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1.4',
+        VERSION:     '0.1.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="MONK 0.1.4 documentation" href="index.html" />
+    <link rel="top" title="MONK 0.1.5 documentation" href="index.html" />
     <link rel="next" title="Contributing" href="contributing.html" />
     <link rel="prev" title="MONK Cross-Testing Framework" href="index.html" /> 
   </head>
@@ -44,7 +44,7 @@
         <li class="right" >
           <a href="index.html" title="MONK Cross-Testing Framework"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MONK 0.1.4 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MONK 0.1.5 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -106,16 +106,18 @@ might look like this:</p>
 <span class="k">def</span> <span class="nf">test_hi</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; send an echo and receive a hello</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c"># set up</span>
-    <span class="n">fixture</span> <span class="o">=</span> <span class="n">mf</span><span class="o">.</span><span class="n">Fixture</span><span class="p">(</span><span class="s">&quot;target_device_login.cfg&quot;</span><span class="p">)</span>
-    <span class="n">expected_response</span> <span class="o">=</span> <span class="s">&quot;hello&quot;</span>
-    <span class="n">send_msg</span> <span class="o">=</span> <span class="s">&quot;echo </span><span class="se">\&quot;</span><span class="s">{}</span><span class="se">\&quot;</span><span class="s">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">expected_response</span><span class="p">)</span>
-    <span class="c"># execute</span>
-    <span class="n">response</span> <span class="o">=</span> <span class="n">fixture</span><span class="o">.</span><span class="n">devs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="n">send_msg</span><span class="p">)</span>
-    <span class="c"># assert - verify response is as expected</span>
-    <span class="n">nt</span><span class="o">.</span><span class="n">eq_</span><span class="p">(</span><span class="n">expected_response</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
-    <span class="c"># tear down</span>
-    <span class="n">h</span><span class="o">.</span><span class="n">tear_down</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c"># set up</span>
+        <span class="n">fixture</span> <span class="o">=</span> <span class="n">mf</span><span class="o">.</span><span class="n">Fixture</span><span class="p">(</span><span class="s">&quot;target_device_login.cfg&quot;</span><span class="p">)</span>
+        <span class="n">expected_response</span> <span class="o">=</span> <span class="s">&quot;hello&quot;</span>
+        <span class="n">send_msg</span> <span class="o">=</span> <span class="s">&quot;echo </span><span class="se">\&quot;</span><span class="s">{}</span><span class="se">\&quot;</span><span class="s">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">expected_response</span><span class="p">)</span>
+        <span class="c"># execute</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">fixture</span><span class="o">.</span><span class="n">devs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="n">send_msg</span><span class="p">)</span>
+        <span class="c"># assert - verify response is as expected</span>
+        <span class="n">nt</span><span class="o">.</span><span class="n">eq_</span><span class="p">(</span><span class="n">expected_response</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="c"># tear down</span>
+        <span class="n">fixture</span><span class="o">.</span><span class="n">tear_down</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>The code example contains a complete Python file that should be executable with
@@ -168,6 +170,12 @@ might also be possible that additional tear down steps might be included in the
 <a class="reference internal" href="glossary.html#term-fixture-file"><em class="xref std std-term">fixture&nbsp;files</em></a> like shutting down the
 <a class="reference internal" href="glossary.html#term-target-device"><em class="xref std std-term">target&nbsp;device</em></a> or deleting test artifacts. Therefore it is suggested to
 always include this line.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Because you need to make sure that the teardown phase always gets executed,
+the code that might raise exceptions must be surrounded by a try-finally
+block.</p>
+</div>
 </div>
 <div class="section" id="fixture-files">
 <span id="intro-cfg"></span><h2>Fixture Files<a class="headerlink" href="#fixture-files" title="Permalink to this headline">¶</a></h2>
@@ -387,7 +395,7 @@ contains all tests that work with this version.</p>
         <li class="right" >
           <a href="index.html" title="MONK Cross-Testing Framework"
              >previous</a> |</li>
-        <li><a href="index.html">MONK 0.1.4 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MONK 0.1.5 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

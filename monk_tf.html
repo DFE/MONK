@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>monk_tf Package &mdash; MONK 0.1.4 documentation</title>
+    <title>monk_tf Package &mdash; MONK 0.1.5 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1.4',
+        VERSION:     '0.1.5',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="MONK 0.1.4 documentation" href="index.html" />
+    <link rel="top" title="MONK 0.1.5 documentation" href="index.html" />
     <link rel="up" title="monk_tf" href="modules.html" />
     <link rel="next" title="Glossary" href="glossary.html" />
     <link rel="prev" title="monk_tf" href="modules.html" /> 
@@ -45,7 +45,7 @@
         <li class="right" >
           <a href="modules.html" title="monk_tf"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MONK 0.1.4 documentation</a> &raquo;</li>
+        <li><a href="index.html">MONK 0.1.5 documentation</a> &raquo;</li>
           <li><a href="modules.html" accesskey="U">monk_tf</a> &raquo;</li> 
       </ul>
     </div>  
@@ -691,12 +691,12 @@ corresponding <a class="reference internal" href="glossary.html#term-monk"><em c
 <div class="section" id="classes">
 <h3>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h3>
 <dl class="exception">
-<dt id="monk_tf.fixture.ADeviceException">
-<em class="property">exception </em><tt class="descclassname">monk_tf.fixture.</tt><tt class="descname">ADeviceException</tt><a class="reference internal" href="_modules/monk_tf/fixture.html#ADeviceException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.fixture.ADeviceException" title="Permalink to this definition">¶</a></dt>
+<dt id="monk_tf.fixture.AFixtureException">
+<em class="property">exception </em><tt class="descclassname">monk_tf.fixture.</tt><tt class="descname">AFixtureException</tt><a class="headerlink" href="#monk_tf.fixture.AFixtureException" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></tt></p>
-<p>Base class for exceptions of the device layer.</p>
+<p>Base class for exceptions of the fixture layer.</p>
 <p>If you want to make sure that you catch all exceptions that are related
-to this layer, you should catch <em>ADeviceExceptions</em>. This also means
+to this layer, you should catch <em>AFixtureExceptions</em>. This also means
 that if you extend this list of exceptions you should inherit from this
 exception and not from <a class="reference external" href="http://docs.python.org/library/exceptions.html#exceptions.Exception" title="(in Python v2.7)"><tt class="xref py py-exc docutils literal"><span class="pre">Exception</span></tt></a>.</p>
 </dd></dl>
@@ -704,7 +704,7 @@ exception and not from <a class="reference external" href="http://docs.python.or
 <dl class="exception">
 <dt id="monk_tf.fixture.AParseException">
 <em class="property">exception </em><tt class="descclassname">monk_tf.fixture.</tt><tt class="descname">AParseException</tt><a class="reference internal" href="_modules/monk_tf/fixture.html#AParseException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.fixture.AParseException" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#monk_tf.fixture.ADeviceException" title="monk_tf.fixture.ADeviceException"><tt class="xref py py-class docutils literal"><span class="pre">monk_tf.fixture.ADeviceException</span></tt></a></p>
+<dd><p>Bases: <a class="reference internal" href="#monk_tf.fixture.AFixtureException" title="monk_tf.fixture.AFixtureException"><tt class="xref py py-class docutils literal"><span class="pre">monk_tf.fixture.AFixtureException</span></tt></a></p>
 <p>Base class for exceptions concerning parsing errors.</p>
 </dd></dl>
 
@@ -724,7 +724,7 @@ provides a very basic example.</p>
 <dl class="exception">
 <dt id="monk_tf.fixture.CantParseException">
 <em class="property">exception </em><tt class="descclassname">monk_tf.fixture.</tt><tt class="descname">CantParseException</tt><a class="reference internal" href="_modules/monk_tf/fixture.html#CantParseException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.fixture.CantParseException" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#monk_tf.fixture.ADeviceException" title="monk_tf.fixture.ADeviceException"><tt class="xref py py-class docutils literal"><span class="pre">monk_tf.fixture.ADeviceException</span></tt></a></p>
+<dd><p>Bases: <a class="reference internal" href="#monk_tf.fixture.AFixtureException" title="monk_tf.fixture.AFixtureException"><tt class="xref py py-class docutils literal"><span class="pre">monk_tf.fixture.AFixtureException</span></tt></a></p>
 <p>is raised when a Fixture cannot parse a given file.</p>
 </dd></dl>
 
@@ -778,6 +778,12 @@ parsing the type attribute in
 </tbody>
 </table>
 <dl class="method">
+<dt id="monk_tf.fixture.Fixture.cmd">
+<tt class="descname">cmd</tt><big>(</big><em>msg</em><big>)</big><a class="headerlink" href="#monk_tf.fixture.Fixture.cmd" title="Permalink to this definition">¶</a></dt>
+<dd><p>call <a class="reference internal" href="#monk_tf.fixture.Fixture.cmd" title="monk_tf.fixture.Fixture.cmd"><tt class="xref py py-meth docutils literal"><span class="pre">cmd()</span></tt></a> from first <tt class="xref py py-class docutils literal"><span class="pre">Device</span></tt></p>
+</dd></dl>
+
+<dl class="method">
 <dt id="monk_tf.fixture.Fixture.read">
 <tt class="descname">read</tt><big>(</big><em>source</em><big>)</big><a class="reference internal" href="_modules/monk_tf/fixture.html#Fixture.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.fixture.Fixture.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read more data, either as a file name or as a parser.</p>
@@ -805,6 +811,13 @@ instance.</td>
 </dd></dl>
 
 <dl class="exception">
+<dt id="monk_tf.fixture.NoDeviceException">
+<em class="property">exception </em><tt class="descclassname">monk_tf.fixture.</tt><tt class="descname">NoDeviceException</tt><a class="headerlink" href="#monk_tf.fixture.NoDeviceException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#monk_tf.fixture.AFixtureException" title="monk_tf.fixture.AFixtureException"><tt class="xref py py-class docutils literal"><span class="pre">monk_tf.fixture.AFixtureException</span></tt></a></p>
+<p>is raised when a <a href="#id2"><span class="problematic" id="id3">:py:clas:`~monk_tf.fixture.Fixture`</span></a> requires a device but has none.</p>
+</dd></dl>
+
+<dl class="exception">
 <dt id="monk_tf.fixture.NotXiniException">
 <em class="property">exception </em><tt class="descclassname">monk_tf.fixture.</tt><tt class="descname">NotXiniException</tt><a class="reference internal" href="_modules/monk_tf/fixture.html#NotXiniException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#monk_tf.fixture.NotXiniException" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#monk_tf.fixture.AParseException" title="monk_tf.fixture.AParseException"><tt class="xref py py-class docutils literal"><span class="pre">monk_tf.fixture.AParseException</span></tt></a></p>
@@ -819,7 +832,7 @@ instance.</td>
 <p>Reads config files in <a class="reference internal" href="glossary.html#term-extended-ini"><em class="xref std std-term">extended&nbsp;INI</em></a> format.</p>
 <p>Parse a config file or create a config file object.</p>
 <dl class="docutils">
-<dt><a href="#id2"><span class="problematic" id="id3">``</span></a>ConfigObj(infile=None, configspec=None, encoding=None,</dt>
+<dt><a href="#id4"><span class="problematic" id="id5">``</span></a>ConfigObj(infile=None, configspec=None, encoding=None,</dt>
 <dd>interpolation=True, raise_errors=False, list_values=True,
 create_empty=False, file_error=False, stringify=True,
 indent_type=None, default_encoding=None, unrepr=False,
@@ -897,7 +910,7 @@ write_empty_values=False, _inspec=False)``</dd>
         <li class="right" >
           <a href="modules.html" title="monk_tf"
              >previous</a> |</li>
-        <li><a href="index.html">MONK 0.1.4 documentation</a> &raquo;</li>
+        <li><a href="index.html">MONK 0.1.5 documentation</a> &raquo;</li>
           <li><a href="modules.html" >monk_tf</a> &raquo;</li> 
       </ul>
     </div>
