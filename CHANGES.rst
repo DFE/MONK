@@ -1,3 +1,10 @@
+Release 0.1.5 (2014-02-25)
+==========================
+
+ * fixed many bugs
+ * most notably 0.1.4 was actually not able to be installed from PyPI without
+   workaround
+
 Release 0.1.4 (2014-01-24)
 ==========================
 
