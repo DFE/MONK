@@ -147,6 +147,7 @@ class XiniParser(config.ConfigObj, AParser):
         :py:class:`~configobj.ConfigObjError`.
         """
         try:
+            self.file_error = True
             super(XiniParser, self)._load(infile, configspec)
         except config.ConfigObjError as e:
             t, val, traceback = sys.exc_info()

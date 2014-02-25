@@ -159,3 +159,11 @@ def test_fast_cmd():
     out = sut.cmd(msg)
     # verify
     nt.eq_(expected_out, out)
+
+@nt.raises(IOError)
+def test_no_fixture_file():
+    """ fixture: calling non existing fixture file raises IOError
+    """
+    # set up not necessary
+    # exercise
+    fixture.Fixture("this_file_does_not_exist.cfg")
