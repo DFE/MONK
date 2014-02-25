@@ -113,6 +113,10 @@ class CantParseException(AFixtureException):
     """
     pass
 
+class NoDeviceException(AFixtureException):
+    """ is raised when a :py:clas:`~monk_tf.fixture.Fixture` requires a device but has none.
+    """
+
 ######################################################
 #
 # Parsers - Read a text file and be used like a dict()
@@ -286,6 +290,14 @@ class Fixture(object):
                 cconf['name'] = cname
                 dconns.append(cclass(**cconf))
             self.devs.append(dclass(name=dname, conns=dconns))
+
+    def cmd(self, msg):
+        """ call :py:meth:`cmd` from first :py:class:`~monk_tf.device.Device`
+        """
+        try:
+            return self.devs[0].cmd(msg)
+        except IndexError:
+            raise NoDeviceException("this fixture has no device loaded")
 
     def tear_down(self):
         """ Can be used for explicit destruction of managed objects.
