@@ -86,17 +86,17 @@ logger = logging.getLogger(__name__)
 #
 ############
 
-class ADeviceException(Exception):
-    """ Base class for exceptions of the device layer.
+class AFixtureException(Exception):
+    """ Base class for exceptions of the fixture layer.
 
     If you want to make sure that you catch all exceptions that are related
-    to this layer, you should catch *ADeviceExceptions*. This also means
+    to this layer, you should catch *AFixtureExceptions*. This also means
     that if you extend this list of exceptions you should inherit from this
     exception and not from :py:exc:`~exceptions.Exception`.
     """
     pass
 
-class AParseException(ADeviceException):
+class AParseException(AFixtureException):
     """ Base class for exceptions concerning parsing errors.
     """
     pass
@@ -108,7 +108,7 @@ class NotXiniException(AParseException):
     """
     pass
 
-class CantParseException(ADeviceException):
+class CantParseException(AFixtureException):
     """ is raised when a Fixture cannot parse a given file.
     """
     pass
