@@ -26,8 +26,11 @@ if sys.argv[-1] == 'publish':
 
 
 def read(name):
-    with open(name, 'r') as f:
-        return f.read()
+    try:
+        with open(name, 'r') as f:
+            return f.read()
+    except IOError:
+        return ""
 
 setup(
     name=monk_tf.__title__,
