@@ -274,6 +274,7 @@ class Fixture(object):
         """
         self._logger.debug("add props: " + str(props))
         self.props.update(props)
+        self._logger.debug("final props: " + str(props))
 
     def _initialize(self):
         """ Create :term:`MONK` objects based on self's properties.
