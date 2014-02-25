@@ -654,7 +654,7 @@ class Authenticated(AState):
 
         :param connection: the connection that uses this state.
         """
-        self.event = self._LOGGED_OUT
+        self.event = self._LOGIN
         connection._logger.debug("execute event '{}' in state '{}'".format(
             self.event,
             str(self),
