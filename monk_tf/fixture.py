@@ -86,17 +86,17 @@ logger = logging.getLogger(__name__)
 #
 ############
 
-class ADeviceException(Exception):
-    """ Base class for exceptions of the device layer.
+class AFixtureException(Exception):
+    """ Base class for exceptions of the fixture layer.
 
     If you want to make sure that you catch all exceptions that are related
-    to this layer, you should catch *ADeviceExceptions*. This also means
+    to this layer, you should catch *AFixtureExceptions*. This also means
     that if you extend this list of exceptions you should inherit from this
     exception and not from :py:exc:`~exceptions.Exception`.
     """
     pass
 
-class AParseException(ADeviceException):
+class AParseException(AFixtureException):
     """ Base class for exceptions concerning parsing errors.
     """
     pass
@@ -108,10 +108,14 @@ class NotXiniException(AParseException):
     """
     pass
 
-class CantParseException(ADeviceException):
+class CantParseException(AFixtureException):
     """ is raised when a Fixture cannot parse a given file.
     """
     pass
+
+class NoDeviceException(AFixtureException):
+    """ is raised when a :py:clas:`~monk_tf.fixture.Fixture` requires a device but has none.
+    """
 
 ######################################################
 #
@@ -143,6 +147,7 @@ class XiniParser(config.ConfigObj, AParser):
         :py:class:`~configobj.ConfigObjError`.
         """
         try:
+            self.file_error = True
             super(XiniParser, self)._load(infile, configspec)
         except config.ConfigObjError as e:
             t, val, traceback = sys.exc_info()
@@ -188,6 +193,8 @@ class Fixture(object):
     _DEFAULT_CLASSES = {
         "Device" : dev.Device,
         "SerialConnection" : conn.SerialConnection,
+        "EchoConnection" : conn.EchoConnection,
+        "DefectiveConnection" : conn.DefectiveConnection,
     }
 
     _DEFAULT_PARSERS = [
@@ -268,6 +275,7 @@ class Fixture(object):
         """
         self._logger.debug("add props: " + str(props))
         self.props.update(props)
+        self._logger.debug("final props: " + str(props))
 
     def _initialize(self):
         """ Create :term:`MONK` objects based on self's properties.
@@ -284,6 +292,14 @@ class Fixture(object):
                 cconf['name'] = cname
                 dconns.append(cclass(**cconf))
             self.devs.append(dclass(name=dname, conns=dconns))
+
+    def cmd(self, msg):
+        """ call :py:meth:`cmd` from first :py:class:`~monk_tf.device.Device`
+        """
+        try:
+            return self.devs[0].cmd(msg)
+        except IndexError:
+            raise NoDeviceException("this fixture has no device loaded")
 
     def tear_down(self):
         """ Can be used for explicit destruction of managed objects.

@@ -146,3 +146,24 @@ def test_cant_parse_exception():
     false_cfg_file = abspath(inspect.getfile(inspect.currentframe()))
     # execute
     sut = fixture.Fixture(false_cfg_file)
+
+def test_fast_cmd():
+    """ fixture: call first device's cmd
+    """
+    # setup
+    sut = fixture.Fixture()
+    sut.devs.append(dev.Device(conn.EchoConnection()))
+    msg = "test"
+    expected_out = msg
+    # exercise
+    out = sut.cmd(msg)
+    # verify
+    nt.eq_(expected_out, out)
+
+@nt.raises(IOError)
+def test_no_fixture_file():
+    """ fixture: calling non existing fixture file raises IOError
+    """
+    # set up not necessary
+    # exercise
+    fixture.Fixture("this_file_does_not_exist.cfg")
