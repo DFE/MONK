@@ -81,8 +81,12 @@ class Device(object):
         """
         for connection in self.conns:
             try:
+                self._logger.debug("connect via '{}'".format(connection.name))
                 connection.connect()
+                self._logger.debug("login via '{}'".format(connection.name))
                 connection.login()
+                self._logger.debug("send cmd '{}' via '{}'".format(
+                    msg, connection.name))
                 return connection.cmd(msg)
             except conn.ConnectionException as excpt:
                 self._logger.exception(excpt)

@@ -96,6 +96,8 @@ def test_connected_login():
     # assert
     nt.ok_("_login" not in sut.calls)
 
+def 
+
 class MockConnection(conn.AConnection):
 
     def __init__(self, *args, **kwargs):

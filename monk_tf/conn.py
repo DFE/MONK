@@ -261,7 +261,7 @@ class AConnection(object):
 
         :return: what the connection implemented. May be None.
         """
-        self._logger.info("logging out...")
+        self._logger.info("disconnecting...")
         try:
             out = self.current_state.disconnect(self)
         except Exception as e:
@@ -271,6 +271,7 @@ class AConnection(object):
             self._logger.debug("current state '{}'".format(self.current_state))
         return out
 
+    @property
     def can_login(self):
         """ Checks wether the prompt is one of the login prompts.
 
@@ -279,6 +280,25 @@ class AConnection(object):
         return any(self.last_prompt.endswith(p) for p in (
                         self.pw_prompt,
                         self.user_prompt,))
+
+    @property
+    def is_authenticated(self):
+        """ checks wether already authenticated.
+
+        The check is done by sending the 'whoami' shell command and compare the
+        result with the given username in self.credentials.
+
+        :return: True=is authed, False=is not authed, None=state can't be
+                 determined.
+        """
+        if not hasattr(self, "credentials"):
+            self._logger.warning("no creds -> no login")
+            return None
+        out = self._cmd(
+                msg="whoami",
+                returncode=False,
+                expected_output=False)
+        return out == self.credentials[0]
 
     def _prompt(self):
         """ Request a prompt.
@@ -289,7 +309,10 @@ class AConnection(object):
                  :term:`target system`.
         """
         self._logger.info("requesting new prompt")
-        return self._cmd("",returncode=False) + os.linesep + self.last_prompt
+        return self._cmd(
+                msg="",
+                returncode=False
+        ) + os.linesep + self.last_prompt
 
     def __str__(self):
         return "{}:({})".format(self.__class__.__name__, str({
@@ -385,7 +408,7 @@ class SerialConnection(AConnection):
             raise UnexpectedPromptException(
                 "'{}'.endswith('{}')".format(self.last_prompt, self.pw_prompt))
         self._cmd(self.credentials[1], returncode=False)
-        if self.can_login():
+        if self.can_login:
             raise UnexpectedPromptException(
                 "login should be finished but prompt is '{}'".format(
                     self.last_prompt))
@@ -420,7 +443,7 @@ class SerialConnection(AConnection):
                 raise EmptyResponseException()
         out_repl = out.replace("\r","")
         # return without msg and prompt
-        lines = out.split("\n")
+        lines = out_repl.split("\n")
         self.last_cmd = msg
         self.last_prompt = lines[-1]
         # if there is no returncode line, it doesn't need to be removed
@@ -502,7 +525,14 @@ class Disconnected(AState):
             self.event,
             str(self),
         ))
-        return connection._connect()
+        out = connection._connect()
+        try:
+            connection._prompt()
+        except EmptyResponseException as e:
+            connection._logger.exception(e)
+            connection._disconnect()
+            self.event = self._DISCONNECT
+            raise CantConnectException("Target device running?")
 
     def login(self, connection):
         """ Should not be called because there is no connection.
@@ -570,17 +600,26 @@ class Connected(AState):
             self.event,
             str(self),
         ))
+        if connection.is_authenticated:
+            connection._logger.info("already authenticated")
+            return True
         if hasattr(connection, "credentials") and connection.credentials:
-            connection._logger.debug("authenticate for user '{}'"
+            connection._logger.info("authenticate for user '{}'"
                     .format(connection.credentials[0]))
-            # make sure you are ready to login
-            if connection.can_login():
+            # request a prompt to identify if last_prompt represents current
+            # state
+            if not connection.can_login:
                 connection._prompt()
             try:
-                # here check again and only login if not already logged in!
-                # same check as before
-                if connection.can_login():
+                if connection.can_login:
                     out = connection._login()
+                    connection._logger.info("connection authenticated")
+                    return out
+                else:
+                    self.event = self._LOGGED_OUT
+                    connection._logger.warning(
+                            "could not authenticate user '{}'".format(
+                                connection.credentials[0]))
             except ConnectionException as e:
                 self.event = self._LOGGED_OUT
                 raise type(e), type(e)(e.message), sys.exc_info()[2]
