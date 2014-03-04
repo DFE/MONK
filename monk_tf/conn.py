@@ -456,7 +456,7 @@ class SerialConnection(AConnection):
             return ""
         out_repl = out.replace("\r","")
         # return without msg and prompt
-        lines = out.split("\n")
+        lines = out_repl.split("\n")
         self.last_cmd = msg
         self.last_prompt = lines[-1]
         # if there is no returncode line, it doesn't need to be removed
