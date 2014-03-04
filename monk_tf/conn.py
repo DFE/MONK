@@ -324,6 +324,9 @@ class EchoConnection(AConnection):
         self.logged_in = True
 
     def _cmd(self, msg, *args, **kwargs):
+        # is unlikely to be used with really empty response
+        if not msg:
+            return "<empty>"
         return msg
 
     def _disconnect(self):
