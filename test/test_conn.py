@@ -78,9 +78,9 @@ def test_cmd_returncode():
     sut = conn.EchoConnection()
     sut2 = conn.DefectiveConnection()
     # execute + assert (raises Error if params can't be parsed)
-    sut._cmd("hello", returncode=True, expected_output=True)
+    sut._cmd("hello", returncode=True)
     try:
-        sut2._cmd("hello", returncode=True, expected_output=True)
+        out = sut2._cmd("hello", returncode=True)
     except conn.MockConnectionException as e:
         pass
 

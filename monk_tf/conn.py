@@ -289,7 +289,10 @@ class AConnection(object):
                  :term:`target system`.
         """
         self._logger.info("requesting new prompt")
-        return self._cmd("",returncode=False) + os.linesep + self.last_prompt
+        out = self._cmd("", returncode=False)
+        if not out:
+            raise EmptyResponseException()
+        return out + os.linesep + self.last_prompt
 
     def __str__(self):
         return "{}:({})".format(self.__class__.__name__, str({
@@ -392,7 +395,7 @@ class SerialConnection(AConnection):
                 "login should be finished but prompt is '{}'".format(
                     self.last_prompt))
 
-    def _cmd(self,msg, returncode=True, expected_output=True):
+    def _cmd(self,msg, returncode=True):
         """ Unsafe, direct command interface.
 
         Also updates :py:attr:`last_cmd`, :py:attr:`last_prompt` and
@@ -402,9 +405,6 @@ class SerialConnection(AConnection):
 
         :param returncode: want a returncode? otherwise non is requested from
                            :term:`target device`
-
-        :param expected_output: is an output expected? True might result in an
-                                :py:class:`~monk_tf.conn.EmptyResponseException`
 
         :return: the standard output from the command execution
         """
@@ -418,8 +418,9 @@ class SerialConnection(AConnection):
         if not out:
             # try again
             out = self._serial.readall()
-            if not out and expected_output:
-                raise EmptyResponseException()
+        # nothing has been received
+        if not out:
+            return ""
         out_repl = out.replace("\r","")
         # return without msg and prompt
         lines = out.split("\n")
