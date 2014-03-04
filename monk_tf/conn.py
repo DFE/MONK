@@ -366,6 +366,8 @@ class SerialConnection(AConnection):
         """
         self.serial_class = serial_class if serial_class else serial.Serial
         kwargs["port"] = kwargs.get("port", "/dev/ttyUSB1")
+        if os.path.isfile(kwargs["port"]):
+            raise CantConnectException("Port does not exist")
         kwargs["baudrate"] = int(kwargs.get("baudrate", 115200))
         kwargs["timeout"] = float(kwargs.get("timeout", 1.5))
         if "user" in kwargs and "password" in kwargs and not "credentials" in kwargs:

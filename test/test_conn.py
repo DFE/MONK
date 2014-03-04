@@ -96,6 +96,15 @@ def test_connected_login():
     # assert
     nt.ok_("_login" not in sut.calls)
 
+@nt.raises(conn.CantConnectException)
+def test_legal_port():
+    """ conn: using a non existing port results in exception
+    """
+    # setup
+    sut = conn.SerialConnection(port="this/port/can/hopefully/not/exis.t")
+    # exercise
+    sut.connect()
+
 class MockConnection(conn.AConnection):
 
     def __init__(self, *args, **kwargs):
