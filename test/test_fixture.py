@@ -30,12 +30,7 @@ def test_simple_xiniparser():
     # set up
     sut = fixture.Fixture()
     props = fixture.XiniParser(here + "/example_fixture.cfg")
-    expected_dev = dev.Device(conn.SerialConnection(
-        name="serial1",
-        port="/dev/ttyUSB0",
-        user="testuser",
-        password="secret1",
-    ))
+    expected_dev = dev.Device(conn.EchoConnection(name="echo1"))
     expected_dev.name = "dev1"
     # execute
     sut._update_props(props)
@@ -54,12 +49,7 @@ def test_simple_fixture():
     """ fixture: use Fixture directly to create simple device
     """
     # set up
-    expected_dev = dev.Device(conn.SerialConnection(
-        name="serial1",
-        port="/dev/ttyUSB0",
-        user="testuser",
-        password="secret1",
-    ))
+    expected_dev = dev.Device(conn.EchoConnection(name="echo1"))
     expected_dev.name = "dev1"
     # execute
     sut = fixture.Fixture(here + "/example_fixture.cfg")
@@ -77,12 +67,7 @@ def test_update_fixture():
     """ fixture: update a Fixture with a second file
     """
     # set up
-    expected_dev = dev.Device(conn.SerialConnection(
-        name="serial2",
-        port="/dev/ttyUSB1",
-        user="testuser2",
-        password="secret2",
-    ))
+    expected_dev = dev.Device(conn.EchoConnection(name="echo3"))
     expected_dev.name = "dev1"
     sut = fixture.Fixture(here + "/example_fixture.cfg")
     # execute
@@ -101,18 +86,8 @@ def test_add_second_dev_update():
     """ fixture: update a second dev into Fixture
     """
     # set up
-    expected_dev1 = dev.Device(conn.SerialConnection(
-        name="serial1",
-        port="/dev/ttyUSB0",
-        user="testuser",
-        password="secret1",
-    ))
-    expected_dev2 = dev.Device(conn.SerialConnection(
-        name="serial2",
-        port="/dev/ttyUSB1",
-        user="testuser2",
-        password="secret2",
-    ))
+    expected_dev1 = dev.Device(conn.EchoConnection(name="echo1"))
+    expected_dev2 = dev.Device(conn.EchoConnection(name="echo2"))
     expected_dev1.name = "dev1"
     expected_dev2.name = "dev2"
     sut = fixture.Fixture(here + "/example_fixture.cfg")

@@ -105,6 +105,27 @@ def test_legal_port():
     # exercise
     sut.connect()
 
+@nt.raises(conn.CantConnectException)
+def test_noprompt_exception():
+    """ conn: connecting to shut down target device results in exception
+    """
+    # setup
+    sut = conn.SilentConnection()
+    # exercise
+    sut.connect()
+
+def test_noprompt_notconnected():
+    """ conn: connecting to shut down target device doesn't change state
+    """
+    # setup
+    sut = conn.SilentConnection()
+    # exercise
+    try:
+        sut.connect()
+    except conn.CantConnectException as e:
+        # verify
+        nt.ok_(isinstance(sut.current_state, conn.Disconnected))
+
 class MockConnection(conn.AConnection):
 
     def __init__(self, *args, **kwargs):

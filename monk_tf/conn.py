@@ -88,6 +88,7 @@ The code of this module is split into the following parts:
 """
 
 import os
+import os.path as op
 import sys
 import logging
 
@@ -333,6 +334,24 @@ class EchoConnection(AConnection):
         pass
 
 
+class SilentConnection(AConnection):
+    """ do whatever is considered silent for each event.
+    """
+
+    def _connect(self):
+        pass
+
+    def _login(self):
+        pass
+
+    def _cmd(self, msg, *args, **kwargs):
+        """ returns "" instead of None to not raise string concat errors
+        """
+        return ""
+
+    def _disconnect(self):
+        pass
+
 class DefectiveConnection(AConnection):
     """ Raise a :py:class:`~monk_tf.conn.MockConnectionException` on each call.
     """
@@ -370,15 +389,26 @@ class SerialConnection(AConnection):
 
         :param serial_class: the class that provides the serial interface.
         """
+        # workaround until "real" logger exists through AConnection.__init__
+        self._logger = logging.getLogger(self.__class__.__name__)
         self.serial_class = serial_class if serial_class else serial.Serial
-        kwargs["port"] = kwargs.get("port", "/dev/ttyUSB1")
-        if os.path.isfile(kwargs["port"]):
-            raise CantConnectException("Port does not exist")
+        port = kwargs.get("port", "/dev/ttyUSB1")
+        if not self._is_serialport(port):
+            raise CantConnectException("incorrect port '{}'".format(port))
+        kwargs["port"] = port
         kwargs["baudrate"] = int(kwargs.get("baudrate", 115200))
         kwargs["timeout"] = float(kwargs.get("timeout", 1.5))
         if "user" in kwargs and "password" in kwargs and not "credentials" in kwargs:
             kwargs["credentials"] = (kwargs.pop("user"), kwargs.pop("password"))
         super(SerialConnection, self).__init__(*args, **kwargs)
+
+    def _is_serialport(self, name):
+        self._logger.debug("check if port '{}' correct".format(name))
+        try:
+            return os.isatty(os.open(name,os.O_RDWR))
+        except OSError as e:
+            self._logger.exception(e)
+            return False
 
     def _connect(self):
         try:
@@ -508,7 +538,14 @@ class Disconnected(AState):
             self.event,
             str(self),
         ))
-        return connection._connect()
+        out = connection._connect()
+        try:
+            connection._prompt()
+        except EmptyResponseException as e:
+            connection._logger.exception(e)
+            self.event = self._DISCONNECT
+            raise CantConnectException("No I/O on connection. Device running?")
+        return out
 
     def login(self, connection):
         """ Should not be called because there is no connection.
