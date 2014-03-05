@@ -326,6 +326,7 @@ class EchoConnection(AConnection):
 
     def _cmd(self, msg, *args, **kwargs):
         # is unlikely to be used with really empty response
+        self.last_prompt = "echo> "
         if not msg:
             return "<empty>"
         return msg
@@ -347,6 +348,7 @@ class SilentConnection(AConnection):
     def _cmd(self, msg, *args, **kwargs):
         """ returns "" instead of None to not raise string concat errors
         """
+        self.last_prompt = ""
         return ""
 
     def _disconnect(self):
