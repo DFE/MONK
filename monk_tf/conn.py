@@ -289,8 +289,9 @@ class AConnection(object):
                  :term:`target system`.
         """
         self._logger.info("requesting new prompt")
+        del self.last_prompt
         out = self._cmd("", returncode=False)
-        if not out:
+        if not out and not self.last_prompt:
             raise EmptyResponseException()
         return out + os.linesep + self.last_prompt
 
