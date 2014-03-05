@@ -447,6 +447,8 @@ class SerialConnection(AConnection):
         msg_rcd = stripped + ("; echo \"$?\"" if stripped and returncode else "")
         # command will only be executed, if it ends in a linebreak
         msg_sepd = msg_rcd + self.linesep
+        self._logger.debug("send message '{}'".format(
+            msg_sepd.encode("string-escape")))
         self._serial.write(msg_sepd)
         # read all that comes back
         out = self._serial.readall()
