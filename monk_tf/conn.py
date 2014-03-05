@@ -420,11 +420,14 @@ class SerialConnection(AConnection):
             raise CantConnectException("Check cables and user rights!")
 
     def _login(self):
-        self._cmd(self.credentials[0], returncode=False)
+        user, pw = self.credentials
+        self._logger.debug("send username '{}'".format(user))
+        self._cmd(user, returncode=False)
         if not self.last_prompt.endswith(self.pw_prompt):
             raise UnexpectedPromptException(
                 "'{}'.endswith('{}')".format(self.last_prompt, self.pw_prompt))
-        self._cmd(self.credentials[1], returncode=False)
+        self._logger.debug("send password '{}'".format(pw))
+        self._cmd(pw, returncode=False)
         if self.can_auth:
             raise UnexpectedPromptException(
                 "login should be finished but prompt is '{}'".format(
