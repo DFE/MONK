@@ -13,6 +13,7 @@
 from nose import tools as nt
 from monk_tf import conn
 
+
 def test_simplest():
     """ conn: create the simplest possible AConnection
     """
@@ -47,6 +48,7 @@ def test_fsm():
     txt_in = "qwerty12345"
     expected = txt_in
     sut = conn.EchoConnection()
+    sut.credentials = ("not", "important")
     # execute
     sut.connect()
     sut.login()
@@ -78,9 +80,9 @@ def test_cmd_returncode():
     sut = conn.EchoConnection()
     sut2 = conn.DefectiveConnection()
     # execute + assert (raises Error if params can't be parsed)
-    sut._cmd("hello", returncode=True, expected_output=True)
+    sut._cmd("hello", returncode=True)
     try:
-        sut2._cmd("hello", returncode=True, expected_output=True)
+        out = sut2._cmd("hello", returncode=True)
     except conn.MockConnectionException as e:
         pass
 
@@ -88,13 +90,43 @@ def test_connected_login():
     """ conn: connection's _login is not called if already logged in
     """
     # set up
-    sut = MockConnection(start_state=conn.Connected())
+    sut = MockConnection(start_state=conn.Authenticated())
     # execute
     sut.login()
     sut.login()
     sut.login()
     # assert
     nt.ok_("_login" not in sut.calls)
+
+@nt.raises(conn.CantConnectException)
+def test_legal_port():
+    """ conn: using a non existing port results in exception
+    """
+    # setup
+    sut = conn.SerialConnection(port="this/port/can/hopefully/not/exis.t")
+    # exercise
+    sut.connect()
+
+@nt.raises(conn.CantConnectException)
+def test_noprompt_exception():
+    """ conn: connecting to shut down target device results in exception
+    """
+    # setup
+    sut = conn.SilentConnection()
+    # exercise
+    sut.connect()
+
+def test_noprompt_notconnected():
+    """ conn: connecting to shut down target device doesn't change state
+    """
+    # setup
+    sut = conn.SilentConnection()
+    # exercise
+    try:
+        sut.connect()
+    except conn.CantConnectException as e:
+        # verify
+        nt.ok_(isinstance(sut.current_state, conn.Disconnected))
 
 class MockConnection(conn.AConnection):
 
@@ -107,7 +139,7 @@ class MockConnection(conn.AConnection):
         self.calls.add("_connect")
 
     def _login(self):
-        self.calls.add("_login")
+        self.calls.append("_login")
         self.logged_in = True
 
     def _cmd(self, *args, **kwargs):

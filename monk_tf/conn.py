@@ -88,6 +88,7 @@ The code of this module is split into the following parts:
 """
 
 import os
+import os.path as op
 import sys
 import logging
 
@@ -142,6 +143,11 @@ class CantConnectException(ConnectionException):
     Reasons might be that the physical connection is not established or that
     the executing user lacks privileges to use this connection, e.g., when he
     is not in the *dialout* group on a Linux machine.
+    """
+    pass
+
+class CantAuthException(ConnectionException):
+    """ is raised if a connection can't authenticate a user.
     """
     pass
 
@@ -271,14 +277,35 @@ class AConnection(object):
             self._logger.debug("current state '{}'".format(self.current_state))
         return out
 
-    def can_login(self):
-        """ Checks wether the prompt is one of the login prompts.
+    @property
+    def has_user_prompt(self):
+        """ Checks whether the current prompt is one asking for a username
 
         :return: True if a login prompt or False otherwise.
         """
-        return any(self.last_prompt.endswith(p) for p in (
-                        self.pw_prompt,
-                        self.user_prompt,))
+        return self.last_prompt.endswith(self.user_prompt)
+
+    @property
+    def has_pw_prompt(self):
+        """ Checks whether the current prompt is one asking for a password
+
+        :return: True if a password prompt or False otherwise.
+        """
+        return self.last_prompt.endswith(self.pw_prompt)
+
+    @property
+    def is_authenticated(self):
+        """ verify if current user is authenticated
+
+        Verification is done by sending "whoami" command comparing the result
+        to the username given in self.credentials
+        """
+        self._logger.debug("check whether already authenticated")
+        if not hasattr(self, "credentials") or not self.credentials:
+            self._logger.warning("no credentials, no login")
+            return None
+        out = self._cmd("whoami",returncode=False)
+        return out == self.credentials[0]
 
     def _prompt(self):
         """ Request a prompt.
@@ -289,7 +316,11 @@ class AConnection(object):
                  :term:`target system`.
         """
         self._logger.info("requesting new prompt")
-        return self._cmd("",returncode=False) + os.linesep + self.last_prompt
+        del self.last_prompt
+        out = self._cmd("", returncode=False)
+        if not (hasattr(self,"last_prompt") and (self.last_prompt or out)):
+            raise EmptyResponseException()
+        return out + os.linesep + self.last_prompt
 
     def __str__(self):
         return "{}:({})".format(self.__class__.__name__, str({
@@ -321,11 +352,33 @@ class EchoConnection(AConnection):
         self.logged_in = True
 
     def _cmd(self, msg, *args, **kwargs):
+        # is unlikely to be used with really empty response
+        self.last_prompt = "echo> "
+        if not msg:
+            return "<empty>"
         return msg
 
     def _disconnect(self):
         pass
 
+
+class SilentConnection(AConnection):
+    """ do whatever is considered silent for each event.
+    """
+
+    def _connect(self):
+        pass
+
+    def _login(self):
+        pass
+
+    def _cmd(self, msg, *args, **kwargs):
+        """ returns "" instead of None to not raise string concat errors
+        """
+        return ""
+
+    def _disconnect(self):
+        pass
 
 class DefectiveConnection(AConnection):
     """ Raise a :py:class:`~monk_tf.conn.MockConnectionException` on each call.
@@ -364,13 +417,26 @@ class SerialConnection(AConnection):
 
         :param serial_class: the class that provides the serial interface.
         """
+        # workaround until "real" logger exists through AConnection.__init__
+        self._logger = logging.getLogger(self.__class__.__name__)
         self.serial_class = serial_class if serial_class else serial.Serial
-        kwargs["port"] = kwargs.get("port", "/dev/ttyUSB1")
+        port = kwargs.get("port", "/dev/ttyUSB1")
+        if not self._is_serialport(port):
+            raise CantConnectException("incorrect port '{}'".format(port))
+        kwargs["port"] = port
         kwargs["baudrate"] = int(kwargs.get("baudrate", 115200))
         kwargs["timeout"] = float(kwargs.get("timeout", 1.5))
         if "user" in kwargs and "password" in kwargs and not "credentials" in kwargs:
             kwargs["credentials"] = (kwargs.pop("user"), kwargs.pop("password"))
         super(SerialConnection, self).__init__(*args, **kwargs)
+
+    def _is_serialport(self, name):
+        self._logger.debug("check if port '{}' correct".format(name))
+        try:
+            return os.isatty(os.open(name,os.O_RDWR))
+        except OSError as e:
+            self._logger.exception(e)
+            return False
 
     def _connect(self):
         try:
@@ -380,17 +446,32 @@ class SerialConnection(AConnection):
             raise CantConnectException("Check cables and user rights!")
 
     def _login(self):
-        self._cmd(self.credentials[0], returncode=False)
-        if not self.last_prompt.endswith(self.pw_prompt):
-            raise UnexpectedPromptException(
-                "'{}'.endswith('{}')".format(self.last_prompt, self.pw_prompt))
-        self._cmd(self.credentials[1], returncode=False)
-        if self.can_login():
-            raise UnexpectedPromptException(
-                "login should be finished but prompt is '{}'".format(
-                    self.last_prompt))
+        if self.is_authenticated:
+            self._logger.debug("already authenticated")
+            return True
+        if hasattr(self, "credentials") and self.credentials:
+            self._logger.debug("authenticate for user '{}'"
+                    .format(self.credentials[0]))
+            if self.has_pw_prompt:
+                self._prompt()
+            if self.has_user_prompt:
+                    user, pw = self.credentials
+                    self._logger.debug("send username '{}'".format(user))
+                    self._cmd(user, returncode=False)
+                    if not self.has_pw_prompt:
+                        raise UnexpectedPromptException(
+                            "'{}'.endswith('{}')".format(
+                                self.last_prompt, self.pw_prompt))
+                    self._logger.debug("send password '{}'".format(pw))
+                    self._cmd(pw, returncode=False)
+                    if self.has_user_prompt or self.has_pw_prompt:
+                        raise UnexpectedPromptException(self.last_prompt)
+            else:
+                raise CantAuthException("Reason unknown")
+        else:
+            raise CantAuthException("Connection has no credentials attribute")
 
-    def _cmd(self,msg, returncode=True, expected_output=True):
+    def _cmd(self,msg, returncode=True):
         """ Unsafe, direct command interface.
 
         Also updates :py:attr:`last_cmd`, :py:attr:`last_prompt` and
@@ -401,26 +482,26 @@ class SerialConnection(AConnection):
         :param returncode: want a returncode? otherwise non is requested from
                            :term:`target device`
 
-        :param expected_output: is an output expected? True might result in an
-                                :py:class:`~monk_tf.conn.EmptyResponseException`
-
         :return: the standard output from the command execution
         """
         stripped = msg.strip()
         msg_rcd = stripped + ("; echo \"$?\"" if stripped and returncode else "")
         # command will only be executed, if it ends in a linebreak
         msg_sepd = msg_rcd + self.linesep
+        self._logger.debug("send message '{}'".format(
+            msg_sepd.encode("string-escape")))
         self._serial.write(msg_sepd)
         # read all that comes back
         out = self._serial.readall()
         if not out:
             # try again
             out = self._serial.readall()
-            if not out and expected_output:
-                raise EmptyResponseException()
+        # nothing has been received
+        if not out:
+            return ""
         out_repl = out.replace("\r","")
         # return without msg and prompt
-        lines = out.split("\n")
+        lines = out_repl.split("\n")
         self.last_cmd = msg
         self.last_prompt = lines[-1]
         # if there is no returncode line, it doesn't need to be removed
@@ -502,7 +583,14 @@ class Disconnected(AState):
             self.event,
             str(self),
         ))
-        return connection._connect()
+        out = connection._connect()
+        try:
+            connection._prompt()
+        except EmptyResponseException as e:
+            connection._logger.exception(e)
+            self.event = self._DISCONNECT
+            raise CantConnectException("No I/O on connection. Device running?")
+        return out
 
     def login(self, connection):
         """ Should not be called because there is no connection.
@@ -570,23 +658,11 @@ class Connected(AState):
             self.event,
             str(self),
         ))
-        if hasattr(connection, "credentials") and connection.credentials:
-            connection._logger.debug("authenticate for user '{}'"
-                    .format(connection.credentials[0]))
-            # make sure you are ready to login
-            if connection.can_login():
-                connection._prompt()
-            try:
-                # here check again and only login if not already logged in!
-                # same check as before
-                if connection.can_login():
-                    out = connection._login()
-            except ConnectionException as e:
-                self.event = self._LOGGED_OUT
-                raise type(e), type(e)(e.message), sys.exc_info()[2]
-        else:
-            connection._logger.warning("no creds -> no login")
-            return False
+        try:
+            return connection._login()
+        except ConnectionException as e:
+            self.event = self._LOGGED_OUT
+            raise type(e), type(e)(e.message), sys.exc_info()[2]
 
     def cmd(self, connection, msg):
         """ Sends a command if login not necessary, otherwise raises exception
