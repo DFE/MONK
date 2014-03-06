@@ -13,6 +13,7 @@
 from nose import tools as nt
 from monk_tf import conn
 
+
 def test_simplest():
     """ conn: create the simplest possible AConnection
     """
@@ -47,6 +48,7 @@ def test_fsm():
     txt_in = "qwerty12345"
     expected = txt_in
     sut = conn.EchoConnection()
+    sut.credentials = ("not", "important")
     # execute
     sut.connect()
     sut.login()
@@ -88,7 +90,7 @@ def test_connected_login():
     """ conn: connection's _login is not called if already logged in
     """
     # set up
-    sut = MockConnection(start_state=conn.Connected())
+    sut = MockConnection(start_state=conn.Authenticated())
     # execute
     sut.login()
     sut.login()
@@ -137,7 +139,7 @@ class MockConnection(conn.AConnection):
         self.calls.add("_connect")
 
     def _login(self):
-        self.calls.add("_login")
+        self.calls.append("_login")
         self.logged_in = True
 
     def _cmd(self, *args, **kwargs):
