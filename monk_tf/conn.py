@@ -146,6 +146,11 @@ class CantConnectException(ConnectionException):
     """
     pass
 
+class CantAuthException(ConnectionException):
+    """ is raised if a connection can't authenticate a user.
+    """
+    pass
+
 
 ##########################################
 #
@@ -630,6 +635,9 @@ class Connected(AState):
                 # same check as before
                 if connection.can_auth:
                     out = connection._login()
+                else:
+                    self.event = self._LOGGED_OUT
+                    raise CantAuthException("Reason unknown")
             except ConnectionException as e:
                 self.event = self._LOGGED_OUT
                 raise type(e), type(e)(e.message), sys.exc_info()[2]
