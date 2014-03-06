@@ -301,8 +301,8 @@ class AConnection(object):
         to the username given in self.credentials
         """
         self._logger.debug("check whether already authenticated")
-        if not hasattr(self, "credentials"):
-            self._logger("no credentials, no login")
+        if not hasattr(self, "credentials") or not self.credentials:
+            self._logger.warning("no credentials, no login")
             return None
         out = self._cmd("whoami",returncode=False)
         return out == self.credentials[0]
