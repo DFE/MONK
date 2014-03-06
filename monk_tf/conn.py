@@ -285,6 +285,20 @@ class AConnection(object):
         """
         return self.last_prompt.endswith(self.user_prompt)
 
+    @property
+    def is_authenticated(self):
+        """ verify if current user is authenticated
+
+        Verification is done by sending "whoami" command comparing the result
+        to the username given in self.credentials
+        """
+        self._logger.debug("check whether already authenticated")
+        if not hasattr(self, "credentials"):
+            self._logger("no credentials, no login")
+            return None
+        out = self._cmd("whoami",returncode=False)
+        return out == self.credentials[0]
+
     def _prompt(self):
         """ Request a prompt.
 
@@ -624,6 +638,9 @@ class Connected(AState):
             self.event,
             str(self),
         ))
+        if connection.is_authenticated:
+            connection._logger.debug("already authenticated")
+            return True
         if hasattr(connection, "credentials") and connection.credentials:
             connection._logger.debug("authenticate for user '{}'"
                     .format(connection.credentials[0]))
@@ -631,8 +648,8 @@ class Connected(AState):
             if connection.can_auth:
                 connection._prompt()
             try:
-                # here check again and only login if not already logged in!
-                # same check as before
+                # if two times no login prompt and not already authed then
+                # there is something very strange going on.
                 if connection.can_auth:
                     out = connection._login()
                 else:
@@ -642,6 +659,7 @@ class Connected(AState):
                 self.event = self._LOGGED_OUT
                 raise type(e), type(e)(e.message), sys.exc_info()[2]
         else:
+            self.event = self._LOGGED_OUT
             connection._logger.warning("no creds -> no login")
             return False
 
