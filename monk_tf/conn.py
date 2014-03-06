@@ -446,18 +446,30 @@ class SerialConnection(AConnection):
             raise CantConnectException("Check cables and user rights!")
 
     def _login(self):
-        user, pw = self.credentials
-        self._logger.debug("send username '{}'".format(user))
-        self._cmd(user, returncode=False)
-        if not self.last_prompt.endswith(self.pw_prompt):
-            raise UnexpectedPromptException(
-                "'{}'.endswith('{}')".format(self.last_prompt, self.pw_prompt))
-        self._logger.debug("send password '{}'".format(pw))
-        self._cmd(pw, returncode=False)
-        if self.can_auth:
-            raise UnexpectedPromptException(
-                "login should be finished but prompt is '{}'".format(
-                    self.last_prompt))
+        if self.is_authenticated:
+            self._logger.debug("already authenticated")
+            return True
+        if hasattr(self, "credentials") and self.credentials:
+            self._logger.debug("authenticate for user '{}'"
+                    .format(self.credentials[0]))
+            if self.has_pw_prompt:
+                self._prompt()
+            if self.has_user_prompt:
+                    user, pw = self.credentials
+                    self._logger.debug("send username '{}'".format(user))
+                    self._cmd(user, returncode=False)
+                    if not self.has_pw_prompt:
+                        raise UnexpectedPromptException(
+                            "'{}'.endswith('{}')".format(
+                                self.last_prompt, self.pw_prompt))
+                    self._logger.debug("send password '{}'".format(pw))
+                    self._cmd(pw, returncode=False)
+                    if self.has_user_prompt or self.has_pw_prompt:
+                        raise UnexpectedPromptException(self.last_prompt)
+            else:
+                raise CantAuthException("Reason unknown")
+        else:
+            raise CantAuthException("Connection has no credentials attribute")
 
     def _cmd(self,msg, returncode=True):
         """ Unsafe, direct command interface.
@@ -646,27 +658,11 @@ class Connected(AState):
             self.event,
             str(self),
         ))
-        if connection.is_authenticated:
-            connection._logger.debug("already authenticated")
-            return True
-        if hasattr(connection, "credentials") and connection.credentials:
-            connection._logger.debug("authenticate for user '{}'"
-                    .format(connection.credentials[0]))
-            if connection.has_pw_prompt:
-                connection._prompt()
-            try:
-                if connection.has_user_prompt:
-                    out = connection._login()
-                else:
-                    self.event = self._LOGGED_OUT
-                    raise CantAuthException("Reason unknown")
-            except ConnectionException as e:
-                self.event = self._LOGGED_OUT
-                raise type(e), type(e)(e.message), sys.exc_info()[2]
-        else:
+        try:
+            return connection._login()
+        except ConnectionException as e:
             self.event = self._LOGGED_OUT
-            connection._logger.warning("no creds -> no login")
-            return False
+            raise type(e), type(e)(e.message), sys.exc_info()[2]
 
     def cmd(self, connection, msg):
         """ Sends a command if login not necessary, otherwise raises exception
