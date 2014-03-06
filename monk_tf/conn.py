@@ -278,12 +278,20 @@ class AConnection(object):
         return out
 
     @property
-    def can_auth(self):
+    def has_user_prompt(self):
         """ Checks whether the current prompt is one asking for a username
 
         :return: True if a login prompt or False otherwise.
         """
         return self.last_prompt.endswith(self.user_prompt)
+
+    @property
+    def has_pw_prompt(self):
+        """ Checks whether the current prompt is one asking for a password
+
+        :return: True if a password prompt or False otherwise.
+        """
+        return self.last_prompt.endswith(self.pw_prompt)
 
     @property
     def is_authenticated(self):
@@ -644,13 +652,10 @@ class Connected(AState):
         if hasattr(connection, "credentials") and connection.credentials:
             connection._logger.debug("authenticate for user '{}'"
                     .format(connection.credentials[0]))
-            # make sure you are ready to login
-            if connection.can_auth:
+            if connection.has_pw_prompt:
                 connection._prompt()
             try:
-                # if two times no login prompt and not already authed then
-                # there is something very strange going on.
-                if connection.can_auth:
+                if connection.has_user_prompt:
                     out = connection._login()
                 else:
                     self.event = self._LOGGED_OUT
