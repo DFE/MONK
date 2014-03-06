@@ -1,3 +1,12 @@
+Release 0.1.6 (2014-03-06)
+==========================
+
+ * again bugs got fixed
+ * most important topic was stabilizing the connect->login->cmd process
+ * error handling improved with more ifs and more userfriendly exceptions
+ * it is now possible to completely move from Disconnected to Authenticated
+   even when the target device is just booting.
+
 Release 0.1.5 (2014-02-25)
 ==========================
 
