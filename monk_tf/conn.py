@@ -291,7 +291,7 @@ class AConnection(object):
         self._logger.info("requesting new prompt")
         del self.last_prompt
         out = self._cmd("", returncode=False)
-        if not out and not self.last_prompt:
+        if not (hasattr(self,"last_prompt") and (self.last_prompt or out)):
             raise EmptyResponseException()
         return out + os.linesep + self.last_prompt
 
@@ -348,7 +348,6 @@ class SilentConnection(AConnection):
     def _cmd(self, msg, *args, **kwargs):
         """ returns "" instead of None to not raise string concat errors
         """
-        self.last_prompt = ""
         return ""
 
     def _disconnect(self):
