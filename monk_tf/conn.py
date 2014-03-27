@@ -453,7 +453,10 @@ class SerialConnection(AConnection):
             self._logger.debug("authenticate for user '{}'"
                     .format(self.credentials[0]))
             if self.has_pw_prompt:
-                self._prompt()
+                try:
+                    self._prompt()
+                except EmptyResponseException:
+                    self._prompt()
             if self.has_user_prompt:
                     user, pw = self.credentials
                     self._logger.debug("send username '{}'".format(user))
