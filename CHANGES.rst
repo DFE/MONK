@@ -1,3 +1,8 @@
+Release 0.1.7 (2014-03-27)
+==========================
+
+ * workaround for slower password prompt return times
+
 Release 0.1.6 (2014-03-06)
 ==========================
 
