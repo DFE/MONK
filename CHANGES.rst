@@ -1,7 +1,9 @@
-Release 0.1.7 (2014-03-27)
+Release 0.1.7/0.1.8 (2014-03-27)
 ==========================
 
  * workaround for slower password prompt return times
+ * there was a problem in the publishing process which lead to changes not
+   being added to the 0.1.7 release
 
 Release 0.1.6 (2014-03-06)
 ==========================
