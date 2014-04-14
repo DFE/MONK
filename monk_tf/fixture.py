@@ -70,6 +70,7 @@ Classes
 -------
 """
 
+import os
 import sys
 import logging
 
@@ -201,6 +202,8 @@ class Fixture(object):
         XiniParser,
     ]
 
+    _DEFAULT_DEBUG_SOURCE = "MONK_DEBUG_SOURCE"
+
     def __init__(self, source=None, name=None, parsers=None, classes=None):
         """
 
@@ -225,7 +228,17 @@ class Fixture(object):
         self.classes = classes or self._DEFAULT_CLASSES
         self.props = {}
         if source:
-            self.read(source)
+            self._update_props(
+                    self._parse(source))
+        if self._DEFAULT_DEBUG_SOURCE in os.environ:
+            self._logger.debug("load debug source from {}".format(
+                self._DEFAULT_DEBUG_SOURCE))
+            self._update_props(
+                    self._parse(os.environ[self._DEFAULT_DEBUG_SOURCE]))
+        else:
+            self._logger.debug("no debug source file found")
+        self._initialize()
+
 
     def read(self, source):
         """ Read more data, either as a file name or as a parser.
