@@ -1,5 +1,11 @@
-Release 0.1.7/0.1.8 (2014-03-27)
+Release 0.1.9 (2014-04-14)
 ==========================
+
+ * add option to set debug fixture file which overwrites differences between
+   test environment and development environment while developing
+
+Release 0.1.7/0.1.8 (2014-03-27)
+================================
 
  * workaround for slower password prompt return times
  * there was a problem in the publishing process which lead to changes not
