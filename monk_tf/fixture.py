@@ -204,7 +204,8 @@ class Fixture(object):
 
     _DEFAULT_DEBUG_SOURCE = "MONK_DEBUG_SOURCE"
 
-    def __init__(self, source=None, name=None, parsers=None, classes=None):
+    def __init__(self, source=None, name=None, parsers=None, classes=None,
+            lookfordbgsrc=True):
         """
 
         :param source: The :term:`fixture file` or
@@ -220,6 +221,10 @@ class Fixture(object):
         :param classes: A :py:class:`dict` of classes to class names. Used for
                         parsing the type attribute in
                         :term:`fixture files<fixture file>`.
+
+        :param lookfordbgsrc: If True an environment variable is looked for to
+                              read a local debug config. If False it won't be
+                              looked for.
         """
         self.name = name or self.__class__.__name__
         self._logger = logging.getLogger("{}:{}".format(__name__, self.name))
@@ -230,7 +235,7 @@ class Fixture(object):
         if source:
             self._update_props(
                     self._parse(source))
-        if self._DEFAULT_DEBUG_SOURCE in os.environ:
+        if lookfordbgsrc and self._DEFAULT_DEBUG_SOURCE in os.environ:
             self._logger.debug("load debug source from {}".format(
                 self._DEFAULT_DEBUG_SOURCE))
             self._update_props(
