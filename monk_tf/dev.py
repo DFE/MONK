@@ -72,6 +72,23 @@ class Device(object):
             self.name
         ))
 
+    @property
+    def ip_addrs(self):
+        """ get a list of all current IP addresses of device
+        """
+        self._logger.info("retreive IP addresses")
+        out = self.cmd(" | ".join([
+            "ifconfig -a",
+            "grep 'inet addr'",
+            "awk -F: '{print $2}'",
+            "awk '{print $1}'",]))
+        ips = out.split("\n")
+        if out and not out.startswith("127.0.0.1"):
+            self._logger.debug("found IP addresses:" + str(out))
+            return out.split('\n')
+        else:
+            raise NoIPException("couldn't receive any IP address")
+
     def cmd(self, msg):
         """ Send a :term:`shell command` to the :term:`target device`.
 

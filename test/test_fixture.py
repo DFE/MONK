@@ -24,11 +24,12 @@ from monk_tf import fixture
 logger = logging.getLogger(__name__)
 here = dirname(abspath(inspect.getfile(inspect.currentframe())))
 
+
 def test_simple_xiniparser():
     """ fixture: use Xiniparser directly to create simple device
     """
     # set up
-    sut = fixture.Fixture()
+    sut = fixture.Fixture(lookfordbgsrc=False)
     props = fixture.XiniParser(here + "/example_fixture.cfg")
     expected_dev = dev.Device(conn.EchoConnection(name="echo1"))
     expected_dev.name = "dev1"
@@ -52,7 +53,7 @@ def test_simple_fixture():
     expected_dev = dev.Device(conn.EchoConnection(name="echo1"))
     expected_dev.name = "dev1"
     # execute
-    sut = fixture.Fixture(here + "/example_fixture.cfg")
+    sut = fixture.Fixture(here + "/example_fixture.cfg",lookfordbgsrc=False)
     # assert
     # check again like previous test case
     logger.debug("sut: " + str(sut))
@@ -69,7 +70,7 @@ def test_update_fixture():
     # set up
     expected_dev = dev.Device(conn.EchoConnection(name="echo3"))
     expected_dev.name = "dev1"
-    sut = fixture.Fixture(here + "/example_fixture.cfg")
+    sut = fixture.Fixture(here + "/example_fixture.cfg",lookfordbgsrc=False)
     # execute
     sut.read(here + "/example_fixture_update.cfg")
     # assert
@@ -90,7 +91,7 @@ def test_add_second_dev_update():
     expected_dev2 = dev.Device(conn.EchoConnection(name="echo2"))
     expected_dev1.name = "dev1"
     expected_dev2.name = "dev2"
-    sut = fixture.Fixture(here + "/example_fixture.cfg")
+    sut = fixture.Fixture(here + "/example_fixture.cfg",lookfordbgsrc=False)
     logger.debug("sut-props-before:" + str(sut.props))
     # execute
     sut.read(here + "/example_fixture_dev2.cfg")
@@ -120,13 +121,13 @@ def test_cant_parse_exception():
     # set up
     false_cfg_file = abspath(inspect.getfile(inspect.currentframe()))
     # execute
-    sut = fixture.Fixture(false_cfg_file)
+    sut = fixture.Fixture(false_cfg_file,lookfordbgsrc=False)
 
 def test_fast_cmd():
     """ fixture: call first device's cmd
     """
     # setup
-    sut = fixture.Fixture()
+    sut = fixture.Fixture(lookfordbgsrc=False)
     sut.devs.append(dev.Device(conn.EchoConnection()))
     msg = "test"
     expected_out = msg
@@ -141,4 +142,4 @@ def test_no_fixture_file():
     """
     # set up not necessary
     # exercise
-    fixture.Fixture("this_file_does_not_exist.cfg")
+    fixture.Fixture("this_file_does_not_exist.cfg",lookfordbgsrc=False)
