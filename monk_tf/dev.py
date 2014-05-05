@@ -46,6 +46,11 @@ class CantHandleException(DeviceException):
     """
     pass
 
+class NoIPException(DeviceException):
+    """ if a device doesn't have any IP addresses this exception is raised
+    """
+    pass
+
 
 ##############################
 #
