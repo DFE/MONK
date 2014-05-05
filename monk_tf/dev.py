@@ -92,7 +92,8 @@ class Device(object):
             self._logger.debug("found IP addresses:" + str(out))
             return out.split('\n')
         else:
-            raise NoIPException("couldn't receive any IP address")
+            raise NoIPException("couldn't receive any IP address:'{}'".format(
+                ips))
 
     def cmd(self, msg):
         """ Send a :term:`shell command` to the :term:`target device`.
