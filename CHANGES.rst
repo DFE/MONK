@@ -1,3 +1,12 @@
+Release 0.1.10/0.1.11 (2014-05-05)
+==================================
+
+Enables devices to use current connections to find its IP addresses. Example
+usecase: You have a serial connection to your device that you know how to
+access. The Device itself uses DHCP to get an IP address and you want to send
+HTTP requests to it. Now you can use MONK to find its IP address via
+SerialConnection and then send your HTTP requests.
+
 Release 0.1.9 (2014-04-14)
 ==========================
 
