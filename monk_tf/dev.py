@@ -95,6 +95,19 @@ class Device(object):
             raise NoIPException("couldn't receive any IP address:'{}'".format(
                 ips))
 
+    @property
+    def mac_addrs(self):
+        """ get a list of all current MAC addresses of device
+        """
+        self._logger.info("retreive MAC addresses")
+        out = self.cmd(" | ".join((
+            "ifconfig -a",
+            "grep HWaddr",
+            "awk '{print $5}'",))
+        macs = out.split("\n")
+        self._logger.debug("found MAC addresses:" + str(macs))
+        return macs
+
     def cmd(self, msg):
         """ Send a :term:`shell command` to the :term:`target device`.
 
