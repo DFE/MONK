@@ -103,7 +103,7 @@ class Device(object):
         out = self.cmd(" | ".join((
             "ifconfig -a",
             "grep HWaddr",
-            "awk '{print $5}'",))
+            "awk '{print $5}'",)))
         macs = out.split("\n")
         self._logger.debug("found MAC addresses:" + str(macs))
         return macs
