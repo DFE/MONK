@@ -89,7 +89,7 @@ class Device(object):
             "awk '{print $1}'",]))
         ips = out.split("\n")
         if out and not out.startswith("127.0.0.1"):
-            self._logger.debug("found IP addresses:" + str(out))
+            self._logger.debug("found IP addresses:" + str(ips))
             return out.split('\n')
         else:
             raise NoIPException("couldn't receive any IP address:'{}'".format(
