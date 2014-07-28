@@ -1,6 +1,11 @@
-Sphinx==1.2b1
-pylibssh2==1.0.1
-pyserial==2.6
-nose==1.3.0
-nosexcover==1.0.8
-setuptools-lint==0.1
+Jinja2==2.7.3
+MarkupSafe==0.23
+Pygments==1.6
+Sphinx==1.2.2
+argparse==1.2.1
+configobj==5.0.5
+docutils==0.12
+nose==1.3.3
+pexpect==3.3
+six==1.7.3
+wsgiref==0.1.2
