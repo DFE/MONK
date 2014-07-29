@@ -122,12 +122,13 @@ class ConnectionBase(object):
 class SerialConn(ConnectionBase):
 
     def __init__(self, port, user, pw, prompt="\r\n[^\r\n]*#"):
+        self.port = port
         self.user = user
         self.pw = pw
         self.prompt = prompt
 
     def _get_exp(self):
-        return fdpexpect.fdspawn(os.open(port, os.O_RDWR|os.O_NOCTTY))
+        return fdpexpect.fdspawn(os.open(self.port, os.O_RDWR|os.O_NONBLOCK|os.O_NOCTTY))
 
     def _login(self, user=None, pw=None):
             self.exp.sendline(user or self.user)
