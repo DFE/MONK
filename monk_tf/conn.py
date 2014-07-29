@@ -109,11 +109,11 @@ class ConnectionBase(object):
         except pexpect.TIMEOUT as e:
             self._login()
 
-    def cmd(self, msg, timeout=30):
+    def cmd(self, msg, expect=None, timeout=30):
         self.login()
         self.exp.sendline(msg)
         self.exp.expect(msg + "\r\n", timeout=timeout)
-        self.exp.expect(self.prompt, timeout=timeout)
+        self.exp.expect(expect or self.prompt, timeout=timeout)
         return self.exp.before
 
     def __del__(self):
