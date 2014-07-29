@@ -77,38 +77,7 @@ class Device(object):
             self.name
         ))
 
-    @property
-    def ip_addrs(self):
-        """ get a list of all current IP addresses of device
-        """
-        self._logger.info("retreive IP addresses")
-        out = self.cmd(" | ".join([
-            "ifconfig -a",
-            "grep 'inet addr'",
-            "awk -F: '{print $2}'",
-            "awk '{print $1}'",]))
-        ips = out.split("\n")
-        if out and not out.startswith("127.0.0.1"):
-            self._logger.debug("found IP addresses:" + str(ips))
-            return out.split('\n')
-        else:
-            raise NoIPException("couldn't receive any IP address:'{}'".format(
-                ips))
-
-    @property
-    def mac_addrs(self):
-        """ get a list of all current MAC addresses of device
-        """
-        self._logger.info("retreive MAC addresses")
-        out = self.cmd(" | ".join((
-            "ifconfig -a",
-            "grep HWaddr",
-            "awk '{print $5}'",)))
-        macs = out.split("\n")
-        self._logger.debug("found MAC addresses:" + str(macs))
-        return macs
-
-    def cmd(self, msg):
+    def cmd(self, msg, expect=None, timeout=None):
         """ Send a :term:`shell command` to the :term:`target device`.
 
         :param msg: the :term:`shell command`.
@@ -117,12 +86,9 @@ class Device(object):
         """
         for connection in self.conns:
             try:
-                connection.connect()
-                connection.login()
                 return connection.cmd(msg)
-            except conn.ConnectionException as excpt:
-                self._logger.exception(excpt)
-        # no connection was able to get to the return statement
+            except:
+                continue
         raise CantHandleException(
                 "dev:'{}',conns:'{}':could not send cmd '{}'".format(
                     self.name,
@@ -130,18 +96,9 @@ class Device(object):
                     msg,
         ))
 
-    def __del__(self):
-        """ Make sure all connections get closed on delete.
-        """
-        for connection in self.conns:
-            try:
-                connection.disconnect()
-            except Exception as excpt:
-                logger.exception(excpt)
-
     def __str__(self):
-        return "{}({}):conns={}".format(
+        return "{}({}):name={}".format(
                 self.__class__.__name__,
-                self.name,
                 [str(c) for c in self.conns],
+                self.name,
         )
