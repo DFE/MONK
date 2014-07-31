@@ -44,7 +44,8 @@ setup(
     license=read("LICENSE.txt"),
     zip_safe=False,
     install_requires = [
-        "pyserial >=2.5",
+        "pexpect >= 3.3",
+        "requests >= 2.2.1",
         "configobj >=4.7.2",
     ],provides = [
         "{} ({})".format(monk_tf.__title__, monk_tf.__version__)
