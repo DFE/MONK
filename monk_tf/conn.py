@@ -89,11 +89,17 @@ The code of this module is split into the following parts:
 
 import os
 import sys
+import re
+import logging
 
 import pexpect
 from pexpect import fdpexpect
 
 class ConnectionBase(object):
+
+    def __init__(self):
+        self._logger = logging.getLogger(type(self).__name__)
+        self._logger.debug("hi.")
 
     @property
     def exp(self):
@@ -104,57 +110,31 @@ class ConnectionBase(object):
             return self._exp
 
     def login(self, user=None, pw=None, timeout=30):
+        self._logger.debug("login({},{},{})".format(user, pw, timeout))
         try:
             self.exp.sendline("")
             self.exp.expect(self.prompt, timeout=timeout)
-            print "already logged in:", self.exp
-            print "---"
-            print
+            self._logger.debug("already logged in")
         except pexpect.TIMEOUT as e:
-            print "(after check) before doing login:", self.exp
-            print "---"
-            print
-            self._login()
+            self._login(user, pw)
 
     def cmd(self, msg, expect=None, timeout=30, login_timeout=None):
-        #print "before"
+        self._logger.debug("cmd({},{},{},{})".format(
+            msg, expect, timeout, login_timeout))
         self.login(timeout=login_timeout or timeout)
-        #print "before '{}', '{}', '{}'".format(
-        #        str(self.exp.buffer).encode("string-escape"),
-        #        str(self.exp.before).encode("string-escape"),
-        #        str(self.exp.after).encode("string-escape"),
-        #)
         self.exp.sendline(msg)
-        #print "<sendline '{}' succeeded> '{}', '{}', '{}'".format(
-        #        msg,
-        #        str(self.exp.buffer).encode("string-escape"),
-        #        str(self.exp.before).encode("string-escape"),
-        #        str(self.exp.after).encode("string-escape"),
-        #)
-        try:
-            expect_msg = msg[:5] + "[^\n]*\r\n"
-            self.exp.expect(expect_msg, timeout=timeout)
-        finally:
-            #print "<exp msg '{}' succ/fail?> '{}', '{}', '{}'".format(
-            #        str(expect_msg).encode("string-escape"),
-            #        str(self.exp.buffer).encode("string-escape"),
-            #        str(self.exp.before).encode("string-escape"),
-            #        str(self.exp.after).encode("string-escape"),
-            #)
-            pass
-        try:
-            self.exp.expect(expect or self.prompt, timeout=timeout)
-        finally:
-            #print "<exp '{}' succ/fail?> '{}', '{}', '{}'".format(
-            #        expect or str(self.prompt).encode("string-escape"),
-            #        str(self.exp.buffer).encode("string-escape"),
-            #        str(self.exp.before).encode("string-escape"),
-            #        str(self.exp.after).encode("string-escape"),
-            #)
-            pass
+        expect_msg = re.escape(msg[:5]) + "[^\n]*\r\n"
+        self.exp.expect(expect_msg, timeout=timeout)
+        self.exp.expect(expect or self.prompt, timeout=timeout)
+        self._logger.debug("cmd({}) result='{}' expect-match='{}'".format(
+            str(msg[:15]).encode("string_escape") + ("[...]" if len(msg) > 15 else ""),
+            str(self.exp.before[:50]).encode("string-escape") + ("[...]" if len(self.exp.before) > 50 else ""),
+            str(self.exp.after[:50]).encode("string-escape") + ("[...]" if len(self.exp.after) > 50 else ""),
+        ))
         return self.exp.before
 
     def __del__(self):
+        self._logger.debug("bye.")
         self.exp.close()
 
 class SerialConn(ConnectionBase):
@@ -165,6 +145,7 @@ class SerialConn(ConnectionBase):
         self.user = user
         self.pw = pw
         self.prompt = prompt
+        super(SerialConn, self).__init__()
 
     def _get_exp(self):
         spawn = fdpexpect.fdspawn(os.open(self.port, os.O_RDWR|os.O_NONBLOCK|os.O_NOCTTY))
@@ -172,6 +153,7 @@ class SerialConn(ConnectionBase):
         return spawn
 
     def _login(self, user=None, pw=None):
+        self._logger.debug("serial._login({},{})".format(user, pw))
         #print "login (u/pw)", user, pw
         #print "self (u/pw)", self.user, self.pw
         self.exp.expect("[lL]ogin: ")
@@ -190,6 +172,7 @@ class SshConn(ConnectionBase):
         self.user = user
         self.pw = pw
         self.prompt = prompt
+        super(SshConn, self).__init__()
 
     def _get_exp(self):
         return pexpect.spawn("ssh {}@{}".format(
@@ -198,6 +181,7 @@ class SshConn(ConnectionBase):
         ))
 
     def _login(self, user=None, pw=None):
-            self.exp.expect("[pP]assword: ")
-            self.exp.sendline(pw or self.pw)
-            self.exp.expect(self.prompt)
+        self._logger.debug("ssh._login({},{})".format(user, pw))
+        self.exp.expect("[pP]assword: ")
+        self.exp.sendline(pw or self.pw)
+        self.exp.expect(self.prompt)

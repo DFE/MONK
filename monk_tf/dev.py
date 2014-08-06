@@ -23,6 +23,7 @@ The package is separated into module exceptions and the device classes.
 """
 
 import logging
+import time
 import json
 
 import requests
@@ -121,17 +122,26 @@ class Device(object):
 class Hydra(Device):
 
     def update(self, link=None):
+        self._logger.info("Attempt update to " + str(link or self._update_link))
         if not self.is_updated:
             out = self.cmd("do-update -c && get-update {} && do-update".format(
                 link if link else self._update_link,
-            ), timeout=600)
-            for conn in self.conns:
-                conn.disconnect()
-            if self.last_returncode != 0 or not self.is_updated:
-                raise UpdateFailedException("rc:{};out:\"{}\"".format(
-                    self.last_returncode,
-                    out,
-                ))
+                ), expect="([lL]ogin: )|([cC]onnection\sto\s[^\s]*\sclosed\.)", timeout=600)
+            if "closed" in self.conns[0].exp.after:
+                self._logger.debug("reset connection after reboot")
+                del self.conns[0]._exp
+            self._logger.debug("wait till device recovered from updating")
+            time.sleep(240)
+            self._logger.debug("continue")
+            if not self.is_updated:
+                error= "build:{};fw:{};out:{}".format(
+                        self.latest_build,
+                        self.current_fw_version,
+                        out[:100],
+                )
+                raise UpdateFailedException(error)
+        else:
+            self._logger.info("Already updated.")
 
     def __init__(self, *args, **kwargs):
         self._update_link = "http://hydraip-integration.internal.dresearch-fe.de:8080/view/HIPOS/job/HydraIP_UpdateV3_USB_Stick/lastSuccessfulBuild/artifact/rel-hudson/hyp-updateV3-hikirk.zip"
@@ -156,7 +166,16 @@ class Hydra(Device):
         return self.has_newest_firmware
 
     def reset_config(self):
-        try:
-            self.cmd("hip-activate-config --reset && halt -p")
-        except CantHandleException as e:
-            pass
+        # check if logged in
+        self.cmd("ls -al")
+        self.cmd(
+            msg="hip-activate-config --reset && sync && halt -p",
+            timeout=150,
+            expect="([lL]ogin:)|([cC]onnection\sto\s[^\s]*\sclosed\.)|(INFO - LAN)"
+        )
+        if "closed" in self.conns[0].exp.after or "INFO" in self.conns[0].exp.after:
+            self._logger.debug("reset connection after config reset")
+            del self.conns[0]._exp
+        self._logger.debug("wait till device recovered from config reset")
+        time.sleep(70)
+        self._logger.debug("continue")
