@@ -85,6 +85,20 @@ The code of this module is split into the following parts:
     5. *AState* - the abstract State class which all other states are based on
     6. *State Classes* - the implementation of the state machine
 
+-------------------------------------------------------------------------------
+
+This module implements connection handling. Using the classes from this module
+you can connect directly to a :term:`target device` via serial or ssh.
+Example::
+
+    # create a serial connection
+    serial=SerialConn(port="/dev/ttyUSB3", user="tester", pw="test")
+    # create a ssh connection
+    ssh=SshConn(host="192.168.2.123", user="tester", pw="test")
+    # send a command
+    serial.cmd("ls -al")
+    # send a command
+    ssh.cmd("ls -al")
 """
 
 import os
@@ -96,9 +110,16 @@ import pexpect
 from pexpect import fdpexpect
 
 class ConnectionBase(object):
+    """ is the base class for all connections.
+    """
+
+
 
     def __init__(self):
-        self._logger = logging.getLogger(type(self).__name__)
+        if hasattr(self, "name"):
+            self._logger = logging.getLogger(self.name)
+        else:
+            self._logger = logging.getLogger(type(self).__name__)
         self._logger.debug("hi.")
 
     @property
@@ -124,7 +145,11 @@ class ConnectionBase(object):
         self.login(timeout=login_timeout or timeout)
         self.exp.sendline(msg)
         expect_msg = re.escape(msg[:5]) + "[^\n]*\r\n"
+        self._logger.debug("expect:" + expect_msg.encode("string-escape"))
         self.exp.expect(expect_msg, timeout=timeout)
+        if False: #"rm" in msg:
+            raise Exception("DIE MONK:" + str(self.exp))
+        self._logger.debug("expect:" + (expect or self.prompt).encode("string-escape"))
         self.exp.expect(expect or self.prompt, timeout=timeout)
         self._logger.debug("cmd({}) result='{}' expect-match='{}'".format(
             str(msg[:15]).encode("string_escape") + ("[...]" if len(msg) > 15 else ""),
@@ -139,8 +164,8 @@ class ConnectionBase(object):
 
 class SerialConn(ConnectionBase):
 
-    def __init__(self, port, user, pw, prompt="\r?\n?[^\n]*#"):
-        #print "connbobj (p/u/pw/pr)", port, user, pw, prompt.encode("string-escape")
+    def __init__(self, name, port, user, pw, prompt="\r?\n?[^\n]*#"):
+        self.name = name
         self.port = port
         self.user = user
         self.pw = pw
@@ -154,30 +179,26 @@ class SerialConn(ConnectionBase):
 
     def _login(self, user=None, pw=None):
         self._logger.debug("serial._login({},{})".format(user, pw))
-        #print "login (u/pw)", user, pw
-        #print "self (u/pw)", self.user, self.pw
         self.exp.expect("[lL]ogin: ")
-        #print "found login prompt"
         self.exp.sendline(user or self.user)
         self.exp.expect("[pP]assword: ")
-        #print "found password prompt"
         self.exp.sendline(pw or self.pw)
         self.exp.expect(self.prompt)
-        #print "got logged in"
 
 class SshConn(ConnectionBase):
 
-    def __init__(self, hostname, user, pw, prompt="\r?\n?[^\n]*#"):
-        self.hostname = hostname
+    def __init__(self, name, host, user, pw, prompt="\r?\n?[^\n]*#"):
+        self.name = name
+        self.host= host
         self.user = user
         self.pw = pw
         self.prompt = prompt
         super(SshConn, self).__init__()
 
     def _get_exp(self):
-        return pexpect.spawn("ssh {}@{}".format(
+        return pexpect.spawn("ssh {}@{} -o TCPKeepAlive=yes -o ServerAliveInterval=5 -o ServerAliveCountMax=3".format(
             self.user,
-            self.hostname
+            self.host
         ))
 
     def _login(self, user=None, pw=None):

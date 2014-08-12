@@ -166,16 +166,18 @@ class Hydra(Device):
         return self.has_newest_firmware
 
     def reset_config(self):
-        # check if logged in
+        # check if logged in + FIXME workaround for current reset fail
         self.cmd("ls -al")
         self.cmd(
-            msg="hip-activate-config --reset && sync && halt -p",
+            msg="rm -rf /var/lib/connman/* && hip-activate-config --reset && sync && halt -p",
             timeout=150,
-            expect="([lL]ogin:)|([cC]onnection\sto\s[^\s]*\sclosed\.)|(INFO - LAN)"
+            expect="([lL]ogin:)|([cC]onnection\sto\s[^\s]*\sclosed\.)|(Timeout.*\.)|(INFO - LAN)"
         )
-        if "closed" in self.conns[0].exp.after or "INFO" in self.conns[0].exp.after:
+        if "closed" in self.conns[0].exp.after \
+                or "INFO" in self.conns[0].exp.after\
+                or "Timeout" in self.conns[0].exp.after:
             self._logger.debug("reset connection after config reset")
             del self.conns[0]._exp
         self._logger.debug("wait till device recovered from config reset")
-        time.sleep(70)
+        time.sleep(90)
         self._logger.debug("continue")
