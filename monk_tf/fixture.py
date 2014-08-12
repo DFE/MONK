@@ -193,9 +193,8 @@ class Fixture(object):
 
     _DEFAULT_CLASSES = {
         "Device" : dev.Device,
-        "SerialConnection" : conn.SerialConnection,
-        "EchoConnection" : conn.EchoConnection,
-        "DefectiveConnection" : conn.DefectiveConnection,
+        "SerialConnection" : conn.SerialConn,
+        "SshConnection" : conn.SshConn,
     }
 
     _DEFAULT_PARSERS = [
