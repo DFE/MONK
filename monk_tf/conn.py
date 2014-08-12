@@ -7,9 +7,7 @@
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; either version
-# 3 of the License, or (at your option) any later version.
-#
+# as published by the Free Software Foundation; either version # 3 of the License, or (at your option) any later version.  #
 
 """
 
@@ -147,8 +145,6 @@ class ConnectionBase(object):
         expect_msg = re.escape(msg[:5]) + "[^\n]*\r\n"
         self._logger.debug("expect:" + expect_msg.encode("string-escape"))
         self.exp.expect(expect_msg, timeout=timeout)
-        if False: #"rm" in msg:
-            raise Exception("DIE MONK:" + str(self.exp))
         self._logger.debug("expect:" + (expect or self.prompt).encode("string-escape"))
         self.exp.expect(expect or self.prompt, timeout=timeout)
         self._logger.debug("cmd({}) result='{}' expect-match='{}'".format(
