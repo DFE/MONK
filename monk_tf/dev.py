@@ -176,5 +176,5 @@ class Hydra(Device):
             self._logger.debug("reset connection after config reset")
             del self.conns[0]._exp
         self._logger.debug("wait till device recovered from config reset")
-        time.sleep(90)
+        time.sleep(120)
         self._logger.debug("continue")
