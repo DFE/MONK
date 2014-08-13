@@ -188,7 +188,7 @@ class DevelDevice(Device):
         pass
 
     def __init__(self, *args, **kwargs):
-        pass
+        super(DevelDevice, self).__init__(*args, **kwargs)
 
     @property
     def latest_build(self):
