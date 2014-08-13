@@ -11,9 +11,7 @@
 # 3 of the License, or (at your option) any later version.
 #
 
-""" Device Layer
-
-This layer abstracts a complete :term:`target device` in a single object, which
+""" Device Layer This layer abstracts a complete :term:`target device` in a single object, which
 can be interacted with without worrying about how the actual communication is
 handled.
 
@@ -178,3 +176,35 @@ class Hydra(Device):
         self._logger.debug("wait till device recovered from config reset")
         time.sleep(120)
         self._logger.debug("continue")
+
+class DevelDevice(Device):
+    """ Use this class instead of your other classes for development purposes
+
+    It does not reset anything and does not update. Everything else should work
+    fine, though.
+    """
+
+    def update(self, link=None):
+        pass
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    @property
+    def latest_build(self):
+        return "not supported"
+
+    @property
+    def current_fw_version(self):
+        return "not supported"
+
+    @property
+    def has_newest_firmware(self):
+        return "not supported"
+
+    @property
+    def is_updated(self):
+        return True
+
+    def reset_config(self):
+        pass
