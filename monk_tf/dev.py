@@ -11,13 +11,24 @@
 # 3 of the License, or (at your option) any later version.
 #
 
-""" Device Layer This layer abstracts a complete :term:`target device` in a single object, which
-can be interacted with without worrying about how the actual communication is
-handled.
+"""
+This module implements device handling. Using the classes from this module you
+can abstract a complete :term:`target device` in a single object. On
+instantiation you give it some connections and then (theoretically) let the
+device handle the rest.
 
-To use this module create a :py:class:`~monk_tf.dev.Device` class.
+Example::
 
-The package is separated into module exceptions and the device classes.
+    import monk_tf.dev as md
+    import monk_tf.conn as mc
+    # create a device with a ssh connection and a serial connection
+    d=md.Device(
+        mc.SshConn('192.168.2.100', 'tester', 'secret'),
+        mc.SerialConn('/dev/ttyUSB2', 'root', 'muchmoresecret'),
+    )
+    # send a command (the same way as with connections)
+    print d.cmd('ls -al')
+    [...]
 """
 
 import logging
@@ -43,19 +54,13 @@ class DeviceException(Exception):
     pass
 
 class CantHandleException(DeviceException):
-    """
-    is raised when a request cannot be handled by the connections of a
+    """ is raised when a request cannot be handled by the connections of a
     :py:class:`~monk_tf.dev.Device`.
     """
     pass
 
-class NoIPException(DeviceException):
-    """ if a device doesn't have any IP addresses this exception is raised
-    """
-    pass
-
 class UpdateFailedException(DeviceException):
-    """ if an update didn't get finished or was rolled back
+    """ is raised if an update didn't get finished or was rolled back.
     """
     pass
 
@@ -90,6 +95,11 @@ class Device(object):
         """ Send a :term:`shell command` to the :term:`target device`.
 
         :param msg: the :term:`shell command`.
+        :param expect: if you don't expect a prompt in the end but something
+                       else, you can add a regex here.
+        :param timeout: when command should return without finding what it's
+                        looking for in the output. Will raise a
+                        :py:exception:`pexpect.Timeout` Exception.
 
         :return: the standard output of the :term:`shell command`.
         """
@@ -118,8 +128,12 @@ class Device(object):
         )
 
 class Hydra(Device):
+    """ is the device type of DResearch Fahrzeugelektronik GmbH.
+    """
 
     def update(self, link=None):
+        """ update the device to current build from Jenkins.
+        """
         self._logger.info("Attempt update to " + str(link or self._update_link))
         if not self.is_updated:
             out = self.cmd("do-update -c && get-update {} && do-update".format(
@@ -148,22 +162,35 @@ class Hydra(Device):
 
     @property
     def latest_build(self):
+        """ get the latest build ID from jenkins
+        """
         out = requests.get(self._jenkins_link).text
         return str(max(build["number"] for build in json.loads(out)["builds"]))
 
     @property
     def current_fw_version(self):
+        """ the current version of the installed firmware
+        """
         return self.cmd("do-update --current-update-version | awk '{print $2}'")
 
     @property
     def has_newest_firmware(self):
+        """ check whether the installed firmware is the newest on jenkins
+        """
         return self.latest_build in self.current_fw_version
 
     @property
     def is_updated(self):
+        """ check whether the device is already updated.
+
+        Currently it is implementd with
+        :py:meth:`dev.Hydra.has_newest_firmware`.
+        """
         return self.has_newest_firmware
 
     def reset_config(self):
+        """ reset the HydraIP configuration on the device
+        """
         self.cmd(
             msg="rm -rf /var/lib/connman/* && hip-activate-config --reset && sync && halt -p",
             timeout=150,
@@ -177,7 +204,7 @@ class Hydra(Device):
         time.sleep(120)
         self._logger.debug("continue")
 
-class DevelDevice(Device):
+class DevelDevice(Hydra):
     """ Use this class instead of your other classes for development purposes
 
     It does not reset anything and does not update. Everything else should work
