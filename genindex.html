@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Index &mdash; MONK 0.1.5 documentation</title>
+    <title>Index &mdash; MONK 0.1.14 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1.5',
+        VERSION:     '0.1.14',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="MONK 0.1.5 documentation" href="index.html" /> 
+    <link rel="top" title="MONK 0.1.14 documentation" href="index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -37,7 +37,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">MONK 0.1.5 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MONK 0.1.14 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -55,6 +55,7 @@
  | <a href="#D"><strong>D</strong></a>
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
+ | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#J"><strong>J</strong></a>
  | <a href="#L"><strong>L</strong></a>
@@ -74,10 +75,6 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="monk_tf.html#monk_tf.conn.AConnection">AConnection (class in monk_tf.conn)</a>
-  </dt>
-
-      
   <dt><a href="monk_tf.html#monk_tf.fixture.AFixtureException">AFixtureException</a>
   </dt>
 
@@ -85,26 +82,14 @@
   <dt><a href="monk_tf.html#monk_tf.fixture.AParseException">AParseException</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="monk_tf.html#monk_tf.fixture.AParser">AParser (class in monk_tf.fixture)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="glossary.html#term-api"><strong>API</strong></a>
-  </dt>
-
-      
-  <dt><a href="monk_tf.html#monk_tf.conn.AState">AState (class in monk_tf.conn)</a>
-  </dt>
-
-      
-  <dt><a href="monk_tf.html#monk_tf.conn.Authenticated">Authenticated (class in monk_tf.conn)</a>
-  </dt>
-
-      
-  <dt><a href="monk_tf.html#monk_tf.conn.AuthenticationRequiredException">AuthenticationRequiredException</a>
   </dt>
 
   </dl></td>
@@ -114,14 +99,6 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="monk_tf.html#monk_tf.conn.AConnection.can_login">can_login() (monk_tf.conn.AConnection method)</a>
-  </dt>
-
-      
-  <dt><a href="monk_tf.html#monk_tf.conn.CantConnectException">CantConnectException</a>
-  </dt>
-
-      
   <dt><a href="monk_tf.html#monk_tf.dev.CantHandleException">CantHandleException</a>
   </dt>
 
@@ -130,22 +107,10 @@
   </dt>
 
       
-  <dt><a href="monk_tf.html#monk_tf.conn.AConnection.cmd">cmd() (monk_tf.conn.AConnection method)</a>
+  <dt><a href="monk_tf.html#monk_tf.conn.ConnectionBase.cmd">cmd() (monk_tf.conn.ConnectionBase method)</a>
   </dt>
 
       <dd><dl>
-        
-  <dt><a href="monk_tf.html#monk_tf.conn.Authenticated.cmd">(monk_tf.conn.Authenticated method)</a>
-  </dt>
-
-        
-  <dt><a href="monk_tf.html#monk_tf.conn.Connected.cmd">(monk_tf.conn.Connected method)</a>
-  </dt>
-
-        
-  <dt><a href="monk_tf.html#monk_tf.conn.Disconnected.cmd">(monk_tf.conn.Disconnected method)</a>
-  </dt>
-
         
   <dt><a href="monk_tf.html#monk_tf.dev.Device.cmd">(monk_tf.dev.Device method)</a>
   </dt>
@@ -156,37 +121,11 @@
 
       </dl></dd>
       
-  <dt><a href="monk_tf.html#monk_tf.conn.CommandException">CommandException</a>
+  <dt><a href="monk_tf.html#monk_tf.conn.ConnectionBase">ConnectionBase (class in monk_tf.conn)</a>
   </dt>
 
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="monk_tf.html#monk_tf.conn.AConnection.connect">connect() (monk_tf.conn.AConnection method)</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="monk_tf.html#monk_tf.conn.Authenticated.connect">(monk_tf.conn.Authenticated method)</a>
-  </dt>
-
-        
-  <dt><a href="monk_tf.html#monk_tf.conn.Connected.connect">(monk_tf.conn.Connected method)</a>
-  </dt>
-
-        
-  <dt><a href="monk_tf.html#monk_tf.conn.Disconnected.connect">(monk_tf.conn.Disconnected method)</a>
-  </dt>
-
-      </dl></dd>
-      
-  <dt><a href="monk_tf.html#monk_tf.conn.Connected">Connected (class in monk_tf.conn)</a>
-  </dt>
-
-      
-  <dt><a href="monk_tf.html#monk_tf.conn.ConnectionException">ConnectionException</a>
-  </dt>
-
       
   <dt><a href="glossary.html#term-cross-compiling"><strong>cross-compiling</strong></a>
   </dt>
@@ -195,6 +134,16 @@
   <dt><a href="glossary.html#term-cross-testing"><strong>cross-testing</strong></a>
   </dt>
 
+      
+  <dt><a href="monk_tf.html#monk_tf.dev.DevelDevice.current_fw_version">current_fw_version (monk_tf.dev.DevelDevice attribute)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="monk_tf.html#monk_tf.dev.Hydra.current_fw_version">(monk_tf.dev.Hydra attribute)</a>
+  </dt>
+
+      </dl></dd>
   </dl></td>
 </tr></table>
 
@@ -202,43 +151,21 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="monk_tf.html#monk_tf.conn.DefectiveConnection">DefectiveConnection (class in monk_tf.conn)</a>
+  <dt><a href="monk_tf.html#monk_tf.dev.DevelDevice">DevelDevice (class in monk_tf.dev)</a>
   </dt>
 
       
   <dt><a href="monk_tf.html#monk_tf.dev.Device">Device (class in monk_tf.dev)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="monk_tf.html#monk_tf.dev.DeviceException">DeviceException</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="glossary.html#term-dfe"><strong>DFE</strong></a>
-  </dt>
-
-      
-  <dt><a href="monk_tf.html#monk_tf.conn.AConnection.disconnect">disconnect() (monk_tf.conn.AConnection method)</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="monk_tf.html#monk_tf.conn.Authenticated.disconnect">(monk_tf.conn.Authenticated method)</a>
-  </dt>
-
-        
-  <dt><a href="monk_tf.html#monk_tf.conn.Connected.disconnect">(monk_tf.conn.Connected method)</a>
-  </dt>
-
-        
-  <dt><a href="monk_tf.html#monk_tf.conn.Disconnected.disconnect">(monk_tf.conn.Disconnected method)</a>
-  </dt>
-
-      </dl></dd>
-      
-  <dt><a href="monk_tf.html#monk_tf.conn.Disconnected">Disconnected (class in monk_tf.conn)</a>
   </dt>
 
   </dl></td>
@@ -248,19 +175,15 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="monk_tf.html#monk_tf.conn.EchoConnection">EchoConnection (class in monk_tf.conn)</a>
+  <dt><a href="glossary.html#term-embedded-system"><strong>embedded system</strong></a>
   </dt>
 
       
-  <dt><a href="glossary.html#term-embedded-system"><strong>embedded system</strong></a>
+  <dt><a href="monk_tf.html#monk_tf.conn.ConnectionBase.exp">exp (monk_tf.conn.ConnectionBase attribute)</a>
   </dt>
 
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="monk_tf.html#monk_tf.conn.EmptyResponseException">EmptyResponseException</a>
-  </dt>
-
       
   <dt><a href="glossary.html#term-extended-ini"><strong>extended INI</strong></a>
   </dt>
@@ -288,6 +211,28 @@
   </dl></td>
 </tr></table>
 
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="monk_tf.html#monk_tf.dev.DevelDevice.has_newest_firmware">has_newest_firmware (monk_tf.dev.DevelDevice attribute)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="monk_tf.html#monk_tf.dev.Hydra.has_newest_firmware">(monk_tf.dev.Hydra attribute)</a>
+  </dt>
+
+      </dl></dd>
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="monk_tf.html#monk_tf.dev.Hydra">Hydra (class in monk_tf.dev)</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
@@ -295,6 +240,18 @@
   <dt><a href="glossary.html#term-ini"><strong>INI</strong></a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="monk_tf.html#monk_tf.dev.DevelDevice.is_updated">is_updated (monk_tf.dev.DevelDevice attribute)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="monk_tf.html#monk_tf.dev.Hydra.is_updated">(monk_tf.dev.Hydra attribute)</a>
+  </dt>
+
+      </dl></dd>
   </dl></td>
 </tr></table>
 
@@ -312,23 +269,21 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="monk_tf.html#monk_tf.conn.AConnection.login">login() (monk_tf.conn.AConnection method)</a>
+  <dt><a href="monk_tf.html#monk_tf.dev.DevelDevice.latest_build">latest_build (monk_tf.dev.DevelDevice attribute)</a>
   </dt>
 
       <dd><dl>
         
-  <dt><a href="monk_tf.html#monk_tf.conn.Authenticated.login">(monk_tf.conn.Authenticated method)</a>
-  </dt>
-
-        
-  <dt><a href="monk_tf.html#monk_tf.conn.Connected.login">(monk_tf.conn.Connected method)</a>
-  </dt>
-
-        
-  <dt><a href="monk_tf.html#monk_tf.conn.Disconnected.login">(monk_tf.conn.Disconnected method)</a>
+  <dt><a href="monk_tf.html#monk_tf.dev.Hydra.latest_build">(monk_tf.dev.Hydra attribute)</a>
   </dt>
 
       </dl></dd>
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="monk_tf.html#monk_tf.conn.ConnectionBase.login">login() (monk_tf.conn.ConnectionBase method)</a>
+  </dt>
+
   </dl></td>
 </tr></table>
 
@@ -336,23 +291,19 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="monk_tf.html#monk_tf.conn.MockConnectionException">MockConnectionException</a>
-  </dt>
-
-      
   <dt><a href="glossary.html#term-monk"><strong>MONK</strong></a>
   </dt>
 
       
-  <dt><a href="monk_tf.html#module-monk_tf.__init__">monk_tf.__init__ (module)</a>
+  <dt><a href="monk_tf.html#module-monk_tf">monk_tf (module)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="monk_tf.html#module-monk_tf.conn">monk_tf.conn (module)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="monk_tf.html#module-monk_tf.dev">monk_tf.dev (module)</a>
   </dt>
@@ -368,24 +319,6 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="monk_tf.html#monk_tf.conn.AState.next_state">next_state() (monk_tf.conn.AState method)</a>
-  </dt>
-
-      <dd><dl>
-        
-  <dt><a href="monk_tf.html#monk_tf.conn.Authenticated.next_state">(monk_tf.conn.Authenticated method)</a>
-  </dt>
-
-        
-  <dt><a href="monk_tf.html#monk_tf.conn.Connected.next_state">(monk_tf.conn.Connected method)</a>
-  </dt>
-
-        
-  <dt><a href="monk_tf.html#monk_tf.conn.Disconnected.next_state">(monk_tf.conn.Disconnected method)</a>
-  </dt>
-
-      </dl></dd>
-      
   <dt><a href="monk_tf.html#monk_tf.fixture.NoDeviceException">NoDeviceException</a>
   </dt>
 
@@ -395,10 +328,6 @@
 
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
-      
-  <dt><a href="monk_tf.html#monk_tf.conn.NotConnectedException">NotConnectedException</a>
-  </dt>
-
       
   <dt><a href="monk_tf.html#monk_tf.fixture.NotXiniException">NotXiniException</a>
   </dt>
@@ -440,6 +369,16 @@
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
+  <dt><a href="monk_tf.html#monk_tf.dev.DevelDevice.reset_config">reset_config() (monk_tf.dev.DevelDevice method)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="monk_tf.html#monk_tf.dev.Hydra.reset_config">(monk_tf.dev.Hydra method)</a>
+  </dt>
+
+      </dl></dd>
+      
   <dt><a href="glossary.html#term-rest"><strong>reST</strong></a>
   </dt>
 
@@ -450,11 +389,15 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="monk_tf.html#monk_tf.conn.SerialConnection">SerialConnection (class in monk_tf.conn)</a>
+  <dt><a href="monk_tf.html#monk_tf.conn.SerialConn">SerialConn (class in monk_tf.conn)</a>
   </dt>
 
       
   <dt><a href="glossary.html#term-shell-command"><strong>shell command</strong></a>
+  </dt>
+
+      
+  <dt><a href="monk_tf.html#monk_tf.conn.SshConn">SshConn (class in monk_tf.conn)</a>
   </dt>
 
   </dl></td>
@@ -514,13 +457,23 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="monk_tf.html#monk_tf.conn.UnexpectedPromptException">UnexpectedPromptException</a>
+  <dt><a href="glossary.html#term-unit-test"><strong>unit test</strong></a>
   </dt>
 
+      
+  <dt><a href="monk_tf.html#monk_tf.dev.DevelDevice.update">update() (monk_tf.dev.DevelDevice method)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="monk_tf.html#monk_tf.dev.Hydra.update">(monk_tf.dev.Hydra method)</a>
+  </dt>
+
+      </dl></dd>
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
-  <dt><a href="glossary.html#term-unit-test"><strong>unit test</strong></a>
+  <dt><a href="monk_tf.html#monk_tf.dev.UpdateFailedException">UpdateFailedException</a>
   </dt>
 
   </dl></td>
@@ -585,12 +538,12 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="index.html">MONK 0.1.5 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MONK 0.1.14 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2012, 2013, 2014, DResearch Fahrzeugelektronik GmbH.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
         <br />
         <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">
             <img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" />

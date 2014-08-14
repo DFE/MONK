@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>monk_tf.fixture &mdash; MONK 0.1.5 documentation</title>
+    <title>monk_tf.fixture &mdash; MONK 0.1.14 documentation</title>
     
     <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.1.5',
+        VERSION:     '0.1.14',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="MONK 0.1.5 documentation" href="../../index.html" />
+    <link rel="top" title="MONK 0.1.14 documentation" href="../../index.html" />
     <link rel="up" title="Module code" href="../index.html" /> 
   </head>
   <body>
@@ -37,7 +37,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">MONK 0.1.5 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">MONK 0.1.14 documentation</a> &raquo;</li>
           <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -66,7 +66,7 @@
 <span class="sd">:py:class:`~monk_tf.conn.AConnection` objects by yourself, you can also choose</span>
 <span class="sd">to put corresponding data in a separate file and let this layer handle the</span>
 <span class="sd">object concstruction and destruction for you. Doing this will probably make</span>
-<span class="sd">your test code look more clean, keep the amount of places where you need to</span>
+<span class="sd">your test code look more clean, keep the number of places where you need to</span>
 <span class="sd">change something as small as possible, and lets you reuse data that you already</span>
 <span class="sd">have described.</span>
 
@@ -88,12 +88,14 @@
 <span class="sd">        # tear down</span>
 <span class="sd">        h.tear_down()</span>
 
-<span class="sd">So using this layer setting up a device only takes one line of code. The rest</span>
-<span class="sd">of the information is in that ``target_device.cfg`` file. Although this data</span>
-<span class="sd">file can have any format you want, :term:`MONK` currently only comes with one text</span>
-<span class="sd">format parser predefined, which is the :py:class:`~monk_tf.fixture.XiniParser`.</span>
-<span class="sd">The ``Xini`` is short for :term:`extended INI`. An example data file might look</span>
-<span class="sd">like this::</span>
+<span class="sd">When using this layer setting up a device only takes one line of code. The rest</span>
+<span class="sd">of the information is in the ``target_device.cfg`` file. :term:`MONK` currently </span>
+<span class="sd">comes with one text format parser predefined, which is the</span>
+<span class="sd">:py:class:`~monk_tf.fixture.XiniParser`. ``Xini`` is short for</span>
+<span class="sd">:term:`extended INI`. You may, however, use any data format you want, if you</span>
+<span class="sd">extend the :py:class:`~monk_tf.fixture.AParser` class accordingly.</span>
+
+<span class="sd">An example ``Xini`` data file might look like this::</span>
 
 <span class="sd">    [device1]</span>
 <span class="sd">        type=Device</span>
@@ -103,21 +105,22 @@
 <span class="sd">            user=example</span>
 <span class="sd">            password=secret</span>
 
-<span class="sd">As you can see it looks like a :term:`INI` file. There are sections, consisting</span>
-<span class="sd">of a title enclosed in squared brackets (``[]``) and lists of properties,</span>
-<span class="sd">consisting of equal-sign (``=``) separated key-value pairs. The unusual part is</span>
-<span class="sd">that the section *serial1* is surrounded by two pairs of squared brackets</span>
-<span class="sd">(``[]``). This is the specialty of this format, because it means that *serial1*</span>
-<span class="sd">is a subsection of *device1* and is therefore a nested section. This nesting</span>
-<span class="sd">can be done unlimited, by surrounding a section with more and more pairs of</span>
-<span class="sd">squared brackets (``[]``) according to the level of nesting that should be</span>
-<span class="sd">achieved. Thus in this example *serial1* belongs to *device1* and the types</span>
-<span class="sd">show which corresponding :term:`MONK` object should be created.</span>
+<span class="sd">As you can see it looks like an :term:`INI` file. There are sections,</span>
+<span class="sd">consisting of a title enclosed in squared brackets (``[]``) and lists of</span>
+<span class="sd">properties, consisting of key-value pairs separated by equality signs (``=``).</span>
+<span class="sd">The unusual part is that the section *serial1* is surrounded by two pairs of</span>
+<span class="sd">squared brackets (``[]``). This is the specialty of this format indicating that</span>
+<span class="sd">*serial1* is a subsection of *device1* and therefore is a nested section. This</span>
+<span class="sd">nesting can be done unlimited, by surrounding a section with more and more</span>
+<span class="sd">pairs of squared brackets (``[]``) according to the level of nesting intended.</span>
+<span class="sd">In this example *serial1* belongs to *device1* and the types indicate the</span>
+<span class="sd">corresponding :term:`MONK` object to be created.</span>
 
 <span class="sd">Classes</span>
 <span class="sd">-------</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 
@@ -134,18 +137,18 @@
 <span class="c">#</span>
 <span class="c">############</span>
 
-<div class="viewcode-block" id="ADeviceException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.ADeviceException">[docs]</a><span class="k">class</span> <span class="nc">ADeviceException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Base class for Exceptions of the device layer.</span>
+<div class="viewcode-block" id="AFixtureException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.AFixtureException">[docs]</a><span class="k">class</span> <span class="nc">AFixtureException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Base class for exceptions of the fixture layer.</span>
 
-<span class="sd">    If you want to make sure that you catch all Exceptions that are related</span>
-<span class="sd">    with this layer, then you should catch *ADeviceExceptions*. This also means</span>
+<span class="sd">    If you want to make sure that you catch all exceptions that are related</span>
+<span class="sd">    to this layer, you should catch *AFixtureExceptions*. This also means</span>
 <span class="sd">    that if you extend this list of exceptions you should inherit from this</span>
 <span class="sd">    exception and not from :py:exc:`~exceptions.Exception`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 </div>
-<div class="viewcode-block" id="AParseException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.AParseException">[docs]</a><span class="k">class</span> <span class="nc">AParseException</span><span class="p">(</span><span class="n">ADeviceException</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Base class for exceptions when a parsing error occurs.</span>
+<div class="viewcode-block" id="AParseException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.AParseException">[docs]</a><span class="k">class</span> <span class="nc">AParseException</span><span class="p">(</span><span class="n">AFixtureException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Base class for exceptions concerning parsing errors.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 </div>
@@ -156,10 +159,14 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 </div>
-<div class="viewcode-block" id="CantParseException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.CantParseException">[docs]</a><span class="k">class</span> <span class="nc">CantParseException</span><span class="p">(</span><span class="n">ADeviceException</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; is raised when a Fixture can not parse a given file.</span>
+<div class="viewcode-block" id="CantParseException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.CantParseException">[docs]</a><span class="k">class</span> <span class="nc">CantParseException</span><span class="p">(</span><span class="n">AFixtureException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; is raised when a Fixture cannot parse a given file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="NoDeviceException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.NoDeviceException">[docs]</a><span class="k">class</span> <span class="nc">NoDeviceException</span><span class="p">(</span><span class="n">AFixtureException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; is raised when a :py:clas:`~monk_tf.fixture.Fixture` requires a device but has none.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
 <span class="c">######################################################</span>
 <span class="c">#</span>
@@ -168,14 +175,14 @@
 <span class="c">######################################################</span>
 </div>
 <div class="viewcode-block" id="AParser"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.AParser">[docs]</a><span class="k">class</span> <span class="nc">AParser</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Base class for all Parsers.</span>
+    <span class="sd">&quot;&quot;&quot; Base class for all parsers.</span>
 
 <span class="sd">    Do not instantiate this class! This basically just provides the :term:`API`</span>
 <span class="sd">    that is needed by :py:class:`~monk_tf.fixture.Fixture` to interact with the</span>
 <span class="sd">    data that is parsed. Each child class should make sure that it always</span>
 <span class="sd">    provides its parsed data like a :py:class:`dict` would. If you require your</span>
-<span class="sd">    own parser, you can extend this and look at</span>
-<span class="sd">    :py:class:`~monk_tf.fixture.XiniParser` for a very basic example.</span>
+<span class="sd">    own parser, you can extend this. :py:class:`~monk_tf.fixture.XiniParser`</span>
+<span class="sd">    provides a very basic example.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 </div>
@@ -184,13 +191,14 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">configspec</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; changes exception type raised.</span>
+        <span class="sd">&quot;&quot;&quot; Changes exception type raised.</span>
 
 <span class="sd">        Overwrites method from :py:class:`~configobj.ConfigObj` to raise a</span>
 <span class="sd">        :py:class:`~monk_tf.fixture.NotXiniException` instead of a</span>
 <span class="sd">        :py:class:`~configobj.ConfigObjError`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_error</span> <span class="o">=</span> <span class="bp">True</span>
             <span class="nb">super</span><span class="p">(</span><span class="n">XiniParser</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">configspec</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">config</span><span class="o">.</span><span class="n">ConfigObjError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">t</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">traceback</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
@@ -206,16 +214,19 @@
     <span class="sd">&quot;&quot;&quot; Creates :term:`MONK` objects based on dictionary like objects.</span>
 
 <span class="sd">    This is the class that provides the fundamental feature of this layer. It</span>
-<span class="sd">    reads data files by trying to parse them though its list of known parsers</span>
-<span class="sd">    and if it succeeds, it creates :term:`MONK` objects based on the</span>
-<span class="sd">    configuration given by the data file. Most likely these objects are one or</span>
-<span class="sd">    more :py:class:`~monk_tf.dev.Device` objects that have at least one</span>
+<span class="sd">    reads data files by trying to parse them via its list of known parsers and</span>
+<span class="sd">    if it succeeds, it creates :term:`MONK` objects based on the configuration</span>
+<span class="sd">    given by the data file. Most likely these objects are one or more</span>
+<span class="sd">    :py:class:`~monk_tf.dev.Device` objects that have at least one</span>
 <span class="sd">    :py:class:`~monk_tf.conn.AConnection` object each. If more than one</span>
 <span class="sd">    :term:`fixture file` is read containing the same name on the highest level,</span>
 <span class="sd">    then the latest data gets used. This does not work on lower levels of</span>
-<span class="sd">    nesting, though.</span>
+<span class="sd">    nesting, though. If you attempt to overwrite lower levels of nesting, what</span>
+<span class="sd">    actually happens is that the highest layer gets overwritten and you lose</span>
+<span class="sd">    the data that was stored in the older objects. This is simply how</span>
+<span class="sd">    :py:meth:`set.update` works.</span>
 
-<span class="sd">    One source of data (either a filename or a child class of</span>
+<span class="sd">    One source of data (either a file name or a child class of</span>
 <span class="sd">    :py:class:`~monk_tf.fixture.AParser`) can be given to an object of this</span>
 <span class="sd">    class by its constructer, others can be added afterwards with the</span>
 <span class="sd">    :py:meth:`~monk_tf.fixture.Fixture.read` method. An example looks like</span>
@@ -223,7 +234,7 @@
 
 <span class="sd">        import monk_tf.fixture as mf</span>
 
-<span class="sd">        h = mf.Fixture(&#39;/etc/monk_tf/default_devices.cfg&#39;)</span>
+<span class="sd">        fixture = mf.Fixture(&#39;/etc/monk_tf/default_devices.cfg&#39;)</span>
 <span class="sd">                .read(&#39;~/.monk/default_devices.cfg&#39;)</span>
 <span class="sd">                # can also be a parser object</span>
 <span class="sd">                .read(XiniParser(&#39;~/testsuite12345/suite_devices.cfg&#39;))</span>
@@ -232,14 +243,20 @@
 
     <span class="n">_DEFAULT_CLASSES</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s">&quot;Device&quot;</span> <span class="p">:</span> <span class="n">dev</span><span class="o">.</span><span class="n">Device</span><span class="p">,</span>
-        <span class="s">&quot;SerialConnection&quot;</span> <span class="p">:</span> <span class="n">conn</span><span class="o">.</span><span class="n">SerialConnection</span><span class="p">,</span>
+        <span class="s">&quot;HydraDevice&quot;</span> <span class="p">:</span> <span class="n">dev</span><span class="o">.</span><span class="n">Hydra</span><span class="p">,</span>
+        <span class="s">&quot;DevelDevice&quot;</span> <span class="p">:</span> <span class="n">dev</span><span class="o">.</span><span class="n">DevelDevice</span><span class="p">,</span>
+        <span class="s">&quot;SerialConnection&quot;</span> <span class="p">:</span> <span class="n">conn</span><span class="o">.</span><span class="n">SerialConn</span><span class="p">,</span>
+        <span class="s">&quot;SshConnection&quot;</span> <span class="p">:</span> <span class="n">conn</span><span class="o">.</span><span class="n">SshConn</span><span class="p">,</span>
     <span class="p">}</span>
 
     <span class="n">_DEFAULT_PARSERS</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">XiniParser</span><span class="p">,</span>
     <span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parsers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">_DEFAULT_DEBUG_SOURCE</span> <span class="o">=</span> <span class="s">&quot;MONK_DEBUG_SOURCE&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parsers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">classes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+            <span class="n">lookfordbgsrc</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :param source: The :term:`fixture file` or</span>
@@ -255,6 +272,10 @@
 <span class="sd">        :param classes: A :py:class:`dict` of classes to class names. Used for</span>
 <span class="sd">                        parsing the type attribute in</span>
 <span class="sd">                        :term:`fixture files&lt;fixture file&gt;`.</span>
+
+<span class="sd">        :param lookfordbgsrc: If True an environment variable is looked for to</span>
+<span class="sd">                              read a local debug config. If False it won&#39;t be</span>
+<span class="sd">                              looked for.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&quot;{}:{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
@@ -263,12 +284,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">classes</span> <span class="o">=</span> <span class="n">classes</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_DEFAULT_CLASSES</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">props</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">source</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_props</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_parse</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">lookfordbgsrc</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_DEFAULT_DEBUG_SOURCE</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;load debug source from {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_DEFAULT_DEBUG_SOURCE</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_props</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_parse</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_DEFAULT_DEBUG_SOURCE</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;no debug source file found&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">()</span>
+
 
 <div class="viewcode-block" id="Fixture.read"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.Fixture.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Read more data, either as a filename or as a parser.</span>
+        <span class="sd">&quot;&quot;&quot; Read more data, either as a file name or as a parser.</span>
 
-<span class="sd">        :param source: the data source; either a filename or a</span>
+<span class="sd">        :param source: the data source; either a file name or a</span>
 <span class="sd">                       :py:class:`~monk_tf.fixture.AParser` child class</span>
 <span class="sd">                       instance.</span>
 
@@ -283,7 +314,7 @@
     <span class="k">def</span> <span class="nf">_parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Parse data file.</span>
 
-<span class="sd">        :param source: the data source; either a filename or a</span>
+<span class="sd">        :param source: the data source; either a file name or a</span>
 <span class="sd">                       :py:class:`~monk_tf.fixture.AParser` child class</span>
 <span class="sd">                       instance.</span>
 
@@ -313,6 +344,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;add props: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">props</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">props</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;final props: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">props</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">_initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Create :term:`MONK` objects based on self&#39;s properties.</span>
@@ -330,6 +362,14 @@
                 <span class="n">dconns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cclass</span><span class="p">(</span><span class="o">**</span><span class="n">cconf</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">devs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dclass</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">dname</span><span class="p">,</span> <span class="n">conns</span><span class="o">=</span><span class="n">dconns</span><span class="p">))</span>
 
+<div class="viewcode-block" id="Fixture.cmd"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.Fixture.cmd">[docs]</a>    <span class="k">def</span> <span class="nf">cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; call :py:meth:`cmd` from first :py:class:`~monk_tf.device.Device`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">devs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NoDeviceException</span><span class="p">(</span><span class="s">&quot;this fixture has no device loaded&quot;</span><span class="p">)</span>
+</div>
 <div class="viewcode-block" id="Fixture.tear_down"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.fixture.Fixture.tear_down">[docs]</a>    <span class="k">def</span> <span class="nf">tear_down</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Can be used for explicit destruction of managed objects.</span>
 
@@ -384,13 +424,13 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">MONK 0.1.5 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">MONK 0.1.14 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2012, 2013, 2014, DResearch Fahrzeugelektronik GmbH.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
         <br />
         <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">
             <img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" />

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Coding Style Guide &mdash; MONK 0.1.5 documentation</title>
+    <title>Coding Style Guide &mdash; MONK 0.1.14 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1.5',
+        VERSION:     '0.1.14',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,9 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="MONK 0.1.5 documentation" href="index.html" />
-    <link rel="next" title="monk_tf" href="modules.html" />
-    <link rel="prev" title="Development Process" href="devel.html" /> 
+    <link rel="top" title="MONK 0.1.14 documentation" href="index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -38,13 +36,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="modules.html" title="monk_tf"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="devel.html" title="Development Process"
-             accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MONK 0.1.5 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MONK 0.1.14 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -304,18 +296,19 @@ what is to be described:</p>
 the text above it. This is because indented text is treated as <em>inside</em>
 a function, while the next line of the same indention is treated as
 <em>outside</em> the definition, as with every other Python code:</p>
-<div class="highlight-python"><pre>def do_something(*args):
-    """This is the correct way to indent a docstring.
+<div class="highlight-python"><div class="highlight"><pre>def do_something(*args):
+    &quot;&quot;&quot;This is the correct way to indent a docstring.
 
     The Python compiler understands that this belongs to the function
     declaration above.
-    """
+    &quot;&quot;&quot;
 
 def do_else():
-"""This is the wrong way to indent a docstring.
+&quot;&quot;&quot;This is the wrong way to indent a docstring.
 
-It won't even be recognised as a docstring.
-"""</pre>
+It won&#39;t even be recognised as a docstring.
+&quot;&quot;&quot;
+</pre></div>
 </div>
 </li>
 <li><p class="first">Texts in comments are parsable by the <a class="reference external" href="http://sphinx-doc.org/">Sphinx</a> documentation generator.
@@ -432,12 +425,6 @@ from, even though it requires a little more work typing. Always remember
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="devel.html"
-                        title="previous chapter">Development Process</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="modules.html"
-                        title="next chapter">monk_tf</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/codingstyle.txt"
@@ -469,18 +456,12 @@ from, even though it requires a little more work typing. Always remember
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="modules.html" title="monk_tf"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="devel.html" title="Development Process"
-             >previous</a> |</li>
-        <li><a href="index.html">MONK 0.1.5 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MONK 0.1.14 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2012, 2013, 2014, DResearch Fahrzeugelektronik GmbH.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
         <br />
         <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">
             <img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" />

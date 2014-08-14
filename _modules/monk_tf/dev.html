@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>monk_tf.dev &mdash; MONK 0.1.5 documentation</title>
+    <title>monk_tf.dev &mdash; MONK 0.1.14 documentation</title>
     
     <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.1.5',
+        VERSION:     '0.1.14',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="MONK 0.1.5 documentation" href="../../index.html" />
+    <link rel="top" title="MONK 0.1.14 documentation" href="../../index.html" />
     <link rel="up" title="Module code" href="../index.html" /> 
   </head>
   <body>
@@ -37,7 +37,7 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">MONK 0.1.5 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">MONK 0.1.14 documentation</a> &raquo;</li>
           <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -61,17 +61,32 @@
 <span class="c"># 3 of the License, or (at your option) any later version.</span>
 <span class="c">#</span>
 
-<span class="sd">&quot;&quot;&quot; Device Layer</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module implements device handling. Using the classes from this module you</span>
+<span class="sd">can abstract a complete :term:`target device` in a single object. On</span>
+<span class="sd">instantiation you give it some connections and then (theoretically) let the</span>
+<span class="sd">device handle the rest.</span>
 
-<span class="sd">This layer abstracts a complete :term:`target device` in a single object, which</span>
-<span class="sd">can be interacted without worries about how the actual communication is done.</span>
+<span class="sd">Example::</span>
 
-<span class="sd">To use this module create a :py:class:`~monk_tf.dev.Device` class.</span>
-
-<span class="sd">The package is separated into module exceptions and the device classes.</span>
+<span class="sd">    import monk_tf.dev as md</span>
+<span class="sd">    import monk_tf.conn as mc</span>
+<span class="sd">    # create a device with a ssh connection and a serial connection</span>
+<span class="sd">    d=md.Device(</span>
+<span class="sd">        mc.SshConn(&#39;192.168.2.100&#39;, &#39;tester&#39;, &#39;secret&#39;),</span>
+<span class="sd">        mc.SerialConn(&#39;/dev/ttyUSB2&#39;, &#39;root&#39;, &#39;muchmoresecret&#39;),</span>
+<span class="sd">    )</span>
+<span class="sd">    # send a command (the same way as with connections)</span>
+<span class="sd">    print d.cmd(&#39;ls -al&#39;)</span>
+<span class="sd">    [...]</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">pexpect</span>
 
 <span class="kn">import</span> <span class="nn">conn</span>
 
@@ -84,14 +99,18 @@
 <span class="c">############</span>
 
 <div class="viewcode-block" id="DeviceException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.DeviceException">[docs]</a><span class="k">class</span> <span class="nc">DeviceException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; base class for Exceptions of the device layer.</span>
+    <span class="sd">&quot;&quot;&quot; Base class for exceptions of the device layer.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 </div>
 <div class="viewcode-block" id="CantHandleException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.CantHandleException">[docs]</a><span class="k">class</span> <span class="nc">CantHandleException</span><span class="p">(</span><span class="n">DeviceException</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; </span>
-<span class="sd">    is raised when a request ca not be handled by the connections of a</span>
+    <span class="sd">&quot;&quot;&quot; is raised when a request cannot be handled by the connections of a</span>
 <span class="sd">    :py:class:`~monk_tf.dev.Device`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="UpdateFailedException"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.UpdateFailedException">[docs]</a><span class="k">class</span> <span class="nc">UpdateFailedException</span><span class="p">(</span><span class="n">DeviceException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; is raised if an update didn&#39;t get finished or was rolled back.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">pass</span>
 
@@ -114,6 +133,7 @@
 
 <span class="sd">        :param name: Device name for logging purposes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&quot;Device&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">conns</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;conns&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&quot;{}:{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
@@ -121,42 +141,150 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
         <span class="p">))</span>
 
-<div class="viewcode-block" id="Device.cmd"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.Device.cmd">[docs]</a>    <span class="k">def</span> <span class="nf">cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; send a :term:`shell command` to the :term:`target device`.</span>
+<div class="viewcode-block" id="Device.cmd"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.Device.cmd">[docs]</a>    <span class="k">def</span> <span class="nf">cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">expect</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">login_timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Send a :term:`shell command` to the :term:`target device`.</span>
 
 <span class="sd">        :param msg: the :term:`shell command`.</span>
+<span class="sd">        :param expect: if you don&#39;t expect a prompt in the end but something</span>
+<span class="sd">                       else, you can add a regex here.</span>
+<span class="sd">        :param timeout: when command should return without finding what it&#39;s</span>
+<span class="sd">                        looking for in the output. Will raise a</span>
+<span class="sd">                        :py:exception:`pexpect.Timeout` Exception.</span>
 
 <span class="sd">        :return: the standard output of the :term:`shell command`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">connection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">conns</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">connection</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
-                <span class="n">connection</span><span class="o">.</span><span class="n">login</span><span class="p">()</span>
-                <span class="k">return</span> <span class="n">connection</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-            <span class="k">except</span> <span class="n">conn</span><span class="o">.</span><span class="n">ConnectionException</span> <span class="k">as</span> <span class="n">excpt</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">excpt</span><span class="p">)</span>
-        <span class="c"># no connection was able to get to the return statement</span>
-        <span class="k">raise</span> <span class="n">CantHandleException</span><span class="p">(</span><span class="s">&quot;dev:&#39;{}&#39;,conns:&#39;{}&#39;:could not send cmd &#39;{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-            <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">conns</span><span class="p">),</span>
-            <span class="n">msg</span><span class="p">,</span>
+                <span class="k">return</span> <span class="n">connection</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span>
+                        <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">,</span>
+                        <span class="n">expect</span><span class="o">=</span><span class="n">expect</span><span class="p">,</span>
+                        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+                        <span class="n">login_timeout</span><span class="o">=</span><span class="n">login_timeout</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">CantHandleException</span><span class="p">(</span>
+                <span class="s">&quot;dev:&#39;{}&#39;,conns:&#39;{}&#39;:could not send cmd &#39;{}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">conns</span><span class="p">),</span>
+                    <span class="n">msg</span><span class="p">,</span>
         <span class="p">))</span>
 </div>
-    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; make sure all connections get closed on delete</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">connection</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">conns</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">connection</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
-            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">excpt</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">excpt</span><span class="p">)</span>
-
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&quot;{}({}):conns={}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="k">return</span> <span class="s">&quot;{}({}):name={}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                 <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">conns</span><span class="p">],</span>
-        <span class="p">)</span></div>
+                <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Hydra"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.Hydra">[docs]</a><span class="k">class</span> <span class="nc">Hydra</span><span class="p">(</span><span class="n">Device</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; is the device type of DResearch Fahrzeugelektronik GmbH.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Hydra.update"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.Hydra.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">link</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; update the device to current build from Jenkins.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Attempt update to &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">link</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_link</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_updated</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="s">&quot;do-update -c &amp;&amp; get-update {} &amp;&amp; do-update&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">link</span> <span class="k">if</span> <span class="n">link</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_link</span><span class="p">,</span>
+                <span class="p">),</span> <span class="n">expect</span><span class="o">=</span><span class="s">&quot;([lL]ogin: )|([cC]onnection\sto\s[^\s]*\sclosed\.)&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s">&quot;closed&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">conns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">exp</span><span class="o">.</span><span class="n">after</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;reset connection after reboot&quot;</span><span class="p">)</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">conns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_exp</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;wait till device recovered from updating&quot;</span><span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">240</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;continue&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_updated</span><span class="p">:</span>
+                <span class="n">error</span><span class="o">=</span> <span class="s">&quot;build:{};fw:{};out:{}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">latest_build</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">current_fw_version</span><span class="p">,</span>
+                        <span class="n">out</span><span class="p">[:</span><span class="mi">100</span><span class="p">],</span>
+                <span class="p">)</span>
+                <span class="k">raise</span> <span class="n">UpdateFailedException</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Already updated.&quot;</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update_link</span> <span class="o">=</span> <span class="s">&quot;http://hydraip-integration.internal.dresearch-fe.de:8080/view/HIPOS/job/HydraIP_UpdateV3_USB_Stick/lastSuccessfulBuild/artifact/rel-hudson/hyp-updateV3-hikirk.zip&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_jenkins_link</span> <span class="o">=</span> <span class="s">&quot;http://hydraip-integration.internal.dresearch-fe.de:8080/view/HIPOS/job/daisy-hipos-dfe-closed-hikirk/api/json&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Hydra</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Hydra.latest_build"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.Hydra.latest_build">[docs]</a>    <span class="k">def</span> <span class="nf">latest_build</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; get the latest build ID from jenkins</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_jenkins_link</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">build</span><span class="p">[</span><span class="s">&quot;number&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">build</span> <span class="ow">in</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">out</span><span class="p">)[</span><span class="s">&quot;builds&quot;</span><span class="p">]))</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Hydra.current_fw_version"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.Hydra.current_fw_version">[docs]</a>    <span class="k">def</span> <span class="nf">current_fw_version</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; the current version of the installed firmware</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="s">&quot;do-update --current-update-version | awk &#39;{print $2}&#39;&quot;</span><span class="p">)</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Hydra.has_newest_firmware"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.Hydra.has_newest_firmware">[docs]</a>    <span class="k">def</span> <span class="nf">has_newest_firmware</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; check whether the installed firmware is the newest on jenkins</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">latest_build</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_fw_version</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="Hydra.is_updated"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.Hydra.is_updated">[docs]</a>    <span class="k">def</span> <span class="nf">is_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; check whether the device is already updated.</span>
+
+<span class="sd">        Currently it is implementd with</span>
+<span class="sd">        :py:meth:`dev.Hydra.has_newest_firmware`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_newest_firmware</span>
+</div>
+<div class="viewcode-block" id="Hydra.reset_config"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.Hydra.reset_config">[docs]</a>    <span class="k">def</span> <span class="nf">reset_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; reset the HydraIP configuration on the device</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span>
+            <span class="n">msg</span><span class="o">=</span><span class="s">&quot;rm -rf /var/lib/connman/* &amp;&amp; hip-activate-config --reset &amp;&amp; sync &amp;&amp; halt -p&quot;</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span>
+            <span class="n">expect</span><span class="o">=</span><span class="s">&quot;([lL]ogin:)|([cC]onnection\sto\s[^\s]*\sclosed\.)|(Timeout.*\.)|(INFO - LAN)&quot;</span><span class="p">,</span>
+            <span class="n">login_timeout</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;login&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">conns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">exp</span><span class="o">.</span><span class="n">after</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;reset connection after config reset&quot;</span><span class="p">)</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">conns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_exp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;wait till device recovered from config reset&quot;</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">120</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;continue&quot;</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="DevelDevice"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.DevelDevice">[docs]</a><span class="k">class</span> <span class="nc">DevelDevice</span><span class="p">(</span><span class="n">Hydra</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Use this class instead of your other classes for development purposes</span>
+
+<span class="sd">    It does not reset anything and does not update. Everything else should work</span>
+<span class="sd">    fine, though.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="DevelDevice.update"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.DevelDevice.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">link</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">pass</span>
+</div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DevelDevice</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="DevelDevice.latest_build"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.DevelDevice.latest_build">[docs]</a>    <span class="k">def</span> <span class="nf">latest_build</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;not supported&quot;</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="DevelDevice.current_fw_version"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.DevelDevice.current_fw_version">[docs]</a>    <span class="k">def</span> <span class="nf">current_fw_version</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;not supported&quot;</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="DevelDevice.has_newest_firmware"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.DevelDevice.has_newest_firmware">[docs]</a>    <span class="k">def</span> <span class="nf">has_newest_firmware</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;not supported&quot;</span>
+</div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="DevelDevice.is_updated"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.DevelDevice.is_updated">[docs]</a>    <span class="k">def</span> <span class="nf">is_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+</div>
+<div class="viewcode-block" id="DevelDevice.reset_config"><a class="viewcode-back" href="../../monk_tf.html#monk_tf.dev.DevelDevice.reset_config">[docs]</a>    <span class="k">def</span> <span class="nf">reset_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div></div>
 </pre></div>
 
           </div>
@@ -193,13 +321,13 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li><a href="../../index.html">MONK 0.1.5 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">MONK 0.1.14 documentation</a> &raquo;</li>
           <li><a href="../index.html" >Module code</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2012, 2013, 2014, DResearch Fahrzeugelektronik GmbH.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
         <br />
         <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">
             <img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" />

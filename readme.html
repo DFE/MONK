@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Intro &mdash; MONK 0.1.14 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1.14',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="MONK 0.1.14 documentation" href="index.html" />
+    <link rel="next" title="The Package" href="monk_tf.html" />
+    <link rel="prev" title="MONK Cross-Testing Framework" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="monk_tf.html" title="The Package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="MONK Cross-Testing Framework"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MONK 0.1.14 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="intro">
+<h1>Intro<a class="headerlink" href="#intro" title="Permalink to this headline">¶</a></h1>
+<p>Using MONk you can write tests like you would write unit tests, just that they
+are able to interact with your embedded system.</p>
+<p>Let&#8217;s look at an example. In the following example we have an embedded system
+with a serial terminal and a network interface. We want to write a test, which
+checks whether the network interface receives correct information via dhcp.</p>
+<p>The test case written with nosetests:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nose.tools</span> <span class="kn">as</span> <span class="nn">nt</span>
+
+<span class="kn">import</span> <span class="nn">monk_tf.conn</span> <span class="kn">as</span> <span class="nn">mc</span>
+<span class="kn">import</span> <span class="nn">monk_tf.dev</span> <span class="kn">as</span> <span class="nn">md</span>
+
+<span class="k">def</span> <span class="nf">test_dhcp</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; check whether dhcp is implemented correctly</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># setup</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">Device</span><span class="p">(</span><span class="n">mc</span><span class="o">.</span><span class="n">SerialConn</span><span class="p">(</span><span class="s">&#39;/dev/ttyUSB1&#39;</span><span class="p">,</span><span class="s">&#39;root&#39;</span><span class="p">,</span><span class="s">&#39;sosecure&#39;</span><span class="p">))</span>
+    <span class="c"># exercise</span>
+    <span class="n">device</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="s">&#39;dhcpc -i eth0&#39;</span><span class="p">)</span>
+    <span class="c"># verify</span>
+    <span class="n">ifconfig_out</span> <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">cmd</span><span class="p">(</span><span class="s">&#39;ifconfig eth0&#39;</span><span class="p">)</span>
+    <span class="n">nt</span><span class="o">.</span><span class="n">ok_</span><span class="p">(</span><span class="s">&#39;192.168.2.100&#39;</span> <span class="ow">in</span> <span class="n">ifconfig_out</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Even for non python programmers it should be not hard to guess, that this test
+will connect to a serial interface on <tt class="docutils literal"><span class="pre">/dev/ttyUSB1</span></tt>, send the shell command
+<tt class="docutils literal"><span class="pre">dhcpc</span></tt> to get a new IP adress for the <tt class="docutils literal"><span class="pre">eth0</span></tt> interface, and in the end it
+checks whether the received IP address that the tester would expect. No need to
+worry about connection handling, login and session handling.</p>
+<p>For more information see the
+<a class="reference external" href="http://dfe.github.io/MONK/monk_tf.html">API Docs</a>.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/logo.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">MONK Cross-Testing  Framework</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="monk_tf.html"
+                        title="next chapter">The Package</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/readme.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="monk_tf.html" title="The Package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="MONK Cross-Testing Framework"
+             >previous</a> |</li>
+        <li><a href="index.html">MONK 0.1.14 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, 2013, 2014, DResearch Fahrzeugelektronik GmbH.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+        <br />
+        <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">
+            <img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" />
+        </a><br />
+        This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.
+    </div>
+
+  </body>
+</html>

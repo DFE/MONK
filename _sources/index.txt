@@ -10,8 +10,8 @@
 MONK Cross-Testing  Framework
 =============================
 
-Write :term:`test cases<test case>` as you would write a :term:`unit test` for
-the development of your :term:`embedded system`.
+Write :term:`test cases<test case>` as you would write a :term:`unit test`,
+just for the development of your :term:`embedded system`.
 
 Contents
 --------
@@ -19,10 +19,7 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   intro
-   contributing
-   devel
-   codingstyle
-   modules
+   readme
+   monk_tf
    glossary
 

@@ -1,35 +1,35 @@
-monk_tf Package
-===============
+The Package
+===========
 
-:mod:`monk_tf` Package
-----------------------
-
-.. automodule:: monk_tf.__init__
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`conn` Module
-------------------
+monk_tf.conn module
+-------------------
 
 .. automodule:: monk_tf.conn
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`dev` Module
------------------
+monk_tf.dev module
+------------------
 
 .. automodule:: monk_tf.dev
     :members:
     :undoc-members:
     :show-inheritance:
 
-:mod:`fixture` Module
----------------------
+monk_tf.fixture module
+----------------------
 
 .. automodule:: monk_tf.fixture
     :members:
     :undoc-members:
     :show-inheritance:
 
+
+Module contents
+---------------
+
+.. automodule:: monk_tf
+    :members:
+    :undoc-members:
+    :show-inheritance:

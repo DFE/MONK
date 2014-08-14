@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Contributing &mdash; MONK 0.1.5 documentation</title>
+    <title>Contributing &mdash; MONK 0.1.14 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1.5',
+        VERSION:     '0.1.14',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,9 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="MONK 0.1.5 documentation" href="index.html" />
-    <link rel="next" title="Development Process" href="devel.html" />
-    <link rel="prev" title="Getting Started" href="intro.html" /> 
+    <link rel="top" title="MONK 0.1.14 documentation" href="index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -38,13 +36,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="devel.html" title="Development Process"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="intro.html" title="Getting Started"
-             accesskey="P">previous</a> |</li>
-        <li><a href="index.html">MONK 0.1.5 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MONK 0.1.14 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -79,13 +71,14 @@ guide without any problems. This document itself is written on a <strong>Ubuntu
 <p>On most Linux distributions Python 2.7 should already be installed, so you
 have nothing to do in that regard. To test it, open a terminal and look if
 that works without an error message:</p>
-<div class="highlight-python"><pre>$ python
+<div class="highlight-python"><div class="highlight"><pre>$ python
 Python 2.7.4 (default, Apr 19 2013, 18:28:01)
 [GCC 4.7.3] on linux2
-Type "help", "copyright", "credits" or "license" for more information.
-&gt;&gt;&gt; print "hi"
+Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.
+&gt;&gt;&gt; print &quot;hi&quot;
 hi
-&gt;&gt;&gt; exit()</pre>
+&gt;&gt;&gt; exit()
+</pre></div>
 </div>
 <p>If it worked, then you already have Python and are ready to go. If not, you
 might be able to install it via your system&#8217;s packet manager or find
@@ -102,7 +95,8 @@ to build the Python package <em>libssh2</em>, which can be installed for you
 automatically, if you have the 2 <em>*-dev</em> packages installed. Those are
 packages created by your operating system vendor and you should use his
 resources to get them. On Ubuntu 13.04 you can do the following:</p>
-<div class="highlight-python"><pre>$ sudo apt-get install python-dev libssh-2-1-dev</pre>
+<div class="highlight-python"><div class="highlight"><pre>$ sudo apt-get install python-dev libssh-2-1-dev
+</pre></div>
 </div>
 <p>You will also need a Python tool, that helps with maintaining multiple
 development environments with different configurations. It is called
@@ -112,7 +106,8 @@ system does not come with a prebuilt <a class="reference internal" href="glossar
 <p>And, of course, you will need <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK&#8217;s</em></a> source code. If you have
 installed <em>git</em> on your system, you can go to your preferred development
 folder and do the following:</p>
-<div class="highlight-python"><pre>$ git clone https://github.com/DFE/MONK</pre>
+<div class="highlight-python"><div class="highlight"><pre>$ git clone https://github.com/DFE/MONK
+</pre></div>
 </div>
 <p>This will create a new folder in that location and will download the source
 code inside.</p>
@@ -150,14 +145,16 @@ your work).</li>
 </div></blockquote>
 <p>To create the <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a> <tt class="docutils literal"><span class="pre">cd</span></tt> into your <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> folder, and then
 run the following command:</p>
-<div class="highlight-python"><pre>MONK$ virtualenv .</pre>
+<div class="highlight-python"><div class="highlight"><pre>MONK$ virtualenv .
+</pre></div>
 </div>
 <p>Run <tt class="docutils literal"><span class="pre">git</span> <span class="pre">status</span></tt> now. You will see there are a lot of new folders which
 are not part of the <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> repository. Those were created by
 <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a> and normally you do not need to touch them directly.</p>
 <p>Every time before you start working on something you should run this command:</p>
-<div class="highlight-python"><pre>MONK$ . bin/activate
-(MONK)MONK$</pre>
+<div class="highlight-python"><div class="highlight"><pre>MONK$ . bin/activate
+(MONK)MONK$
+</pre></div>
 </div>
 <p>If the activation was successful, you should see the name of the folder
 within braces in front of your prompt. If you do not see it, then please
@@ -166,8 +163,9 @@ refer to the <a class="reference external" href="http://www.virtualenv.org/en/la
 you can install <em>requirements-tests.txt</em> and if you want to develop you can
 install <em>requirements-develop.txt</em>. Because it does not hurt, we will just
 install both now:</p>
-<div class="highlight-python"><pre>(MONK)MONK$ pip install -r requirements-test.txt
-(MONK)MONK$ pip install -r requirements-develop.txt</pre>
+<div class="highlight-python"><div class="highlight"><pre>(MONK)MONK$ pip install -r requirements-test.txt
+(MONK)MONK$ pip install -r requirements-develop.txt
+</pre></div>
 </div>
 <p>Remember that this step only needs to be done once in the beginning and
 whenever these file got updated. If there are no changes it does not hurt to
@@ -175,11 +173,13 @@ call them again as it should not change anything.</p>
 <p>Next you want to install <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> inside of your <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a> in a
 way, that makes it possible to test and to develop it. This is achieved with
 the following command:</p>
-<div class="highlight-python"><pre>(MONK)MONK$ python setup.py develop</pre>
+<div class="highlight-python"><div class="highlight"><pre>(MONK)MONK$ python setup.py develop
+</pre></div>
 </div>
 <p>After you are finished, you deactivate <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a> with this command:</p>
-<div class="highlight-python"><pre>(MONK)MONK$ deactivate
-MONK$</pre>
+<div class="highlight-python"><div class="highlight"><pre>(MONK)MONK$ deactivate
+MONK$
+</pre></div>
 </div>
 <p>As you can see, the name in braces in front of the prompt is gone and you are
 back in normal mode.</p>
@@ -206,8 +206,9 @@ installed automatically while running MONK&#8217;s setup. You only need to worry
 bout it in case of errors or when you start to write unit tests yourself.
 In that case refer to the <a class="reference external" href="https://nose.readthedocs.org/en/latest/">nosetests documentation</a>.</p>
 <p>To run <em>nose</em> use:</p>
-<div class="highlight-python"><pre>MONK$ . bin/activate
-(MONK)MONK$ python setup.py nosetests</pre>
+<div class="highlight-python"><div class="highlight"><pre>MONK$ . bin/activate
+(MONK)MONK$ python setup.py nosetests
+</pre></div>
 </div>
 <p>This command will install all required python packages locally into the folder.
 Read the output carefully. In general you should see successful attempts to
@@ -219,17 +220,19 @@ our mailing list (<a class="reference external" href="mailto:project-monk&#37;&#
 <p>To check if it is working, you can go into one file that is being tested and
 change something. Because we can be sure that there is a test for
 <tt class="docutils literal"><span class="pre">monk_tf/serial_conn.py</span></tt>, we will use it as an example:</p>
-<div class="highlight-python"><pre>(MONK)MONK$ vim monk_tf/conn.py #or any editor of your choice</pre>
+<div class="highlight-python"><div class="highlight"><pre>(MONK)MONK$ vim monk_tf/conn.py #or any editor of your choice
+</pre></div>
 </div>
 <p>In that file add a line with <tt class="docutils literal"><span class="pre">raise</span> <span class="pre">Exception(&quot;Hello</span> <span class="pre">Error!&quot;)</span></tt> in the
-constructor of <a class="reference internal" href="monk_tf.html#monk_tf.conn.SerialConnection" title="monk_tf.conn.SerialConnection"><tt class="xref py py-class docutils literal"><span class="pre">SerialConnection</span></tt></a> (the
+constructor of <tt class="xref py py-class docutils literal"><span class="pre">SerialConnection</span></tt> (the
 <tt class="xref py py-meth docutils literal"><span class="pre">__init__()</span></tt> method).  If you run the
 tests again with <tt class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">nosetests</span></tt> from the project&#8217;s root folder
 (<a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> in our example), the tests with <a class="reference internal" href="monk_tf.html#module-monk_tf.conn" title="monk_tf.conn"><tt class="xref py py-mod docutils literal"><span class="pre">conn</span></tt></a> should
 all fail with that exception.</p>
 <p>After you are finished, you can remove the exception and do not forget to
 <em>deactivate</em> your environment:</p>
-<div class="highlight-python"><pre>(MONK)MONK$ deactivate</pre>
+<div class="highlight-python"><div class="highlight"><pre>(MONK)MONK$ deactivate
+</pre></div>
 </div>
 <p>The interesting point is, that you can now test on the go while developing,
 much like an IDE would offer you. In contrast to the IDE, however, you know
@@ -246,9 +249,10 @@ and humans to read.  That makes reading <a class="reference internal" href="glos
 editor possible. Text editors like Vim will even highlight the <a class="reference internal" href="glossary.html#term-rest"><em class="xref std std-term">reST</em></a>
 format for you. So the simplest way to read the documentation will be directly
 in the source tree:</p>
-<div class="highlight-python"><pre>(MONK)MONK$ cd doc/source
-#read this page's source file:
-(MONK)MONK$ vim contributing.rst</pre>
+<div class="highlight-python"><div class="highlight"><pre>(MONK)MONK$ cd doc/source
+#read this page&#39;s source file:
+(MONK)MONK$ vim contributing.rst
+</pre></div>
 </div>
 <p>Another way to read the docs, is on <a class="reference external" href="https://github.com/DFE/MONK/blob/dev/doc/source/contributing.rst">the corresponding GitHub page</a>, but make
 sure that you are at the right commit. The advantages of the website are that
@@ -267,30 +271,35 @@ the easiest, but we trust you can handle it!</p>
 <span id="contrib-build"></span><h2>Building the Documentation<a class="headerlink" href="#building-the-documentation" title="Permalink to this headline">¶</a></h2>
 <p>As always the first step is to go into your <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> repository and
 activate <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a>:</p>
-<div class="highlight-python"><pre>$ cd &lt;MONK&gt;
+<div class="highlight-python"><div class="highlight"><pre>$ cd &lt;MONK&gt;
 MONK$ . bin/activate
-(MONK)MONK$</pre>
+(MONK)MONK$
+</pre></div>
 </div>
 <p>Change into the doc folder:</p>
-<div class="highlight-python"><pre>(MONK)MONK$ cd doc
-(MONK)doc$</pre>
+<div class="highlight-python"><div class="highlight"><pre>(MONK)MONK$ cd doc
+(MONK)doc$
+</pre></div>
 </div>
 <p>When you look into that folder you can see that there is a <em>Makefile</em> that
 contains tasks for everything you might want to do. In general you just want
 the html docs. In that case you call:</p>
-<div class="highlight-python"><pre>(MONK)doc$ make html</pre>
+<div class="highlight-python"><div class="highlight"><pre>(MONK)doc$ make html
+</pre></div>
 </div>
 <p>If you want to build everything and decide what to use later on, then:</p>
-<div class="highlight-python"><pre>(MONK)doc$ make</pre>
+<div class="highlight-python"><div class="highlight"><pre>(MONK)doc$ make
+</pre></div>
 </div>
 <p>Keep in mind that building everything requires some LaTeX related system
 libraries. Until now we have no complete list of those and instead
 install the LyX LaTeX editor, which automatically installs all required
 packages (and some more):</p>
-<div class="highlight-python"><pre>(MONK)doc$ deactivate
+<div class="highlight-python"><div class="highlight"><pre>(MONK)doc$ deactivate
 doc$ sudo apt-get install lyx
 doc$ . ../bin/activate
-(MONK)doc$ make</pre>
+(MONK)doc$ make
+</pre></div>
 </div>
 <p>We only rarely use the PDF files, which is why nobody got around to
 improving that part. So if you prefer using PDF files, then we would appreciate
@@ -309,8 +318,9 @@ can be opened with a browser or a PDF reader, respectively:</p>
 <a class="reference external" href="http://sphinx-doc.org/">Sphinx Documentation</a>. For problems with building the PDF we cannot help you.
 Sorry! But we wish you a great deal of luck! :)</p>
 <p>When finished, do not forget to deactivate your <a class="reference internal" href="glossary.html#term-virtualenv"><em class="xref std std-term">virtualenv</em></a>:</p>
-<div class="highlight-python"><pre>(MONK)doc$ deactivate
-doc$</pre>
+<div class="highlight-python"><div class="highlight"><pre>(MONK)doc$ deactivate
+doc$
+</pre></div>
 </div>
 </div>
 <div class="section" id="contribution-example-creation-of-this-tutorial">
@@ -338,35 +348,39 @@ the issue description stays empty until a solution is found.</p>
 <p>Afterwards he fetched the newest version of <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a> from GitHub. Because
 he already had a development environment, it was not necessary to clone
 <a class="reference internal" href="glossary.html#term-monk"><em class="xref std std-term">MONK</em></a>:</p>
-<div class="highlight-python"><pre>#go to the MONK folder
+<div class="highlight-python"><div class="highlight"><pre>#go to the MONK folder
 $ cd MONK
 #make sure to be on the right branch
 MONK$ git checkout dev
 #pull updates from Github
-MONK$ git pull --rebase</pre>
+MONK$ git pull --rebase
+</pre></div>
 </div>
 <p>He then created a feature branch for his new commits:</p>
-<div class="highlight-python"><pre>MONK$ git checkout -b f-docs-devenv</pre>
+<div class="highlight-python"><div class="highlight"><pre>MONK$ git checkout -b f-docs-devenv
+</pre></div>
 </div>
 <p>He added the name of this branch to the <em>Notes</em> section of the issue.</p>
 <p>Now he started the development environment and changed to the documentation
 folder:</p>
-<div class="highlight-python"><pre>MONK$ . bin/activate
+<div class="highlight-python"><div class="highlight"><pre>MONK$ . bin/activate
 (MONK)MONK$ cd doc
-(MONK)doc$</pre>
+(MONK)doc$
+</pre></div>
 </div>
 <p>Then he started to edit <em>contributing.rst</em> and built the html documentation
 to check his results:</p>
-<div class="highlight-python"><pre>(MONK)doc$ vim source/contributing.rst
+<div class="highlight-python"><div class="highlight"><pre>(MONK)doc$ vim source/contributing.rst
 (MONK)doc$ make html
 ...
 (MONK)doc$ chromium-browser build/html/contributing.html
-# repeat until happy or time runs out</pre>
+# repeat until happy or time runs out
+</pre></div>
 </div>
 <p>Whenever he left work, he committed his changes in form of a WIP commit, always
 mentioning the GitHub issue with <tt class="docutils literal"><span class="pre">#36</span></tt>. This way GitHub always knew which
 issue the commits belonged to and could list them accordingly:</p>
-<div class="highlight-python"><pre>(MONK)doc$ git add source/contributing.rst
+<div class="highlight-python"><div class="highlight"><pre>(MONK)doc$ git add source/contributing.rst
 (MONK)doc$ git commit -s
 #commit message:
 WIP: contributing.rst: Rewrite for development env
@@ -376,8 +390,9 @@ See Github Issue #36.
 Signed-off-by: Erik Bernoth &lt;erik.bernoth@gmail.com&gt;
 #end of commit message
 #be careful with the following command, because it influences the internal
-#structure of your git repository as well as GitHub's
-(MONK)doc$ git push -f origin f-docs-devenv</pre>
+#structure of your git repository as well as GitHub&#39;s
+(MONK)doc$ git push -f origin f-docs-devenv
+</pre></div>
 </div>
 <p>This ensures the most up-to-date version is always available at GitHub and all
 commits are listed in the GitHub issue. Some major decisions are also added as
@@ -397,9 +412,10 @@ developer himself. If two reviewers give an <tt class="docutils literal"><span c
 the developer he or a maintainer will amend all commits by adding a line for
 each reviewer to the commit message, stating that this commit was checked by
 them:</p>
-<div class="highlight-python"><pre>TODO: add Acked-by line according to issues #36 reviewers. If you are a
+<div class="highlight-python"><div class="highlight"><pre>TODO: add Acked-by line according to issues #36 reviewers. If you are a
 reviewer and read this, add an Acked-by example with your name here,
-please.</pre>
+please.
+</pre></div>
 </div>
 <p>Then a maintainer will close the issue and merge the feature branch with the
 <tt class="docutils literal"><span class="pre">dev</span></tt> branch, thereby solving the issue.</p>
@@ -446,12 +462,6 @@ learn something and wish you a good time developing on <a class="reference inter
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="intro.html"
-                        title="previous chapter">Getting Started</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="devel.html"
-                        title="next chapter">Development Process</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/contributing.txt"
@@ -483,18 +493,12 @@ learn something and wish you a good time developing on <a class="reference inter
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="right" >
-          <a href="devel.html" title="Development Process"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="intro.html" title="Getting Started"
-             >previous</a> |</li>
-        <li><a href="index.html">MONK 0.1.5 documentation</a> &raquo;</li> 
+        <li><a href="index.html">MONK 0.1.14 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2012, 2013, 2014, DResearch Fahrzeugelektronik GmbH.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
         <br />
         <a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/">
             <img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" />
