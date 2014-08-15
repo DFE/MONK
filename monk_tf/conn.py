@@ -85,7 +85,7 @@ class ConnectionBase(object):
         except pexpect.TIMEOUT as e:
             self._login(user, pw)
 
-    def cmd(self, msg, expect=None, timeout=30):
+    def cmd(self, msg, expect=None, timeout=30, login_timeout=None):
         """ send a shell command and retreive its output.
 
         :param msg: the shell command
@@ -93,6 +93,8 @@ class ConnectionBase(object):
                        Defaults to the prompt set on connection instantiation
         :param timeout: how long a command call should wait for its desired
                         result
+        :param login_timeout: how long the connection should wait until it
+                              decides a login is necessary.
 
         :return: the stdout and stderr of the shell command
         """
