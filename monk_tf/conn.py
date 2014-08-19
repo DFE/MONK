@@ -66,7 +66,7 @@ class ConnectionBase(object):
             self._exp = self._get_exp()
             return self._exp
 
-    def _expect(pattern, timeout=-1, searchwindowsize=-1):
+    def _expect(self, pattern, timeout=-1, searchwindowsize=-1):
         """ a wrapper for :pexpect:meth:`spawn.expect`
         """
         self._logger.debug("expect({},{},{})".format(
@@ -78,7 +78,7 @@ class ConnectionBase(object):
             self._logger.debug("expect failed.")
             raise e
 
-    def _send(s):
+    def _send(self, s):
         """ a wrapper for :pexpect:meth:`spawn.send`
         """
         self._logger.debug("send({})".format(s))
@@ -89,7 +89,7 @@ class ConnectionBase(object):
             self._logger.debug("send failed.")
             raise e
 
-    def _sendline(s=""):
+    def _sendline(self, s=""):
         """ a wrapper for :pexpect:meth:`spawn.sendline`
         """
         self._logger.debug("sendline({})".format(s))
