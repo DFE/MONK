@@ -66,6 +66,40 @@ class ConnectionBase(object):
             self._exp = self._get_exp()
             return self._exp
 
+    def _expect(pattern, timeout=-1, searchwindowsize=-1):
+        """ a wrapper for :pexpect:meth:`spawn.expect`
+        """
+        self._logger.debug("expect({},{},{})".format(
+            pattern, timeout, searchwindowsize))
+        try:
+            self.exp.expect(pattern, timeout, searchwindowsize)
+            self._logger.debug("expect succeeded.")
+        except Exception as e:
+            self._logger.debug("expect failed.")
+            raise e
+
+    def _send(s):
+        """ a wrapper for :pexpect:meth:`spawn.send`
+        """
+        self._logger.debug("send({})".format(s))
+        try:
+            self.exp.send(s)
+            self._logger.debug("send succeeded.")
+        except Exception as e:
+            self._logger.debug("send failed.")
+            raise e
+
+    def _sendline(s=""):
+        """ a wrapper for :pexpect:meth:`spawn.sendline`
+        """
+        self._logger.debug("sendline({})".format(s))
+        try:
+            self.exp.sendline(s)
+            self._logger.debug("sendline succeeded.")
+        except Exception as e:
+            self._logger.debug("sendline failed.")
+            raise e
+
     def login(self, user=None, pw=None, timeout=30):
         """ attempts to authenticate to the connection.
 
@@ -79,8 +113,8 @@ class ConnectionBase(object):
         """
         self._logger.debug("login({},{},{})".format(user, pw, timeout))
         try:
-            self.exp.sendline("")
-            self.exp.expect(self.prompt, timeout=timeout)
+            self._sendline("")
+            self._expect(self.prompt, timeout=timeout)
             self._logger.debug("already logged in")
         except pexpect.TIMEOUT as e:
             self._login(user, pw)
@@ -101,12 +135,10 @@ class ConnectionBase(object):
         self._logger.debug("cmd({},{},{},{})".format(
             msg, expect, timeout, login_timeout))
         self.login(timeout=login_timeout or timeout)
-        self.exp.sendline(msg)
+        self._sendline(msg)
         expect_msg = re.escape(msg[:5]) + "[^\n]*\r\n"
-        self._logger.debug("expect:" + expect_msg.encode("string-escape"))
-        self.exp.expect(expect_msg, timeout=timeout)
-        self._logger.debug("expect:" + (expect or self.prompt).encode("string-escape"))
-        self.exp.expect(expect or self.prompt, timeout=timeout)
+        self._expect(expect_msg, timeout=timeout)
+        self._expect(expect or self.prompt, timeout=timeout)
         self._logger.debug("cmd({}) result='{}' expect-match='{}'".format(
             str(msg[:15]).encode("string_escape") + ("[...]" if len(msg) > 15 else ""),
             str(self.exp.before[:50]).encode("string-escape") + ("[...]" if len(self.exp.before) > 50 else ""),
@@ -144,11 +176,11 @@ class SerialConn(ConnectionBase):
 
     def _login(self, user=None, pw=None):
         self._logger.debug("serial._login({},{})".format(user, pw))
-        self.exp.expect("[lL]ogin: ")
-        self.exp.sendline(user or self.user)
-        self.exp.expect("[pP]assword: ")
-        self.exp.sendline(pw or self.pw)
-        self.exp.expect(self.prompt)
+        self._expect("[lL]ogin: ")
+        self._sendline(user or self.user)
+        self._expect("[pP]assword: ")
+        self._sendline(pw or self.pw)
+        self._expect(self.prompt)
 
 class SshConn(ConnectionBase):
     """ implements an ssh connection.
@@ -174,9 +206,8 @@ class SshConn(ConnectionBase):
             self.user,
             self.host
         ))
-
     def _login(self, user=None, pw=None):
         self._logger.debug("ssh._login({},{})".format(user, pw))
-        self.exp.expect("[pP]assword: ")
-        self.exp.sendline(pw or self.pw)
-        self.exp.expect(self.prompt)
+        self._expect("[pP]assword: ")
+        self._sendline(pw or self.pw)
+        self._expect(self.prompt)
