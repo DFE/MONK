@@ -120,6 +120,14 @@ class Device(object):
                     msg,
         ))
 
+    def log(self, msg):
+        """ sends a debug-level message to the logger
+
+        This method is used so often, that a smaller version of it is quite
+        comfortable.
+        """
+        self._logger.debug(msg)
+
     def __str__(self):
         return "{}({}):name={}".format(
                 self.__class__.__name__,
