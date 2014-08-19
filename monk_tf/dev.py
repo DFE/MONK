@@ -143,6 +143,9 @@ class Hydra(Device):
         """ update the device to current build from Jenkins.
         """
         self._logger.info("Attempt update to " + str(link or self._update_link))
+        if not self.do_resetupdate:
+            self.log("don't update due to MONK configuration")
+            return
         if not self.is_updated:
             out = self.cmd("do-update -c && get-update {} && do-update".format(
                 link if link else self._update_link,
@@ -166,6 +169,8 @@ class Hydra(Device):
     def __init__(self, *args, **kwargs):
         self._update_link = "http://hydraip-integration.internal.dresearch-fe.de:8080/view/HIPOS/job/HydraIP_UpdateV3_USB_Stick/lastSuccessfulBuild/artifact/rel-hudson/hyp-updateV3-hikirk.zip"
         self._jenkins_link = "http://hydraip-integration.internal.dresearch-fe.de:8080/view/HIPOS/job/daisy-hipos-dfe-closed-hikirk/api/json"
+        self.do_update = kwargs.pop("update",True)
+        self.do_resetconfig = kwargs.pop("resetconfig",True)
         super(Hydra, self).__init__(*args, **kwargs)
 
     @property
@@ -199,6 +204,9 @@ class Hydra(Device):
     def reset_config(self):
         """ reset the HydraIP configuration on the device
         """
+        if not self.do_resetupdate:
+            self.log("don't reset config due to MONK configuration")
+            return
         # otherwise it might not really be a reset
         self.cmd("rm /etc/drconfig/hydraip.json.good")
         self.cmd(
