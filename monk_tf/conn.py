@@ -70,7 +70,7 @@ class ConnectionBase(object):
         """ a wrapper for :pexpect:meth:`spawn.expect`
         """
         self._logger.debug("expect({},{},{})".format(
-            pattern, timeout, searchwindowsize))
+            str(pattern).encode('string-escape'), timeout, searchwindowsize))
         try:
             self.exp.expect(pattern, timeout, searchwindowsize)
             self._logger.debug("expect succeeded.")

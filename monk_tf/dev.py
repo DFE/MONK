@@ -126,7 +126,7 @@ class Device(object):
         This method is used so often, that a smaller version of it is quite
         comfortable.
         """
-        self.log(msg)
+        self._logger.debug(msg)
 
     def __str__(self):
         return "{}({}):name={}".format(
