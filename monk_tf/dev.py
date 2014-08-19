@@ -204,7 +204,7 @@ class Hydra(Device):
     def reset_config(self):
         """ reset the HydraIP configuration on the device
         """
-        if not self.do_resetupdate:
+        if not self.do_resetconfig:
             self.log("don't reset config due to MONK configuration")
             return
         # otherwise it might not really be a reset
