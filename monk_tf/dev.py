@@ -143,7 +143,7 @@ class Hydra(Device):
         """ update the device to current build from Jenkins.
         """
         self._logger.info("Attempt update to " + str(link or self._update_link))
-        if not self.do_resetupdate:
+        if not self.do_update:
             self.log("don't update due to MONK configuration")
             return
         if not self.is_updated:
