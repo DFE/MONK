@@ -126,7 +126,7 @@ class Device(object):
         This method is used so often, that a smaller version of it is quite
         comfortable.
         """
-        self._logger.debug(msg)
+        self.log(msg)
 
     def __str__(self):
         return "{}({}):name={}".format(
@@ -151,11 +151,11 @@ class Hydra(Device):
                 link if link else self._update_link,
                 ), expect="([lL]ogin: )|([cC]onnection\sto\s[^\s]*\sclosed\.)", timeout=600)
             if "closed" in self.conns[0].exp.after:
-                self._logger.debug("reset connection after reboot")
+                self.log("reset connection after reboot")
                 del self.conns[0]._exp
-            self._logger.debug("wait till device recovered from updating")
+            self.log("wait till device recovered from updating")
             time.sleep(240)
-            self._logger.debug("continue")
+            self.log("continue")
             if not self.is_updated:
                 error= "build:{};fw:{};out:{}".format(
                         self.latest_build,
@@ -216,8 +216,8 @@ class Hydra(Device):
             login_timeout=20,
         )
         if "login" not in self.conns[0].exp.after.lower():
-            self._logger.debug("reset connection after config reset")
+            self.log("reset connection after config reset")
             del self.conns[0]._exp
-        self._logger.debug("wait till device recovered from config reset")
+        self.log("wait till device recovered from config reset")
         time.sleep(120)
-        self._logger.debug("continue")
+        self.log("continue")
