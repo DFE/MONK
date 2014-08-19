@@ -199,6 +199,8 @@ class Hydra(Device):
     def reset_config(self):
         """ reset the HydraIP configuration on the device
         """
+        # otherwise it might not really be a reset
+        self.cmd("rm /etc/drconfig/hydraip.json.good")
         self.cmd(
             msg="rm -rf /var/lib/connman/* && hip-activate-config --reset && sync && halt -p",
             timeout=150,
