@@ -169,8 +169,9 @@ class Hydra(Device):
     def __init__(self, *args, **kwargs):
         self._update_link = "http://hydraip-integration.internal.dresearch-fe.de:8080/view/HIPOS/job/HydraIP_UpdateV3_USB_Stick/lastSuccessfulBuild/artifact/rel-hudson/hyp-updateV3-hikirk.zip"
         self._jenkins_link = "http://hydraip-integration.internal.dresearch-fe.de:8080/view/HIPOS/job/daisy-hipos-dfe-closed-hikirk/api/json"
-        self.do_update = kwargs.pop("update",True)
-        self.do_resetconfig = kwargs.pop("resetconfig",True)
+        # I want BOOLEANS!
+        self.do_update = kwargs.pop("update",True) == True
+        self.do_resetconfig = kwargs.pop("resetconfig",True) == True
         super(Hydra, self).__init__(*args, **kwargs)
 
     @property

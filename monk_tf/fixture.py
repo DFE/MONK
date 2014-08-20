@@ -299,17 +299,20 @@ class Fixture(object):
         """ Create :term:`MONK` objects based on self's properties.
         """
         self._logger.debug("initialize with props: " + str(self.props))
-        self.devs = []
-        for dname in self.props.keys():
-            dconf = dict(self.props[dname])
-            dclass = self.classes[dconf.pop("type")]
-            dconns = []
-            for cname in dconf.keys():
-                cconf = dict(dconf[cname])
-                cclass = self.classes[cconf.pop("type")]
-                cconf['name'] = cname
-                dconns.append(cclass(**cconf))
-            self.devs.append(dclass(name=dname, conns=dconns))
+        self.devs = [self._parse_section(d, self.props[d]) for d in self.props.keys()]
+
+    def _parse_section(self, name, section):
+        self._logger.debug("parse_section({},{},{})".format(
+            str(name),
+            type(section).__name__,
+            section.keys()
+        ))
+        sectype = self.classes[section.pop("type")]
+        if "conns" in section:
+            cs = section.pop("conns")
+            section["conns"] = [self._parse_section(s, cs[s]) for s in cs]
+        section["name"] = name
+        return sectype(**section)
 
     def cmd(self, msg):
         """ call :py:meth:`cmd` from first :py:class:`~monk_tf.device.Device`
