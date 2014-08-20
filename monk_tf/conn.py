@@ -202,7 +202,7 @@ class SshConn(ConnectionBase):
         super(SshConn, self).__init__()
 
     def _get_exp(self):
-        return pexpect.spawn("ssh {}@{} -o TCPKeepAlive=yes -o ServerAliveInterval=5 -o ServerAliveCountMax=3".format(
+        return pexpect.spawn("ssh {}@{} -o TCPKeepAlive=yes -o ServerAliveInterval=5 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=no".format(
             self.user,
             self.host
         ))
