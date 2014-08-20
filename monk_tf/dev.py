@@ -103,8 +103,16 @@ class Device(object):
 
         :return: the standard output of the :term:`shell command`.
         """
+        self.log("cmd({},{},{},{})".format(
+            msg, expect, timeout, login_timeout))
+        if not self.conns:
+            self._logger.warning("device has no connections to use for interaction")
         for connection in self.conns:
             try:
+                self.log("send cmd '{}' via connection '{}'".format(
+                    msg.encode('string-escape'),
+                    connection,
+                ))
                 return connection.cmd(
                         msg=msg,
                         expect=expect,
