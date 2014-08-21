@@ -97,6 +97,11 @@ class AFixtureException(Exception):
     """
     pass
 
+class CantHandleException(AFixtureException):
+    """ if none of the devices is able to handle a cmd_any() call
+    """
+    pass
+
 class AParseException(AFixtureException):
     """ Base class for exceptions concerning parsing errors.
     """
@@ -314,13 +319,68 @@ class Fixture(object):
         section["name"] = name
         return sectype(**section)
 
-    def cmd(self, msg):
+    def cmd_first(self, msg, expect=None, timeout=30, login_timeout=None):
         """ call :py:meth:`cmd` from first :py:class:`~monk_tf.device.Device`
         """
+        self.log("cmd_first({},{},{},{})".format(
+            msg, expect, timeout, login_timeout))
         try:
             return self.devs[0].cmd(msg)
         except IndexError:
             raise NoDeviceException("this fixture has no device loaded")
+
+    def cmd_any(self, msg, expect=None, timeout=30, login_timeout=None):
+        self.log("cmd_any({},{},{},{})".format(
+            msg, expect, timeout, login_timeout))
+        if not self.devs:
+            self._logger.warning("fixture has no devices for sending commands to")
+        for dev in self.devs:
+            try:
+                self.log("send cmd '{}' to device '{}'".format(
+                    msg.encode("string-escape"),
+                    dev,
+                ))
+                return dev.cmd(
+                        msg=msg,
+                        expect=expect,
+                        timeout=timeout,
+                        login_timeout=login_timeout,
+                )
+            except Exception as e:
+                self._logger.exception(e)
+            raise CantHandleException(
+                    "fixt:'{}',devs:{},could not send cmd '{}'".format(
+                        self.name,
+                        map(str, self.devs),
+                        msg.encode('string-escape'),
+            ))
+
+    def cmd_all(self, msg, expect=None, timeout=30, login_timeout=None):
+        self.log("cmd_any({},{},{},{})".format(
+            msg, expect, timeout, login_timeout))
+        if not self.devs:
+            self._logger.warning("fixture has no devices for sending commands to")
+        for dev in self.devs:
+            self.log("send cmd '{}' to device '{}'".format(
+                msg.encode("string-escape"),
+                dev,
+            ))
+            return dev.cmd(
+                    msg=msg,
+                    expect=expect,
+                    timeout=timeout,
+                    login_timeout=login_timeout,
+            )
+
+    def reset_config_all(self):
+        if not self.devs:
+            self._logger.warning("fixture has no devices for sending commands to")
+        for dev in self.devs:
+            dev.reset_config()
+
+
+    def log(self, msg):
+        self._logger.debug(msg)
 
     def tear_down(self):
         """ Can be used for explicit destruction of managed objects.
