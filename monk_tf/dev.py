@@ -187,7 +187,7 @@ class Hydra(Device):
         """ get the latest build ID from jenkins
         """
         out = requests.get(self._jenkins_link).text
-        return str(max(build["number"] for build in json.loads(out)["builds"]))
+        return json.loads(out)["lastSuccessfulBuild"]["number"]
 
     @property
     def current_fw_version(self):
