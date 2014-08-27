@@ -35,6 +35,23 @@ import logging
 import pexpect
 from pexpect import fdpexpect
 
+############
+#
+# Exceptions
+#
+############
+
+class ConnectionException(Exception):
+    """ Base class for Exceptions from this module
+    """
+    pass
+
+class NoBCCException(ConnectionException):
+    """ is raised when the BCC class does not find the drbcc tool needed for
+        execution.
+    """
+    pass
+
 class ConnectionBase(object):
     """ is the base class for all connections.
 
@@ -49,11 +66,14 @@ class ConnectionBase(object):
 
 
     def __init__(self):
-        if hasattr(self, "name"):
+        if hasattr(self, "name") and self.name:
             self._logger = logging.getLogger(self.name)
         else:
             self._logger = logging.getLogger(type(self).__name__)
         self._logger.debug("hi.")
+
+    def log(self, msg):
+        self._logger.debug(msg)
 
     @property
     def exp(self):
@@ -97,7 +117,9 @@ class ConnectionBase(object):
             self.exp.sendline(s)
             self._logger.debug("sendline succeeded.")
         except Exception as e:
-            self._logger.debug("sendline failed.")
+            self._logger.debug("sendline failed.(has pexpect? {})".format(
+                        "yes" if self.exp else "no",
+            ))
             raise e
 
     def login(self, user=None, pw=None, timeout=30):
@@ -211,3 +233,39 @@ class SshConn(ConnectionBase):
         self._expect("[pP]assword: ")
         self._sendline(pw or self.pw)
         self._expect(self.prompt)
+
+###############################################################
+#
+# Others - Connections that don't have a normal shell interface
+#
+###############################################################
+
+class BCC(ConnectionBase):
+
+    def __init__(self, port, speed="57600", name=None, prompt="\r?\n?drbcc> "):
+        if os.system("hash drbcc"):
+            raise NoBCCException("Please install the DResearch drbcc tool!")
+        self.name = name
+        self.port = port
+        self.speed = speed
+        self.prompt = prompt
+        super(BCC, self).__init__()
+
+    def _get_exp(self):
+        self.log("_get_exp() with port '{}' and speed '{}'".format(
+                        self.port,
+                        self.speed,
+        ))
+        try:
+            return pexpect.spawn("drbcc --dev={},{}".format(
+                            self.port,
+                            self.speed,
+            ))
+        except Exception as e:
+            self.log("caught exception while spawning")
+            self._logger.exception(e)
+            raise e
+
+    def _login(self, user=None, pw=None):
+        self.log("_login() unnecessary for BCC")
+        pass
