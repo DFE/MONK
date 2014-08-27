@@ -86,6 +86,7 @@ class Device(object):
         self._logger = logging.getLogger("Device")
         self.conns = kwargs.pop("conns", list(args))
         self.name = kwargs.pop("name", self.__class__.__name__)
+        self.bcc = kwargs.pop("bcc", None)
         self._logger = logging.getLogger("{}:{}".format(
             __name__,
             self.name
