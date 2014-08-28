@@ -208,7 +208,13 @@ class SshConn(ConnectionBase):
     """ implements an ssh connection.
     """
 
-    def __init__(self, name, host, user, pw, prompt="\r?\n?[^\n]*#"):
+    def __init__(self, name, host, user, pw,
+            prompt="\r?\n?[^\n]*#",
+            tcpkeepalive=True,
+            serveraliveinterval=10,
+            serveralivecountmax=3,
+            stricthostkeychecking=False,
+        ):
         """
         :param name: the name of the connection
         :param host: the URL to the device
@@ -221,12 +227,20 @@ class SshConn(ConnectionBase):
         self.user = user
         self.pw = pw
         self.prompt = prompt
+        self.tcpkeepalive = tcpkeepalive
+        self.serveraliveinterval = serveraliveinterval
+        self.serveralivecountmax = serveralivecountmax
+        self.stricthostkeychecking = stricthostkeychecking
         super(SshConn, self).__init__()
 
     def _get_exp(self):
-        return pexpect.spawn("ssh {}@{} -o TCPKeepAlive=yes -o ServerAliveInterval=5 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=no".format(
+        return pexpect.spawn("ssh {}@{} -o TCPKeepAlive={} -o ServerAliveInterval={} -o ServerAliveCountMax={} -o StrictHostKeyChecking={}".format(
             self.user,
-            self.host
+            self.host,
+            "yes" if self.tcpkeepalive else "no",
+            self.serveraliveinterval,
+            self.serveralivecountmax,
+            "yes" if self.stricthostkeychecking else "no",
         ))
     def _login(self, user=None, pw=None):
         self._logger.debug("ssh._login({},{})".format(user, pw))
