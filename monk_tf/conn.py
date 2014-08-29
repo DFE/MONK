@@ -46,11 +46,22 @@ class ConnectionException(Exception):
     """
     pass
 
-class NoBCCException(ConnectionException):
+class BccException(ConnectionException):
+    """ is raised to explain some BCC behaviour
+    """
+    pass
+
+class NoBCCException(BccException):
     """ is raised when the BCC class does not find the drbcc tool needed for
         execution.
     """
     pass
+
+#############
+#
+# Connections
+#
+#############
 
 class ConnectionBase(object):
     """ is the base class for all connections.
@@ -264,6 +275,12 @@ class BCC(ConnectionBase):
         self.speed = speed
         self.prompt = prompt
         super(BCC, self).__init__()
+
+    def login(self,*args,**kwargs):
+        try:
+            super(BCC,self).login(*args,**kwargs)
+        except pexpect.EOF:
+            raise BccException("EOF found. Did you configure the correct port?")
 
     def _get_exp(self):
         self.log("_get_exp() with port '{}' and speed '{}'".format(
