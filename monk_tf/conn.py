@@ -93,22 +93,25 @@ class ConnectionBase(object):
         """ the pexpect object - Don't bother with this if you don't know what
                                  it means.
         """
+        self.log("retrieve pexpect object")
         try:
             return self._exp
         except AttributeError as e:
+            self.log("have no pexpect object yet")
             self._exp = self._get_exp()
             return self._exp
 
     def _expect(self, pattern, timeout=-1, searchwindowsize=-1):
         """ a wrapper for :pexpect:meth:`spawn.expect`
         """
-        self._logger.debug("expect({},{},{})".format(
+        self.log("expect({},{},{})".format(
             str(pattern).encode('string-escape'), timeout, searchwindowsize))
         try:
             self.exp.expect(pattern, timeout, searchwindowsize)
-            self._logger.debug("expect succeeded.")
+            self.log("expect succeeded.")
         except Exception as e:
-            self._logger.debug("expect failed.")
+            self.log("expect failed.")
+            self._logger.exception(e)
             raise e
 
     def _send(self, s):
@@ -281,7 +284,8 @@ class BCC(ConnectionBase):
     def login(self,*args,**kwargs):
         try:
             super(BCC,self).login(*args,**kwargs)
-        except pexpect.EOF:
+        except pexpect.EOF as e:
+            self._logger.exception(e)
             raise BccException("EOF found. Did you configure the correct port?")
 
     def _get_exp(self):
