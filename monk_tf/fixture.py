@@ -392,11 +392,9 @@ class Fixture(object):
         This should be called in every :term:`test case` as the last step.
 
         """
+        self.log("teardown")
         for device in self.devs:
-            try:
-                del device
-            except Exception as e:
-                logger.exception(e)
+            device.close_all()
         self.devs = []
 
     def __str__(self):

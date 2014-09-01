@@ -81,7 +81,9 @@ class ConnectionBase(object):
             self._logger = logging.getLogger(self.name)
         else:
             self._logger = logging.getLogger(type(self).__name__)
-        self._logger.debug("hi.")
+        # make sure a pexpect object is created
+        self.exp != False
+        self.log("hi.")
 
     def log(self, msg):
         self._logger.debug(msg)
@@ -179,9 +181,9 @@ class ConnectionBase(object):
         ))
         return self.exp.before
 
-    def __del__(self):
-        self._logger.debug("bye.")
-        self.exp.close()
+    def close(self):
+        self.log("force pexpect object to close")
+        self.exp.close(force=True)
 
 class SerialConn(ConnectionBase):
     """ implements a serial connection.

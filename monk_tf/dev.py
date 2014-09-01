@@ -137,6 +137,12 @@ class Device(object):
         """
         self._logger.debug(msg)
 
+    def close_all(self):
+        self.log("close_all()")
+        for c in self.conns:
+            c.close()
+        self.bcc.close()
+
     def __str__(self):
         return "{}({}):name={}".format(
                 self.__class__.__name__,
