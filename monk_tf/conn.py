@@ -309,6 +309,12 @@ class BCC(ConnectionBase):
         self.prompt = prompt
         super(BCC, self).__init__()
 
+    def cmd(self, msg, expect=None, timeout=30, login_timeout=None):
+        """ doesn't need a returncode
+        """
+        _, out = super(BCC, self).cmd(msg, expect, timeout, login_timeout, do_retcode=False)
+        return out
+
     def login(self,*args,**kwargs):
         try:
             super(BCC,self).login(*args,**kwargs)
