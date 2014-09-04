@@ -157,7 +157,7 @@ class ConnectionBase(object):
         except pexpect.TIMEOUT as e:
             self._login(user, pw)
 
-    def cmd(self, msg, expect=None, timeout=30, login_timeout=None):
+    def cmd(self, msg, expect=None, timeout=30, login_timeout=None, do_retcode=True):
         """ send a shell command and retreive its output.
 
         :param msg: the shell command
@@ -173,16 +173,44 @@ class ConnectionBase(object):
         self._logger.debug("cmd({},{},{},{})".format(
             msg, expect, timeout, login_timeout))
         self.login(timeout=login_timeout or timeout)
-        self._sendline(msg)
-        expect_msg = re.escape(msg[:5]) + "[^\n]*\r\n"
-        self._expect(expect_msg, timeout=timeout)
+        prepped_msg = self._prep_cmdmessage(msg)
+        self._sendline(prepped_msg)
+        # expect the last 10 characters of the cmd message
+        self._expect(re.escape(prepped_msg[-10:]) + "[^\n]*\r\n", timeout=timeout)
         self._expect(expect or self.prompt, timeout=timeout)
         self._logger.debug("cmd({}) result='{}' expect-match='{}'".format(
             str(msg[:15]).encode("string_escape") + ("[...]" if len(msg) > 15 else ""),
             str(self.exp.before[:50]).encode("string-escape") + ("[...]" if len(self.exp.before) > 50 else ""),
             str(self.exp.after[:50]).encode("string-escape") + ("[...]" if len(self.exp.after) > 50 else ""),
         ))
-        return self.exp.before
+        return self._prep_cmdoutput(self.exp.before)
+
+    def _prep_cmdmessage(self, msg, do_retcode=True):
+        """ prepares a command message before it is delivered to pexpect
+
+        It might add retreiving a returncode and strips unnecessary whitespace.
+        """
+        # If the connection is a shell, you might want a returncode.
+        # If it is not (like drbcc) then you might have no way to retreive a
+        # returncode. Therefore make a decision here.
+        get_retcode = "; echo $?" if do_retcode else ""
+        # strip each line for unnecessary whitespace and delete empty lines
+        prepped = "\n".join(line.strip() for line in msg.split("\n") if line.strip())
+        return prepped + get_retcode
+
+    def _prep_cmdoutput(self, out, do_retcode=True):
+        """ prepare the pexpect output for returning to the user
+
+        Removing all the unnecessary "\r" characters and separates the
+        returncode if one is requested.
+        """
+        prepped_out = out.replace("\r","")
+        if do_retcode:
+            splitted = prepped_out.split("\n")
+            return int(splitted[-1]), "\n".join(splitted[:-1])
+        else:
+            return None, prepped_out
+
 
     def close(self):
         self.log("force pexpect object to close")
