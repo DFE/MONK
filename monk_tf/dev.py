@@ -92,7 +92,7 @@ class Device(object):
             self.name
         ))
 
-    def cmd(self, msg, expect=None, timeout=30, login_timeout=None):
+    def cmd(self, msg, expect=None, timeout=30, login_timeout=None, do_retcode=True):
         """ Send a :term:`shell command` to the :term:`target device`.
 
         :param msg: the :term:`shell command`.
@@ -101,11 +101,11 @@ class Device(object):
         :param timeout: when command should return without finding what it's
                         looking for in the output. Will raise a
                         :py:exception:`pexpect.Timeout` Exception.
-
+        :param do_retcode: should this command retreive a returncode
         :return: the standard output of the :term:`shell command`.
         """
-        self.log("cmd({},{},{},{})".format(
-            msg, expect, timeout, login_timeout))
+        self.log("cmd({},{},{},{},{})".format(
+            msg, expect, timeout, login_timeout, do_retcode))
         if not self.conns:
             self._logger.warning("device has no connections to use for interaction")
         for connection in self.conns:
@@ -119,6 +119,7 @@ class Device(object):
                         expect=expect,
                         timeout=timeout,
                         login_timeout=login_timeout,
+                        do_retcode=do_retcode,
                 )
             except Exception as e:
                 self._logger.exception(e)
@@ -162,9 +163,12 @@ class Hydra(Device):
             self.log("don't update due to MONK configuration")
             return
         if not self.is_updated:
-            out = self.cmd("do-update -c && get-update {} && do-update".format(
-                link if link else self._update_link,
-                ), expect="([lL]ogin: )|([cC]onnection\sto\s[^\s]*\sclosed\.)", timeout=600)
+            _, out = self.cmd("do-update -c && get-update {} && do-update".format(
+                    link if link else self._update_link,
+                ), expect="([lL]ogin: )|([cC]onnection\sto\s[^\s]*\sclosed\.)",
+                timeout=600,
+                do_retcode=False,
+            )
             if "closed" in self.conns[0].exp.after:
                 self.log("reset connection after reboot")
                 del self.conns[0]._exp
@@ -200,7 +204,8 @@ class Hydra(Device):
     def current_fw_version(self):
         """ the current version of the installed firmware
         """
-        return self.cmd("do-update --current-update-version | awk '{print $2}'")
+        _, out = self.cmd("do-update --current-update-version | awk '{print $2}'")
+        return out
 
     @property
     def has_newest_firmware(self):

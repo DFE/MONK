@@ -155,6 +155,7 @@ class ConnectionBase(object):
             self._expect(self.prompt, timeout=timeout)
             self._logger.debug("already logged in")
         except pexpect.TIMEOUT as e:
+            self.log("Timeout Exception is expected. It means we are not logged in yet, so let's do that:")
             self._login(user, pw)
 
     def cmd(self, msg, expect=None, timeout=30, login_timeout=None, do_retcode=True):
