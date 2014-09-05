@@ -174,7 +174,7 @@ class ConnectionBase(object):
         self._logger.debug("cmd({},{},{},{})".format(
             msg, expect, timeout, login_timeout))
         self.login(timeout=login_timeout or timeout)
-        prepped_msg = self._prep_cmdmessage(msg)
+        prepped_msg = self._prep_cmdmessage(msg, do_retcode)
         self._sendline(prepped_msg)
         # expect the last 10 characters of the cmd message
         self._expect(re.escape(prepped_msg[-10:]) + "[^\n]*\r\n", timeout=timeout)
@@ -184,19 +184,21 @@ class ConnectionBase(object):
             str(self.exp.before[:50]).encode("string-escape") + ("[...]" if len(self.exp.before) > 50 else ""),
             str(self.exp.after[:50]).encode("string-escape") + ("[...]" if len(self.exp.after) > 50 else ""),
         ))
-        return self._prep_cmdoutput(self.exp.before)
+        return self._prep_cmdoutput(self.exp.before, do_retcode)
 
     def _prep_cmdmessage(self, msg, do_retcode=True):
         """ prepares a command message before it is delivered to pexpect
 
         It might add retreiving a returncode and strips unnecessary whitespace.
         """
+        self.log("prep_msg({},{})".format(msg, do_retcode))
         # If the connection is a shell, you might want a returncode.
         # If it is not (like drbcc) then you might have no way to retreive a
         # returncode. Therefore make a decision here.
         get_retcode = "; echo $?" if do_retcode else ""
         # strip each line for unnecessary whitespace and delete empty lines
         prepped = "\n".join(line.strip() for line in msg.split("\n") if line.strip())
+        self.log("prepped:" + str(prepped+get_retcode))
         return prepped + get_retcode
 
     def _prep_cmdoutput(self, out, do_retcode=True):
@@ -205,17 +207,20 @@ class ConnectionBase(object):
         Removing all the unnecessary "\r" characters and separates the
         returncode if one is requested.
         """
+        self.log("prep_out({},{})".format(out, do_retcode))
+        if not out:
+            self.log("out was empty and therefore couldn't be prepped.")
+            return None, out
         prepped_out = out.replace("\r","")
+        prepped_out = "\n".join(line.strip() for line in prepped_out.split("\n") if line.strip())
         if do_retcode:
             splitted = prepped_out.split("\n")
+            self.log("prepped with retcode")
             return int(splitted[-1]), "\n".join(splitted[:-1])
         else:
+            self.log("prepped without retcode")
             return None, prepped_out
 
-
-    def close(self):
-        self.log("force pexpect object to close")
-        self.exp.close(force=True)
 
 class SerialConn(ConnectionBase):
     """ implements a serial connection.
@@ -248,6 +253,10 @@ class SerialConn(ConnectionBase):
         self._expect("[pP]assword: ")
         self._sendline(pw or self.pw)
         self._expect(self.prompt)
+
+    def close(self):
+        self.log("force pexpect object to close")
+        self.exp.close()
 
 class SshConn(ConnectionBase):
     """ implements an ssh connection.
@@ -293,6 +302,10 @@ class SshConn(ConnectionBase):
         self._sendline(pw or self.pw)
         self._expect(self.prompt)
 
+    def close(self):
+        self.log("force pexpect object to close")
+        self.exp.close(force=True)
+
 ###############################################################
 #
 # Others - Connections that don't have a normal shell interface
@@ -313,8 +326,7 @@ class BCC(ConnectionBase):
     def cmd(self, msg, expect=None, timeout=30, login_timeout=None):
         """ doesn't need a returncode
         """
-        _, out = super(BCC, self).cmd(msg, expect, timeout, login_timeout, do_retcode=False)
-        return out
+        return super(BCC, self).cmd(msg, expect, timeout, login_timeout, do_retcode=False)
 
     def login(self,*args,**kwargs):
         try:
@@ -341,3 +353,7 @@ class BCC(ConnectionBase):
     def _login(self, user=None, pw=None):
         self.log("_login() unnecessary for BCC")
         pass
+
+    def close(self):
+        self.log("force pexpect object to close")
+        self.exp.close(force=True)
