@@ -201,6 +201,7 @@ class Fixture(object):
         "HydraDevice" : dev.Hydra,
         "SerialConnection" : conn.SerialConn,
         "SshConnection" : conn.SshConn,
+        "BCC" : conn.BCC,
     }
 
     _DEFAULT_PARSERS = [
@@ -316,6 +317,9 @@ class Fixture(object):
         if "conns" in section:
             cs = section.pop("conns")
             section["conns"] = [self._parse_section(s, cs[s]) for s in cs]
+        if "bcc" in section:
+            bs = section.pop("bcc")
+            section["bcc"] = self._parse_section("bcc", bs)
         section["name"] = name
         return sectype(**section)
 
@@ -388,11 +392,9 @@ class Fixture(object):
         This should be called in every :term:`test case` as the last step.
 
         """
+        self.log("teardown")
         for device in self.devs:
-            try:
-                del device
-            except Exception as e:
-                logger.exception(e)
+            device.close_all()
         self.devs = []
 
     def __str__(self):

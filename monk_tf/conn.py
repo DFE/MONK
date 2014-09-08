@@ -35,6 +35,34 @@ import logging
 import pexpect
 from pexpect import fdpexpect
 
+############
+#
+# Exceptions
+#
+############
+
+class ConnectionException(Exception):
+    """ Base class for Exceptions from this module
+    """
+    pass
+
+class BccException(ConnectionException):
+    """ is raised to explain some BCC behaviour
+    """
+    pass
+
+class NoBCCException(BccException):
+    """ is raised when the BCC class does not find the drbcc tool needed for
+        execution.
+    """
+    pass
+
+#############
+#
+# Connections
+#
+#############
+
 class ConnectionBase(object):
     """ is the base class for all connections.
 
@@ -49,33 +77,41 @@ class ConnectionBase(object):
 
 
     def __init__(self):
-        if hasattr(self, "name"):
+        if hasattr(self, "name") and self.name:
             self._logger = logging.getLogger(self.name)
         else:
             self._logger = logging.getLogger(type(self).__name__)
-        self._logger.debug("hi.")
+        # make sure a pexpect object is created
+        self.exp != False
+        self.log("hi.")
+
+    def log(self, msg):
+        self._logger.debug(msg)
 
     @property
     def exp(self):
         """ the pexpect object - Don't bother with this if you don't know what
                                  it means.
         """
+        self.log("retrieve pexpect object")
         try:
             return self._exp
         except AttributeError as e:
+            self.log("have no pexpect object yet")
             self._exp = self._get_exp()
             return self._exp
 
     def _expect(self, pattern, timeout=-1, searchwindowsize=-1):
         """ a wrapper for :pexpect:meth:`spawn.expect`
         """
-        self._logger.debug("expect({},{},{})".format(
+        self.log("expect({},{},{})".format(
             str(pattern).encode('string-escape'), timeout, searchwindowsize))
         try:
             self.exp.expect(pattern, timeout, searchwindowsize)
-            self._logger.debug("expect succeeded.")
+            self.log("expect succeeded.")
         except Exception as e:
-            self._logger.debug("expect failed.")
+            self.log("expect failed.")
+            self._logger.exception(e)
             raise e
 
     def _send(self, s):
@@ -97,7 +133,9 @@ class ConnectionBase(object):
             self.exp.sendline(s)
             self._logger.debug("sendline succeeded.")
         except Exception as e:
-            self._logger.debug("sendline failed.")
+            self._logger.debug("sendline failed.(has pexpect? {})".format(
+                        "yes" if self.exp else "no",
+            ))
             raise e
 
     def login(self, user=None, pw=None, timeout=30):
@@ -117,9 +155,10 @@ class ConnectionBase(object):
             self._expect(self.prompt, timeout=timeout)
             self._logger.debug("already logged in")
         except pexpect.TIMEOUT as e:
+            self.log("Timeout Exception is expected. It means we are not logged in yet, so let's do that:")
             self._login(user, pw)
 
-    def cmd(self, msg, expect=None, timeout=30, login_timeout=None):
+    def cmd(self, msg, expect=None, timeout=30, login_timeout=None, do_retcode=True):
         """ send a shell command and retreive its output.
 
         :param msg: the shell command
@@ -135,20 +174,53 @@ class ConnectionBase(object):
         self._logger.debug("cmd({},{},{},{})".format(
             msg, expect, timeout, login_timeout))
         self.login(timeout=login_timeout or timeout)
-        self._sendline(msg)
-        expect_msg = re.escape(msg[:5]) + "[^\n]*\r\n"
-        self._expect(expect_msg, timeout=timeout)
+        prepped_msg = self._prep_cmdmessage(msg, do_retcode)
+        self._sendline(prepped_msg)
+        # expect the last 10 characters of the cmd message
+        self._expect(re.escape(prepped_msg[-10:]) + "[^\n]*\r\n", timeout=timeout)
         self._expect(expect or self.prompt, timeout=timeout)
         self._logger.debug("cmd({}) result='{}' expect-match='{}'".format(
             str(msg[:15]).encode("string_escape") + ("[...]" if len(msg) > 15 else ""),
             str(self.exp.before[:50]).encode("string-escape") + ("[...]" if len(self.exp.before) > 50 else ""),
             str(self.exp.after[:50]).encode("string-escape") + ("[...]" if len(self.exp.after) > 50 else ""),
         ))
-        return self.exp.before
+        return self._prep_cmdoutput(self.exp.before, do_retcode)
 
-    def __del__(self):
-        self._logger.debug("bye.")
-        self.exp.close()
+    def _prep_cmdmessage(self, msg, do_retcode=True):
+        """ prepares a command message before it is delivered to pexpect
+
+        It might add retreiving a returncode and strips unnecessary whitespace.
+        """
+        self.log("prep_msg({},{})".format(msg, do_retcode))
+        # If the connection is a shell, you might want a returncode.
+        # If it is not (like drbcc) then you might have no way to retreive a
+        # returncode. Therefore make a decision here.
+        get_retcode = "; echo $?" if do_retcode else ""
+        # strip each line for unnecessary whitespace and delete empty lines
+        prepped = "\n".join(line.strip() for line in msg.split("\n") if line.strip())
+        self.log("prepped:" + str(prepped+get_retcode))
+        return prepped + get_retcode
+
+    def _prep_cmdoutput(self, out, do_retcode=True):
+        """ prepare the pexpect output for returning to the user
+
+        Removing all the unnecessary "\r" characters and separates the
+        returncode if one is requested.
+        """
+        self.log("prep_out({},{})".format(out, do_retcode))
+        if not out:
+            self.log("out was empty and therefore couldn't be prepped.")
+            return None, out
+        prepped_out = out.replace("\r","")
+        prepped_out = "\n".join(line.strip() for line in prepped_out.split("\n") if line.strip())
+        if do_retcode:
+            splitted = prepped_out.split("\n")
+            self.log("prepped with retcode")
+            return int(splitted[-1]), "\n".join(splitted[:-1])
+        else:
+            self.log("prepped without retcode")
+            return None, prepped_out
+
 
 class SerialConn(ConnectionBase):
     """ implements a serial connection.
@@ -182,11 +254,21 @@ class SerialConn(ConnectionBase):
         self._sendline(pw or self.pw)
         self._expect(self.prompt)
 
+    def close(self):
+        self.log("force pexpect object to close")
+        self.exp.close()
+
 class SshConn(ConnectionBase):
     """ implements an ssh connection.
     """
 
-    def __init__(self, name, host, user, pw, prompt="\r?\n?[^\n]*#"):
+    def __init__(self, name, host, user, pw,
+            prompt="\r?\n?[^\n]*#",
+            tcpkeepalive=True,
+            serveraliveinterval=10,
+            serveralivecountmax=3,
+            stricthostkeychecking=False,
+        ):
         """
         :param name: the name of the connection
         :param host: the URL to the device
@@ -199,15 +281,79 @@ class SshConn(ConnectionBase):
         self.user = user
         self.pw = pw
         self.prompt = prompt
+        self.tcpkeepalive = tcpkeepalive
+        self.serveraliveinterval = serveraliveinterval
+        self.serveralivecountmax = serveralivecountmax
+        self.stricthostkeychecking = stricthostkeychecking
         super(SshConn, self).__init__()
 
     def _get_exp(self):
-        return pexpect.spawn("ssh {}@{} -o TCPKeepAlive=yes -o ServerAliveInterval=5 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=no".format(
+        return pexpect.spawn("ssh {}@{} -o TCPKeepAlive={} -o ServerAliveInterval={} -o ServerAliveCountMax={} -o StrictHostKeyChecking={}".format(
             self.user,
-            self.host
+            self.host,
+            "yes" if self.tcpkeepalive else "no",
+            self.serveraliveinterval,
+            self.serveralivecountmax,
+            "yes" if self.stricthostkeychecking else "no",
         ))
     def _login(self, user=None, pw=None):
         self._logger.debug("ssh._login({},{})".format(user, pw))
         self._expect("[pP]assword: ")
         self._sendline(pw or self.pw)
         self._expect(self.prompt)
+
+    def close(self):
+        self.log("force pexpect object to close")
+        self.exp.close(force=True)
+
+###############################################################
+#
+# Others - Connections that don't have a normal shell interface
+#
+###############################################################
+
+class BCC(ConnectionBase):
+
+    def __init__(self, port, speed="57600", name=None, prompt="\r?\n?drbcc> "):
+        if os.system("hash drbcc"):
+            raise NoBCCException("Please install the DResearch drbcc tool!")
+        self.name = name
+        self.port = port
+        self.speed = speed
+        self.prompt = prompt
+        super(BCC, self).__init__()
+
+    def cmd(self, msg, expect=None, timeout=30, login_timeout=None):
+        """ doesn't need a returncode
+        """
+        return super(BCC, self).cmd(msg, expect, timeout, login_timeout, do_retcode=False)
+
+    def login(self,*args,**kwargs):
+        try:
+            super(BCC,self).login(*args,**kwargs)
+        except pexpect.EOF as e:
+            self._logger.exception(e)
+            raise BccException("EOF found. Did you configure the correct port?")
+
+    def _get_exp(self):
+        self.log("_get_exp() with port '{}' and speed '{}'".format(
+                        self.port,
+                        self.speed,
+        ))
+        try:
+            return pexpect.spawn("drbcc --dev={},{}".format(
+                            self.port,
+                            self.speed,
+            ))
+        except Exception as e:
+            self.log("caught exception while spawning")
+            self._logger.exception(e)
+            raise e
+
+    def _login(self, user=None, pw=None):
+        self.log("_login() unnecessary for BCC")
+        pass
+
+    def close(self):
+        self.log("force pexpect object to close")
+        self.exp.close(force=True)
