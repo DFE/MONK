@@ -397,7 +397,7 @@ class Fixture(object):
                         return dev
                     else:
                         names.append(dev.name)
-                raise WrongNameException("Couldn't retreive connection with name '{}'. Available names are: {}".format(which, names)
+                raise WrongNameException("Couldn't retreive connection with name '{}'. Available names are: {}".format(which, names))
 
     def reset_config_all(self):
         if not self.devs:

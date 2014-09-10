@@ -76,13 +76,14 @@ class ConnectionBase(object):
 
 
 
-    def __init__(self):
+    def __init__(self, default_timeout=None):
         if hasattr(self, "name") and self.name:
             self._logger = logging.getLogger(self.name)
         else:
             self._logger = logging.getLogger(type(self).__name__)
         # make sure a pexpect object is created
         self.exp != False
+        self.default_timeout = default_timeout or 30
         self.log("hi.")
 
     def log(self, msg):
@@ -138,7 +139,7 @@ class ConnectionBase(object):
             ))
             raise e
 
-    def login(self, user=None, pw=None, timeout=30):
+    def login(self, user=None, pw=None, timeout=None):
         """ attempts to authenticate to the connection.
 
         Default for user and password are the one's given to the connection on
@@ -152,13 +153,13 @@ class ConnectionBase(object):
         self._logger.debug("login({},{},{})".format(user, pw, timeout))
         try:
             self._sendline("")
-            self._expect(self.prompt, timeout=timeout)
+            self._expect(self.prompt, timeout=timeout or self.default_timeout)
             self._logger.debug("already logged in")
         except pexpect.TIMEOUT as e:
             self.log("Timeout Exception is expected. It means we are not logged in yet, so let's do that:")
             self._login(user, pw)
 
-    def cmd(self, msg, expect=None, timeout=30, login_timeout=None, do_retcode=True):
+    def cmd(self, msg, expect=None, timeout=None, login_timeout=None, do_retcode=True):
         """ send a shell command and retreive its output.
 
         :param msg: the shell command
@@ -172,13 +173,16 @@ class ConnectionBase(object):
         :return: the stdout and stderr of the shell command
         """
         self._logger.debug("cmd({},{},{},{})".format(
-            msg, expect, timeout, login_timeout))
-        self.login(timeout=login_timeout or timeout)
+            msg,
+            expect,
+            timeout or self.default_timeout,
+            login_timeout or timeout or self.default_timeout))
+        self.login(timeout=login_timeout or timeout or self.default_timeout)
         prepped_msg = self._prep_cmdmessage(msg, do_retcode)
         self._sendline(prepped_msg)
         # expect the last 10 characters of the cmd message
         self._expect(re.escape(prepped_msg[-10:]) + "[^\n]*\r\n", timeout=timeout)
-        self._expect(expect or self.prompt, timeout=timeout)
+        self._expect(expect or self.prompt, timeout=timeout or self.default_timeout)
         self._logger.debug("cmd({}) result='{}' expect-match='{}'".format(
             str(msg[:15]).encode("string_escape") + ("[...]" if len(msg) > 15 else ""),
             str(self.exp.before[:50]).encode("string-escape") + ("[...]" if len(self.exp.before) > 50 else ""),
@@ -226,7 +230,10 @@ class SerialConn(ConnectionBase):
     """ implements a serial connection.
     """
 
-    def __init__(self, name, port, user, pw, prompt="\r?\n?[^\n]*#"):
+    def __init__(self, name, port, user, pw,
+            prompt="\r?\n?[^\n]*#",
+            default_timeout=None,
+        ):
         """
         :param name: the name of the connection
         :param port: the path to the device file that is used for this connection
@@ -239,7 +246,7 @@ class SerialConn(ConnectionBase):
         self.user = user
         self.pw = pw
         self.prompt = prompt
-        super(SerialConn, self).__init__()
+        super(SerialConn, self).__init__(default_timeout=default_timeout)
 
     def _get_exp(self):
         spawn = fdpexpect.fdspawn(os.open(self.port, os.O_RDWR|os.O_NONBLOCK|os.O_NOCTTY))
@@ -268,6 +275,7 @@ class SshConn(ConnectionBase):
             serveraliveinterval=10,
             serveralivecountmax=3,
             stricthostkeychecking=False,
+            default_timeout=None,
         ):
         """
         :param name: the name of the connection
@@ -285,7 +293,7 @@ class SshConn(ConnectionBase):
         self.serveraliveinterval = serveraliveinterval
         self.serveralivecountmax = serveralivecountmax
         self.stricthostkeychecking = stricthostkeychecking
-        super(SshConn, self).__init__()
+        super(SshConn, self).__init__(default_timeout=default_timeout)
 
     def _get_exp(self):
         return pexpect.spawn("ssh {}@{} -o TCPKeepAlive={} -o ServerAliveInterval={} -o ServerAliveCountMax={} -o StrictHostKeyChecking={}".format(
@@ -314,16 +322,21 @@ class SshConn(ConnectionBase):
 
 class BCC(ConnectionBase):
 
-    def __init__(self, port, speed="57600", name=None, prompt="\r?\n?drbcc> "):
+    def __init__(self, port,
+            speed="57600",
+            name=None,
+            prompt="\r?\n?drbcc> ",
+            default_timeout=None
+        ):
         if os.system("hash drbcc"):
             raise NoBCCException("Please install the DResearch drbcc tool!")
         self.name = name
         self.port = port
         self.speed = speed
         self.prompt = prompt
-        super(BCC, self).__init__()
+        super(BCC, self).__init__(default_timeout=default_timeout)
 
-    def cmd(self, msg, expect=None, timeout=30, login_timeout=None):
+    def cmd(self, msg, expect=None, timeout=None, login_timeout=None):
         """ doesn't need a returncode
         """
         return super(BCC, self).cmd(msg, expect, timeout, login_timeout, do_retcode=False)
