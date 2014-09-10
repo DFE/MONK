@@ -64,6 +64,11 @@ class UpdateFailedException(DeviceException):
     """
     pass
 
+class WrongNameException(DeviceException):
+    """ is raised when no connection with a given name could be found.
+    """
+    pass
+
 
 ##############################
 #
@@ -85,6 +90,7 @@ class Device(object):
         """
         self._logger = logging.getLogger("Device")
         self.conns = kwargs.pop("conns", list(args))
+        self._conns_dict = {}
         self.name = kwargs.pop("name", self.__class__.__name__)
         self.bcc = kwargs.pop("bcc", None)
         self._logger = logging.getLogger("{}:{}".format(
@@ -129,6 +135,24 @@ class Device(object):
                     map(str, self.conns),
                     msg,
         ))
+
+    def get_conn(self, which):
+        self.log("get_conn({})".format(which))
+        try:
+            return self.conns[which]
+        except TypeError:
+            try:
+                return self._conns_dict[which]
+            except KeyError:
+                names = []
+                for conn in self.conns:
+                    if conn.name == which:
+                        self.log("cache conn in dict:" + which)
+                        self._conns_dict[which] = conn
+                        return conn
+                    else:
+                        names.append(conn.name)
+                raise WrongNameException("Couldn't retreive connection with name '{}'. Available names are: {}".format(which, names))
 
     def log(self, msg):
         """ sends a debug-level message to the logger
