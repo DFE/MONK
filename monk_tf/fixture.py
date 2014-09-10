@@ -122,6 +122,12 @@ class CantParseException(AFixtureException):
 class NoDeviceException(AFixtureException):
     """ is raised when a :py:clas:`~monk_tf.fixture.Fixture` requires a device but has none.
     """
+    pass
+
+class WrongNameException(AFixtureException):
+    """ is raised when no devs with a given name could be found.
+    """
+    pass
 
 ######################################################
 #
@@ -235,6 +241,7 @@ class Fixture(object):
         self.name = name or self.__class__.__name__
         self._logger = logging.getLogger("{}:{}".format(__name__, self.name))
         self.devs = []
+        self._devs_dict = {}
         self.parsers = parsers or self._DEFAULT_PARSERS
         self.classes = classes or self._DEFAULT_CLASSES
         self.props = {}
@@ -375,6 +382,22 @@ class Fixture(object):
                     timeout=timeout,
                     login_timeout=login_timeout,
             )
+
+    def get_dev(self, which):
+        try:
+            return self.devs[which]
+        except TypeError:
+            try:
+                return self._devs_dict[which]
+            except KeyError:
+                names = []
+                for dev in self._devs:
+                    if dev.name == which:
+                        self._devs_dict[which] = dev
+                        return dev
+                    else:
+                        names.append(dev.name)
+                raise WrongNameException("Couldn't retreive connection with name '{}'. Available names are: {}".format(which, names)
 
     def reset_config_all(self):
         if not self.devs:
