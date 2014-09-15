@@ -31,8 +31,10 @@ import os
 import sys
 import re
 import logging
+import time
 
 import pexpect
+from pexpect import pxssh
 from pexpect import fdpexpect
 
 ############
@@ -57,6 +59,11 @@ class NoBCCException(BccException):
     """
     pass
 
+class CantCreateConn(ConnectionException):
+    """ is raised when even several attempt were not able to create a connection.
+    """
+    pass
+
 #############
 #
 # Connections
@@ -76,14 +83,13 @@ class ConnectionBase(object):
 
 
 
-    def __init__(self, default_timeout=None):
+    def __init__(self, default_timeout=None, first_prompt_timeout=None):
         if hasattr(self, "name") and self.name:
             self._logger = logging.getLogger(self.name)
         else:
             self._logger = logging.getLogger(type(self).__name__)
-        # make sure a pexpect object is created
-        self.exp != False
         self.default_timeout = default_timeout or 30
+        self.first_prompt_timeout = first_prompt_timeout or 120
         self.log("hi.")
 
     def log(self, msg):
@@ -111,8 +117,7 @@ class ConnectionBase(object):
             self.exp.expect(pattern, timeout, searchwindowsize)
             self.log("expect succeeded.")
         except Exception as e:
-            self.log("expect failed.")
-            self._logger.exception(e)
+            self.log("expect failed with '{}'".format(e.__class__.__name__))
             raise e
 
     def _send(self, s):
@@ -139,55 +144,66 @@ class ConnectionBase(object):
             ))
             raise e
 
-    def login(self, user=None, pw=None, timeout=None):
-        """ attempts to authenticate to the connection.
+    def expect_prompt(self, timeout=None):
+        self.log("expect prompt")
+        self._sendline("")
+        self._expect(self.prompt, timeout=timeout or self.default_timeout)
 
-        Default for user and password are the one's given to the connection on
-        instantiation.
 
-        :param user: the username
-        :param pw: the password
-        :param timeout: how long the connection waits to see whether it is
-                        logged in already
+    def wait_for_prompt(self, timeout=-1):
         """
-        self._logger.debug("login({},{},{})".format(user, pw, timeout))
-        try:
-            self._sendline("")
-            self._expect(self.prompt, timeout=timeout or self.default_timeout)
-            self._logger.debug("already logged in")
-        except pexpect.TIMEOUT as e:
-            self.log("Timeout Exception is expected. It means we are not logged in yet, so let's do that:")
-            self._login(user, pw)
+        """
+        self.log("wait_for_prompt({}".format(
+            timeout,
+        ))
+        end_time = time.time() + timeout
+        while time.time() <= end_time:
+            self.log("try prompt")
+            try:
+                self.expect_prompt(timeout)
+                self._logger.debug("ready")
+                break
+            except (pexpect.EOF, pexpect.TIMEOUT) as e:
+                self.log("could not retreive prompt")
+                self.close()
+                self.log("sleep before retry")
+                time.sleep(3)
 
-    def cmd(self, msg, expect=None, timeout=None, login_timeout=None, do_retcode=True):
+    def cmd(self, msg, expect=None, timeout=-1, do_retcode=True):
         """ send a shell command and retreive its output.
-
-        :param msg: the shell command
-        :param expect: a regex that represents the end of an interaction.
-                       Defaults to the prompt set on connection instantiation
-        :param timeout: how long a command call should wait for its desired
-                        result
-        :param login_timeout: how long the connection should wait until it
-                              decides a login is necessary.
-
-        :return: the stdout and stderr of the shell command
         """
-        self._logger.debug("cmd({},{},{},{})".format(
+        self._logger.debug("START cmd({},{},{},{})".format(
             msg,
             expect,
             timeout or self.default_timeout,
-            login_timeout or timeout or self.default_timeout))
-        self.login(timeout=login_timeout or timeout or self.default_timeout)
+            do_retcode,
+        ))
+        self.wait_for_prompt(self.first_prompt_timeout)
         prepped_msg = self._prep_cmdmessage(msg, do_retcode)
         self._sendline(prepped_msg)
         # expect the last 10 characters of the cmd message
-        self._expect(re.escape(prepped_msg[-10:]) + "[^\n]*\r\n", timeout=timeout)
-        self._expect(expect or self.prompt, timeout=timeout or self.default_timeout)
-        self._logger.debug("cmd({}) result='{}' expect-match='{}'".format(
-            str(msg[:15]).encode("string_escape") + ("[...]" if len(msg) > 15 else ""),
-            str(self.exp.before[:50]).encode("string-escape") + ("[...]" if len(self.exp.before) > 50 else ""),
-            str(self.exp.after[:50]).encode("string-escape") + ("[...]" if len(self.exp.after) > 50 else ""),
-        ))
+        cmd_expect = [re.escape(prepped_msg[-10:]) + "[^\n]*\r\n"]
+        if expect and pexpect.EOF in expect:
+            cmd_expect.append(pexpect.EOF)
+        if expect and pexpect.TIMEOUT in expect:
+            cmd_expect.append(pexpect.TIMEOUT)
+        try:
+            self._expect(cmd_expect, timeout=timeout)
+        except (pexpect.EOF, pexpect.TIMEOUT) as e:
+            self._logger.warning("Couldn't read the command. Retrying just with last character.")
+            cmd_expect[0] = re.escape(prepped_msg[-1]) + "[^\n]*\r\n"
+            self._expect(cmd_expect, timeout=timeout)
+        try:
+            self._expect(expect or self.prompt, timeout=timeout or self.default_timeout)
+            self._logger.debug("SUCCESS: cmd({}) result='{}' expect-match='{}'".format(
+                str(msg)[:15].encode("string_escape") + ("[...]" if len(str(msg)) > 15 else ""),
+                str(self.exp.before)[:50].encode("string-escape") + ("[...]" if len(str(self.exp.before)) > 50 else ""),
+                str(self.exp.after)[:50].encode("string-escape") + ("[...]" if len(str(self.exp.after)) > 50 else ""),
+            ))
+        except (pexpect.EOF, pexpect.TIMEOUT) as e:
+            self.log("caught EOF/TIMEOUT on last expect; closing connections")
+            self.close()
+            raise e
         return self._prep_cmdoutput(self.exp.before, do_retcode)
 
     def _prep_cmdmessage(self, msg, do_retcode=True):
@@ -225,6 +241,21 @@ class ConnectionBase(object):
             self.log("prepped without retcode")
             return None, prepped_out
 
+    def close(self):
+        self.log("close connection")
+        try:
+            self._exp.close()
+            del self._exp
+            self.log("successfully closed connection")
+        except AttributeError:
+            self.log("connection already closed")
+            pass
+
+    def __del__(self):
+        self.log("getting deleted")
+        self.close()
+        self.log("bye.")
+
 
 class SerialConn(ConnectionBase):
     """ implements a serial connection.
@@ -233,6 +264,7 @@ class SerialConn(ConnectionBase):
     def __init__(self, name, port, user, pw,
             prompt="\r?\n?[^\n]*#",
             default_timeout=None,
+            first_prompt_timeout=None,
         ):
         """
         :param name: the name of the connection
@@ -246,36 +278,33 @@ class SerialConn(ConnectionBase):
         self.user = user
         self.pw = pw
         self.prompt = prompt
-        super(SerialConn, self).__init__(default_timeout=default_timeout)
+        super(SerialConn, self).__init__(
+                default_timeout=default_timeout,
+                first_prompt_timeout=first_prompt_timeout,
+        )
 
     def _get_exp(self):
         spawn = fdpexpect.fdspawn(os.open(self.port, os.O_RDWR|os.O_NONBLOCK|os.O_NOCTTY))
-        #spawn.logfile = sys.stdout
+        self._sendline()
+        self._expect("(?i)login: ")
+        self._sendline(user or self.user)
+        self._expect("(?i)password: ")
+        self._sendline(pw or self.pw)
+        self._expect(self.prompt)
         return spawn
 
     def _login(self, user=None, pw=None):
         self._logger.debug("serial._login({},{})".format(user, pw))
-        self._expect("[lL]ogin: ")
-        self._sendline(user or self.user)
-        self._expect("[pP]assword: ")
-        self._sendline(pw or self.pw)
-        self._expect(self.prompt)
-
-    def close(self):
-        self.log("force pexpect object to close")
-        self.exp.close()
 
 class SshConn(ConnectionBase):
     """ implements an ssh connection.
     """
 
     def __init__(self, name, host, user, pw,
-            prompt="\r?\n?[^\n]*#",
-            tcpkeepalive=True,
-            serveraliveinterval=10,
-            serveralivecountmax=3,
-            stricthostkeychecking=False,
+            prompt=None,
             default_timeout=None,
+            force_password=True,
+            first_prompt_timeout=None,
         ):
         """
         :param name: the name of the connection
@@ -288,31 +317,48 @@ class SshConn(ConnectionBase):
         self.host= host
         self.user = user
         self.pw = pw
-        self.prompt = prompt
-        self.tcpkeepalive = tcpkeepalive
-        self.serveraliveinterval = serveraliveinterval
-        self.serveralivecountmax = serveralivecountmax
-        self.stricthostkeychecking = stricthostkeychecking
-        super(SshConn, self).__init__(default_timeout=default_timeout)
+        self.force_password = force_password
+        if prompt:
+            self._logger.warning("ssh connection ignores attribute prompt, because it sets its own prompt")
+        super(SshConn, self).__init__(
+                default_timeout=default_timeout,
+                first_prompt_timeout=first_prompt_timeout,
+        )
+
+    @property
+    def prompt(self):
+        self.log("retreive ssh PROMPT")
+        return self.exp.PROMPT
 
     def _get_exp(self):
-        return pexpect.spawn("ssh {}@{} -o TCPKeepAlive={} -o ServerAliveInterval={} -o ServerAliveCountMax={} -o StrictHostKeyChecking={}".format(
-            self.user,
-            self.host,
-            "yes" if self.tcpkeepalive else "no",
-            self.serveraliveinterval,
-            self.serveralivecountmax,
-            "yes" if self.stricthostkeychecking else "no",
-        ))
-    def _login(self, user=None, pw=None):
-        self._logger.debug("ssh._login({},{})".format(user, pw))
-        self._expect("[pP]assword: ")
-        self._sendline(pw or self.pw)
-        self._expect(self.prompt)
+        self.log("create pxssh object")
+        end_time = time.time() + self.first_prompt_timeout
+        while time.time() < end_time:
+            self.log("try creating pxssh object")
+            try:
+                s = pxssh.pxssh()
+                s.force_password = self.force_password
+                s.login(self.host, self.user, self.pw)
+                return s
+            except (pxssh.ExceptionPxssh, pexpect.EOF, pexpect.TIMEOUT) as e:
+                self.log("wait a little before retry creating pxssh object")
+                time.sleep(3)
+        raise CantCreateConn("tried for '{}' seconds".format(self.first_prompt_timeout))
+
+    def expect_prompt(self, timeout):
+        self.log("ssh expect prompt")
+        self._sendline("")
+        self.exp.prompt(timeout or self.default_timeout or -1)
 
     def close(self):
-        self.log("force pexpect object to close")
-        self.exp.close(force=True)
+        self.log("force pxssh object to logout")
+        try:
+            self._exp.logout()
+        except Exception as e:
+            self.log("while logging out caught the following exception:{}".format(
+                        e.__class__.__name__,
+            ))
+        super(SshConn, self).close()
 
 ###############################################################
 #
@@ -339,7 +385,12 @@ class BCC(ConnectionBase):
     def cmd(self, msg, expect=None, timeout=None, login_timeout=None):
         """ doesn't need a returncode
         """
-        return super(BCC, self).cmd(msg, expect, timeout, login_timeout, do_retcode=False)
+        return super(BCC, self).cmd(
+                msg=msg,
+                expect=expect,
+                timeout=timeout,
+                do_retcode=False
+        )
 
     def login(self,*args,**kwargs):
         try:
@@ -349,23 +400,22 @@ class BCC(ConnectionBase):
             raise BccException("EOF found. Did you configure the correct port?")
 
     def _get_exp(self):
-        self.log("_get_exp() with port '{}' and speed '{}'".format(
+        self.log("_get_exp('{}','{}')".format(
                         self.port,
                         self.speed,
         ))
-        try:
-            return pexpect.spawn("drbcc --dev={},{}".format(
-                            self.port,
-                            self.speed,
-            ))
-        except Exception as e:
-            self.log("caught exception while spawning")
-            self._logger.exception(e)
-            raise e
-
-    def _login(self, user=None, pw=None):
-        self.log("_login() unnecessary for BCC")
-        pass
+        end_time = time.time() + self.first_prompt_timeout
+        while time.time() < end_time:
+            self.log("try opening drbcc connection")
+            try:
+                return pexpect.spawn("drbcc --dev={},{}".format(
+                                self.port,
+                                self.speed,
+                ))
+            except Exception as e:
+                self.log("wait a little before retry opening drbcc connection")
+                time.sleep(3)
+        raise CantCreateConn("tried for '{}' seconds".format(self.first_prompt_timeout))
 
     def close(self):
         self.log("force pexpect object to close")

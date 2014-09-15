@@ -93,6 +93,7 @@ class Device(object):
         self._conns_dict = {}
         self.name = kwargs.pop("name", self.__class__.__name__)
         self.bcc = kwargs.pop("bcc", None)
+        self.prompt = PromptReplacement()
         self._logger = logging.getLogger("{}:{}".format(
             __name__,
             self.name
@@ -122,9 +123,8 @@ class Device(object):
                 ))
                 return connection.cmd(
                         msg=msg,
-                        expect=expect,
+                        expect=PromptReplacement.replace(connection, expect),
                         timeout=timeout,
-                        login_timeout=login_timeout,
                         do_retcode=do_retcode,
                 )
             except Exception as e:
@@ -256,13 +256,29 @@ class Hydra(Device):
         self.cmd("rm /etc/drconfig/hydraip.json.good")
         self.cmd(
             msg="rm -rf /var/lib/connman/* && hip-activate-config --reset && sync && halt -p",
-            timeout=150,
-            expect="([lL]ogin:)|([cC]onnection\sto\s[^\s]*\sclosed\.)|(Timeout.*\.)|(INFO - LAN)",
-            login_timeout=20,
+            expect=[self.prompt, pexpect.EOF, pexpect.TIMEOUT],
+            do_retcode=False,
         )
-        if "login" not in self.conns[0].exp.after.lower():
-            self.log("reset connection after config reset")
-            del self.conns[0]._exp
-        self.log("wait till device recovered from config reset")
-        time.sleep(120)
-        self.log("continue")
+
+#########
+#
+# Helpers
+#
+#########
+
+class PromptReplacement(object):
+    """ should be replaced by each connection's own prompt.
+    """
+    @classmethod
+    def replace(cls, c, expect):
+        """ this is an awful workaround...
+        """
+        if not expect:
+            return expect
+        if isinstance(expect, str):
+            return expect
+        if isinstance(expect, Exception):
+            return expect
+        if not isinstance(expect, list):
+            expect = list(expect)
+        return [c.prompt if isinstance(e, PromptReplacement) else e for e in expect]

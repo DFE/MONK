@@ -391,7 +391,7 @@ class Fixture(object):
                 return self._devs_dict[which]
             except KeyError:
                 names = []
-                for dev in self._devs:
+                for dev in self.devs:
                     if dev.name == which:
                         self._devs_dict[which] = dev
                         return dev
