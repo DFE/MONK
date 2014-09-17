@@ -353,8 +353,8 @@ class SshConn(ConnectionBase):
                 s.login(
                         server=self.host,
                         username=self.user,
-                        passwordself.pw,
-                        login_timeout=login_timeout,
+                        password=self.pw,
+                        login_timeout=self.login_timeout,
                 )
                 return s
             except (pxssh.ExceptionPxssh, pexpect.EOF, pexpect.TIMEOUT) as e:
