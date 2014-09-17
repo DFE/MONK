@@ -64,6 +64,11 @@ class CantCreateConn(ConnectionException):
     """
     pass
 
+class NoRetcodeException(ConnectionException):
+    """ is raised when the output doesn't contain a retcode for unknown reasons.
+    """
+    pass
+
 #############
 #
 # Connections
@@ -215,7 +220,7 @@ class ConnectionBase(object):
         # If the connection is a shell, you might want a returncode.
         # If it is not (like drbcc) then you might have no way to retreive a
         # returncode. Therefore make a decision here.
-        get_retcode = "; echo $?" if do_retcode else ""
+        get_retcode = '; echo "<retcode>$?</retcode>"' if do_retcode else ""
         # strip each line for unnecessary whitespace and delete empty lines
         prepped = "\n".join(line.strip() for line in msg.split("\n") if line.strip())
         self.log("prepped:" + str(prepped+get_retcode))
@@ -234,9 +239,14 @@ class ConnectionBase(object):
         prepped_out = out.replace("\r","")
         prepped_out = "\n".join(line.strip() for line in prepped_out.split("\n") if line.strip())
         if do_retcode:
-            splitted = prepped_out.split("\n")
-            self.log("prepped with retcode")
-            return int(splitted[-1]), "\n".join(splitted[:-1])
+            try:
+                match = re.search("\n?<retcode>(\d+)</retcode>.*$", prepped_out)
+                retcode = int(match.group(1))
+                prepped_out = prepped_out.replace(match.group(0), "")
+                self.log("prepped with retcode")
+                return retcode, prepped_out
+            except (AttributeError, IndexError) as e:
+                raise NoRetcodeException("failed to find retcode with '{}'".format(e.__class__.__name__))
         else:
             self.log("prepped without retcode")
             return None, prepped_out
