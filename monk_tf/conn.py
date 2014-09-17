@@ -315,6 +315,7 @@ class SshConn(ConnectionBase):
             default_timeout=None,
             force_password=True,
             first_prompt_timeout=None,
+            login_timeout=10,
         ):
         """
         :param name: the name of the connection
@@ -328,6 +329,7 @@ class SshConn(ConnectionBase):
         self.user = user
         self.pw = pw
         self.force_password = force_password
+        self.login_timeout = login_timeout
         if prompt:
             self._logger.warning("ssh connection ignores attribute prompt, because it sets its own prompt")
         super(SshConn, self).__init__(
@@ -348,7 +350,12 @@ class SshConn(ConnectionBase):
             try:
                 s = pxssh.pxssh()
                 s.force_password = self.force_password
-                s.login(self.host, self.user, self.pw)
+                s.login(
+                        server=self.host,
+                        username=self.user,
+                        passwordself.pw,
+                        login_timeout=login_timeout,
+                )
                 return s
             except (pxssh.ExceptionPxssh, pexpect.EOF, pexpect.TIMEOUT) as e:
                 self.log("wait a little before retry creating pxssh object")
