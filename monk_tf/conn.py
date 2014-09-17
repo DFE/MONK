@@ -193,11 +193,11 @@ class ConnectionBase(object):
         if expect and pexpect.TIMEOUT in expect:
             cmd_expect.append(pexpect.TIMEOUT)
         try:
-            self._expect(cmd_expect, timeout=timeout)
+            self._expect(cmd_expect, timeout=0.1)
         except (pexpect.EOF, pexpect.TIMEOUT) as e:
             self._logger.warning("Couldn't read the command. Retrying just with last character.")
             cmd_expect[0] = re.escape(prepped_msg[-1]) + "[^\n]*\r\n"
-            self._expect(cmd_expect, timeout=timeout)
+            self._expect(cmd_expect, timeout=0.1)
         try:
             self._expect(expect or self.prompt, timeout=timeout or self.default_timeout)
             self._logger.debug("SUCCESS: cmd({}) result='{}' expect-match='{}'".format(
