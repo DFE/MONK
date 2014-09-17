@@ -329,7 +329,7 @@ class SshConn(ConnectionBase):
         self.user = user
         self.pw = pw
         self.force_password = force_password
-        self.login_timeout = login_timeout
+        self.login_timeout = int(login_timeout)
         if prompt:
             self._logger.warning("ssh connection ignores attribute prompt, because it sets its own prompt")
         super(SshConn, self).__init__(
