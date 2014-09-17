@@ -174,7 +174,7 @@ class ConnectionBase(object):
                 self.log("sleep before retry")
                 time.sleep(3)
 
-    def cmd(self, msg, expect=None, timeout=-1, do_retcode=True):
+    def cmd(self, msg, timeout=-1, expect=None, do_retcode=True):
         """ send a shell command and retreive its output.
         """
         self._logger.debug("START cmd({},{},{},{})".format(
@@ -399,7 +399,7 @@ class BCC(ConnectionBase):
         self.prompt = prompt
         super(BCC, self).__init__(default_timeout=default_timeout)
 
-    def cmd(self, msg, expect=None, timeout=None, login_timeout=None):
+    def cmd(self, msg, timeout=None, expect=None, login_timeout=None):
         """ doesn't need a returncode
         """
         return super(BCC, self).cmd(
