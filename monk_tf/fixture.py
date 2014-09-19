@@ -207,7 +207,6 @@ class Fixture(object):
         "HydraDevice" : dev.Hydra,
         "SerialConnection" : conn.SerialConn,
         "SshConnection" : conn.SshConn,
-        "BCC" : conn.BCC,
     }
 
     _DEFAULT_PARSERS = [
@@ -325,8 +324,12 @@ class Fixture(object):
             cs = section.pop("conns")
             section["conns"] = [self._parse_section(s, cs[s]) for s in cs]
         if "bcc" in section:
+            self.log("DEPRECATED: Use bctrl instead of bcc")
             bs = section.pop("bcc")
             section["bcc"] = self._parse_section("bcc", bs)
+        if "bctrl" in section:
+            bs = section.pop("bctrl")
+            section["bcc"] = self._parse_section("bctrl", bs)
         section["name"] = name
         return sectype(**section)
 

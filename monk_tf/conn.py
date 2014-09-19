@@ -186,18 +186,6 @@ class ConnectionBase(object):
         self.wait_for_prompt(self.first_prompt_timeout)
         prepped_msg = self._prep_cmdmessage(msg, do_retcode)
         self._sendline(prepped_msg)
-        # expect the last 10 characters of the cmd message
-        cmd_expect = [re.escape(prepped_msg[-10:]) + "[^\n]*\r\n"]
-        if expect and pexpect.EOF in expect:
-            cmd_expect.append(pexpect.EOF)
-        if expect and pexpect.TIMEOUT in expect:
-            cmd_expect.append(pexpect.TIMEOUT)
-        try:
-            self._expect(cmd_expect, timeout=0.1)
-        except (pexpect.EOF, pexpect.TIMEOUT) as e:
-            self._logger.warning("Couldn't read the command. Retrying just with last character.")
-            cmd_expect[0] = re.escape(prepped_msg[-1]) + "[^\n]*\r\n"
-            self._expect(cmd_expect, timeout=0.1)
         try:
             self._expect(expect or self.prompt, timeout=timeout or self.default_timeout)
             self._logger.debug("SUCCESS: cmd({}) result='{}' expect-match='{}'".format(
@@ -209,7 +197,7 @@ class ConnectionBase(object):
             self.log("caught EOF/TIMEOUT on last expect; closing connections")
             self.close()
             raise e
-        return self._prep_cmdoutput(self.exp.before, do_retcode)
+        return self._prep_cmdoutput(self.exp.before, prepped_msg, do_retcode)
 
     def _prep_cmdmessage(self, msg, do_retcode=True):
         """ prepares a command message before it is delivered to pexpect
@@ -226,7 +214,7 @@ class ConnectionBase(object):
         self.log("prepped:" + str(prepped+get_retcode))
         return prepped + get_retcode
 
-    def _prep_cmdoutput(self, out, do_retcode=True):
+    def _prep_cmdoutput(self, out, cmd_expect, do_retcode=True):
         """ prepare the pexpect output for returning to the user
 
         Removing all the unnecessary "\r" characters and separates the
@@ -236,11 +224,15 @@ class ConnectionBase(object):
         if not out:
             self.log("out was empty and therefore couldn't be prepped.")
             return None, out
-        prepped_out = out.replace("\r","")
-        prepped_out = "\n".join(line.strip() for line in prepped_out.split("\n") if line.strip())
+        #remove shell line breaks
+        prepped_out = out.replace(" \r", "")
+        #remove the \r from \r\n
+        prepped_out = prepped_out.replace("\r","")
+        # remove cmd line
+        prepped_out = prepped_out.replace(cmd_expect + "\n", "")
         if do_retcode:
             try:
-                match = re.search("\n?<retcode>(\d+)</retcode>.*$", prepped_out)
+                match = re.search("\n?<retcode>(\d+)</retcode>.*\n", prepped_out)
                 retcode = int(match.group(1))
                 prepped_out = prepped_out.replace(match.group(0), "")
                 self.log("prepped with retcode")
@@ -376,64 +368,3 @@ class SshConn(ConnectionBase):
                         e.__class__.__name__,
             ))
         super(SshConn, self).close()
-
-###############################################################
-#
-# Others - Connections that don't have a normal shell interface
-#
-###############################################################
-
-class BCC(ConnectionBase):
-
-    def __init__(self, port,
-            speed="57600",
-            name=None,
-            prompt="\r?\n?drbcc> ",
-            default_timeout=None
-        ):
-        if os.system("hash drbcc"):
-            raise NoBCCException("Please install the DResearch drbcc tool!")
-        self.name = name
-        self.port = port
-        self.speed = speed
-        self.prompt = prompt
-        super(BCC, self).__init__(default_timeout=default_timeout)
-
-    def cmd(self, msg, timeout=None, expect=None, login_timeout=None):
-        """ doesn't need a returncode
-        """
-        return super(BCC, self).cmd(
-                msg=msg,
-                expect=expect,
-                timeout=timeout,
-                do_retcode=False
-        )
-
-    def login(self,*args,**kwargs):
-        try:
-            super(BCC,self).login(*args,**kwargs)
-        except pexpect.EOF as e:
-            self._logger.exception(e)
-            raise BccException("EOF found. Did you configure the correct port?")
-
-    def _get_exp(self):
-        self.log("_get_exp('{}','{}')".format(
-                        self.port,
-                        self.speed,
-        ))
-        end_time = time.time() + self.first_prompt_timeout
-        while time.time() < end_time:
-            self.log("try opening drbcc connection")
-            try:
-                return pexpect.spawn("drbcc --dev={},{}".format(
-                                self.port,
-                                self.speed,
-                ))
-            except Exception as e:
-                self.log("wait a little before retry opening drbcc connection")
-                time.sleep(3)
-        raise CantCreateConn("tried for '{}' seconds".format(self.first_prompt_timeout))
-
-    def close(self):
-        self.log("force pexpect object to close")
-        self.exp.close(force=True)
