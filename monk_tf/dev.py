@@ -99,6 +99,7 @@ class Device(object):
             self.name
         ))
 
+    @property
     def bcc(self):
         self.log("DEPRECATED: use bctrl instead of bcc")
         return self.bctrl

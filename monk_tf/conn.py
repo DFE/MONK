@@ -94,7 +94,7 @@ class ConnectionBase(object):
         else:
             self._logger = logging.getLogger(type(self).__name__)
         self.default_timeout = default_timeout or 30
-        self.first_prompt_timeout = first_prompt_timeout or 120
+        self.first_prompt_timeout = int(first_prompt_timeout) if first_prompt_timeout else 120
         self.log("hi.")
 
     def log(self, msg):
@@ -117,12 +117,17 @@ class ConnectionBase(object):
         """ a wrapper for :pexpect:meth:`spawn.expect`
         """
         self.log("expect({},{},{})".format(
-            str(pattern).encode('string-escape'), timeout, searchwindowsize))
+            str(pattern).encode('string-escape'),
+            timeout,
+            searchwindowsize,
+        ))
         try:
             self.exp.expect(pattern, timeout, searchwindowsize)
             self.log("expect succeeded.")
         except Exception as e:
-            self.log("expect failed with '{}'".format(e.__class__.__name__))
+            self.log("expect failed with '{}'".format(
+                e.__class__.__name__,
+            ))
             raise e
 
     def _send(self, s):
@@ -204,15 +209,21 @@ class ConnectionBase(object):
 
         It might add retreiving a returncode and strips unnecessary whitespace.
         """
-        self.log("prep_msg({},{})".format(msg, do_retcode))
+        self.log("prep_msg({},{})".format(
+            str(msg).encode("string-escape"),
+            do_retcode,
+        ))
         # If the connection is a shell, you might want a returncode.
         # If it is not (like drbcc) then you might have no way to retreive a
         # returncode. Therefore make a decision here.
         get_retcode = '; echo "<retcode>$?</retcode>"' if do_retcode else ""
         # strip each line for unnecessary whitespace and delete empty lines
         prepped = "\n".join(line.strip() for line in msg.split("\n") if line.strip())
-        self.log("prepped:" + str(prepped+get_retcode))
-        return prepped + get_retcode
+        out = prepped+get_retcode
+        self.log("prepped:'{}'".format(
+            out.encode("string-escape"),
+        ))
+        return out
 
     def _prep_cmdoutput(self, out, cmd_expect, do_retcode=True):
         """ prepare the pexpect output for returning to the user
@@ -220,7 +231,10 @@ class ConnectionBase(object):
         Removing all the unnecessary "\r" characters and separates the
         returncode if one is requested.
         """
-        self.log("prep_out({},{})".format(out, do_retcode))
+        self.log("prep_out({},{})".format(
+            str(out).encode("string-escape"),
+            do_retcode,
+        ))
         if not out:
             self.log("out was empty and therefore couldn't be prepped.")
             return None, out
@@ -233,12 +247,19 @@ class ConnectionBase(object):
         if do_retcode:
             try:
                 match = re.search("\n?<retcode>(\d+)</retcode>.*\n", prepped_out)
+                self.log("found retcode string '{}'".format(
+                    str(match.group(0)).encode("string-escape"),
+                ))
                 retcode = int(match.group(1))
                 prepped_out = prepped_out.replace(match.group(0), "")
                 self.log("prepped with retcode")
                 return retcode, prepped_out
             except (AttributeError, IndexError) as e:
-                raise NoRetcodeException("failed to find retcode with '{}'".format(e.__class__.__name__))
+                self._logger.exception(e)
+                raise NoRetcodeException("failed to find retcode with '{}'. Formatted output:'{}'".format(
+                            e.__class__.__name__,
+                            prepped_out.encode("string-escape"),
+                ))
         else:
             self.log("prepped without retcode")
             return None, prepped_out
