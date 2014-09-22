@@ -92,17 +92,8 @@ class Device(object):
         self.conns = kwargs.pop("conns", list(args))
         self._conns_dict = {}
         self.name = kwargs.pop("name", self.__class__.__name__)
-        self.bctrl = kwargs.pop("bctrl", None) or kwargs.pop("bcc", None)
         self.prompt = PromptReplacement()
-        self._logger = logging.getLogger("{}:{}".format(
-            __name__,
-            self.name
-        ))
-
-    @property
-    def bcc(self):
-        self.log("DEPRECATED: use bctrl instead of bcc")
-        return self.bctrl
+        self._logger = logging.getLogger(self.name)
 
     def cmd(self, msg, expect=None, timeout=30, login_timeout=None, do_retcode=True):
         """ Send a :term:`shell command` to the :term:`target device`.
@@ -171,7 +162,6 @@ class Device(object):
         self.log("close_all()")
         for c in self.conns:
             c.close()
-        self.bctrl.close()
 
     def __str__(self):
         return "{}({}):name={}".format(
