@@ -240,6 +240,7 @@ class ConnectionBase(object):
             return None, out
         #remove shell line breaks
         prepped_out = out.replace(" \r", "")
+        prepped_out = prepped_out.replace("\r\r\n", "")
         #remove the \r from \r\n
         prepped_out = prepped_out.replace("\r","")
         # remove cmd line
