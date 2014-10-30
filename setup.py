@@ -47,6 +47,7 @@ setup(
         "pexpect >= 3.3",
         "requests >= 2.2.1",
         "configobj >=4.7.2",
+        "logbook >=0.7.0",
     ],provides = [
         "{} ({})".format(monk_tf.__title__, monk_tf.__version__)
     ],

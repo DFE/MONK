@@ -72,14 +72,14 @@ Classes
 
 import os
 import sys
-import logging
 
+import logbook
 import configobj as config
 
 import conn
 import dev
 
-logger = logging.getLogger(__name__)
+logger = logbook.Logger(__name__)
 
 ############
 #
@@ -238,7 +238,7 @@ class Fixture(object):
                               looked for.
         """
         self.name = name or self.__class__.__name__
-        self._logger = logging.getLogger("{}:{}".format(__name__, self.name))
+        self._logger = logbook.Logger("{}:{}".format(__name__, self.name))
         self.devs = []
         self._devs_dict = {}
         self.parsers = parsers or self._DEFAULT_PARSERS

@@ -31,16 +31,16 @@ Example::
     [...]
 """
 
-import logging
 import time
 import json
 
+import logbook
 import requests
 import pexpect
 
 import conn
 
-logger = logging.getLogger(__name__)
+logger = logbook.Logger(__name__)
 
 ############
 #
@@ -88,12 +88,11 @@ class Device(object):
 
         :param name: Device name for logging purposes.
         """
-        self._logger = logging.getLogger("Device")
         self.conns = kwargs.pop("conns", list(args))
         self._conns_dict = {}
         self.name = kwargs.pop("name", self.__class__.__name__)
         self.prompt = PromptReplacement()
-        self._logger = logging.getLogger(self.name)
+        self._logger = logbook.Logger(self.name)
 
     def cmd(self, msg, expect=None, timeout=30, login_timeout=None, do_retcode=True):
         """ Send a :term:`shell command` to the :term:`target device`.

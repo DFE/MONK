@@ -30,9 +30,9 @@ Example::
 import os
 import sys
 import re
-import logging
 import time
 
+import logbook
 import pexpect
 from pexpect import pxssh
 from pexpect import fdpexpect
@@ -90,9 +90,9 @@ class ConnectionBase(object):
 
     def __init__(self, default_timeout=None, first_prompt_timeout=None):
         if hasattr(self, "name") and self.name:
-            self._logger = logging.getLogger(self.name)
+            self._logger = logbook.Logger(self.name)
         else:
-            self._logger = logging.getLogger(type(self).__name__)
+            self._logger = logbook.Logger(type(self).__name__)
         self.default_timeout = default_timeout or 30
         self.first_prompt_timeout = int(first_prompt_timeout) if first_prompt_timeout else 120
         self.log("hi.")
