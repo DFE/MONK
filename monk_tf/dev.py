@@ -174,33 +174,27 @@ class Hydra(Device):
     """ is the device type of DResearch Fahrzeugelektronik GmbH.
     """
 
-    def update(self, link=None):
+    def update(self, link=None, force=None):
         """ update the device to current build from Jenkins.
         """
         self._logger.info("Attempt update to " + str(link or self._update_link))
         if not self.do_update:
             self.log("don't update due to MONK configuration")
             return
-        if not self.is_updated:
+        connection_closed = (pexpect.EOF, pexpect.TIMEOUT)
+        if not self.is_updated or force:
             _, out = self.cmd("do-update -c && get-update {} && do-update".format(
                     link if link else self._update_link,
-                ), expect="([lL]ogin: )|([cC]onnection\sto\s[^\s]*\sclosed\.)",
+                ), expect=("[lL]ogin: ",) +  connection_closed,
                 timeout=600,
                 do_retcode=False,
             )
-            if "closed" in self.conns[0].exp.after:
+            if self.conns[0].exp.after in connection_closed:
                 self.log("reset connection after reboot")
                 del self.conns[0]._exp
             self.log("wait till device recovered from updating")
             time.sleep(240)
             self.log("continue")
-            if not self.is_updated:
-                error= "build:{};fw:{};out:{}".format(
-                        self.latest_build,
-                        self.current_fw_version,
-                        out[:100],
-                )
-                raise UpdateFailedException(error)
         else:
             self._logger.info("Already updated.")
 

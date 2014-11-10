@@ -386,7 +386,6 @@ class SshConn(ConnectionBase):
         try:
             self._exp.logout()
         except Exception as e:
-            self.log("while logging out caught the following exception:{}".format(
-                        e.__class__.__name__,
-            ))
+            self.log("while logging out caught the following exception, can often be ignored")
+            self._logger.exception(e)
         super(SshConn, self).close()
