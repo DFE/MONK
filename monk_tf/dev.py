@@ -230,7 +230,7 @@ class Hydra(Device):
     def has_newest_firmware(self):
         """ check whether the installed firmware is the newest on jenkins
         """
-        return self.latest_build in self.current_fw_version
+        return str(self.latest_build) in str(self.current_fw_version)
 
     @property
     def is_updated(self):
