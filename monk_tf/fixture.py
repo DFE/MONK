@@ -428,3 +428,11 @@ class Fixture(object):
                 cls=self.__class__.__name__,
                 devs=[str(d) for d in self.devs],
         )
+
+    def __enter__(self):
+        self.log("__enter__")
+        return [self] + list(self.devs)
+
+    def __exit__(self, exception_type, exception_val, trace):
+        self.log("__exit__")
+        self.tear_down()

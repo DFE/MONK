@@ -163,7 +163,7 @@ class ConnectionBase(object):
     def wait_for_prompt(self, timeout=-1):
         """
         """
-        self.log("wait_for_prompt({}".format(
+        self.log("wait_for_prompt({})".format(
             timeout,
         ))
         end_time = time.time() + timeout
