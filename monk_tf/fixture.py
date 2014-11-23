@@ -71,8 +71,10 @@ Classes
 """
 
 import os
+import os.path as op
 import sys
 import logging
+import collections
 
 import configobj as config
 
@@ -107,13 +109,6 @@ class AParseException(AFixtureException):
     """
     pass
 
-class NotXiniException(AParseException):
-    """
-    is raised when a :term:`fixture file` could not be parsed as
-    :term:`extended INI`.
-    """
-    pass
-
 class CantParseException(AFixtureException):
     """ is raised when a Fixture cannot parse a given file.
     """
@@ -128,42 +123,6 @@ class WrongNameException(AFixtureException):
     """ is raised when no devs with a given name could be found.
     """
     pass
-
-######################################################
-#
-# Parsers - Read a text file and be used like a dict()
-#
-######################################################
-
-class AParser(dict):
-    """ Base class for all parsers.
-
-    Do not instantiate this class! This basically just provides the :term:`API`
-    that is needed by :py:class:`~monk_tf.fixture.Fixture` to interact with the
-    data that is parsed. Each child class should make sure that it always
-    provides its parsed data like a :py:class:`dict` would. If you require your
-    own parser, you can extend this. :py:class:`~monk_tf.fixture.XiniParser`
-    provides a very basic example.
-    """
-    pass
-
-class XiniParser(config.ConfigObj, AParser):
-    """ Reads config files in :term:`extended INI` format.
-    """
-
-    def _load(self, infile, configspec):
-        """ Changes exception type raised.
-
-        Overwrites method from :py:class:`~configobj.ConfigObj` to raise a
-        :py:class:`~monk_tf.fixture.NotXiniException` instead of a
-        :py:class:`~configobj.ConfigObjError`.
-        """
-        try:
-            self.file_error = True
-            super(XiniParser, self)._load(infile, configspec)
-        except config.ConfigObjError as e:
-            t, val, traceback = sys.exc_info()
-            raise NotXiniException, e.message, traceback
 
 ##############################################################
 #
@@ -209,18 +168,13 @@ class Fixture(object):
         "SshConnection" : conn.SshConn,
     }
 
-    _DEFAULT_PARSERS = [
-        XiniParser,
-    ]
-
     _DEFAULT_DEBUG_SOURCE = "MONK_DEBUG_SOURCE"
 
-    def __init__(self, source=None, name=None, parsers=None, classes=None,
-            lookfordbgsrc=True):
+    def __init__(self, call_location, name=None, classes=None,
+            lookfordbgsrc=True, filename="fixture.cfg", ):
         """
 
-        :param source: The :term:`fixture file` or
-                       :py:class:`~monk_tf.fixture.AParser` object to be read.
+        :param call_location: the __file__ from where this is called.
 
         :param name: The name of this object.
 
@@ -236,25 +190,39 @@ class Fixture(object):
         :param lookfordbgsrc: If True an environment variable is looked for to
                               read a local debug config. If False it won't be
                               looked for.
+
+        :param filename: the name of the file which contains the configuration.
         """
+        self.call_location = op.dirname(op.abspath(call_location))
         self.name = name or self.__class__.__name__
         self._logger = logging.getLogger("{}:{}".format(__name__, self.name))
         self.devs = []
         self._devs_dict = {}
-        self.parsers = parsers or self._DEFAULT_PARSERS
         self.classes = classes or self._DEFAULT_CLASSES
-        self.props = {}
-        if source:
-            self._update_props(
-                    self._parse(source))
-        if lookfordbgsrc and self._DEFAULT_DEBUG_SOURCE in os.environ:
-            self._logger.debug("load debug source from {}".format(
-                self._DEFAULT_DEBUG_SOURCE))
-            self._update_props(
-                    self._parse(os.environ[self._DEFAULT_DEBUG_SOURCE]))
-        else:
-            self._logger.debug("no debug source file found")
-        self._initialize()
+        self.props = config.ConfigObj()
+        self.filename = filename
+        # look if the user has a default config in his home dir
+        home_fixture = op.expanduser(op.join("~", self.filename))
+        if op.exists(home_fixture):
+            self.read(home_fixture)
+        # starting from root load all fixtures from parent directories
+        self.log("location:{}".format(self.call_location))
+        self.log("parent_dirs:" + str(list(self._parent_dirs(self.call_location))))
+        for p in reversed(list(self._parent_dirs(self.call_location))):
+            fixture_file = op.join(p, self.filename)
+            if op.exists(fixture_file):
+                self.read(fixture_file)
+
+    def _parent_dirs(self, path):
+        """ generate parent directories for path
+        """
+        while True:
+            yield path
+            mem = op.dirname(path)
+            if path == mem:
+                break
+            else:
+                path = mem
 
 
     def read(self, source):
@@ -267,51 +235,19 @@ class Fixture(object):
         :return: self
         """
         self._logger.debug("read: " + str(source))
-        props = self._parse(source)
-        self._update_props(props)
+        self.tear_down()
+        self.props.merge(config.ConfigObj(source))
         self._initialize()
         return self
-
-    def _parse(self, source):
-        """ Parse data file.
-
-        :param source: the data source; either a file name or a
-                       :py:class:`~monk_tf.fixture.AParser` child class
-                       instance.
-
-        :return: Returns a :py:class:`~monk_tf.fixture.AParser` instance.
-        :raises: :py:class:`~monk_tf.fixture.CantParseException`
-        """
-        self._logger.debug("parse: " + str(source))
-        if isinstance(source, AParser):
-            return source
-        else:
-            for parser in self.parsers:
-                try:
-                    return parser(source)
-                except AParseException as e:
-                    self._logger.exception(e)
-                    continue
-            raise CantParseException()
-
-    def _update_props(self, props):
-        """ Updates the properties with a dictionary-like object.
-
-        This basically uses :py:meth:`dict.update` to update
-        :py:attr:`self.props <~monk_tf.fixture.Fixture.props>` with a new set
-        of data.
-
-        :param props: object that can be used with :py:meth:`dict.update`
-        """
-        self._logger.debug("add props: " + str(props))
-        self.props.update(props)
-        self._logger.debug("final props: " + str(props))
 
     def _initialize(self):
         """ Create :term:`MONK` objects based on self's properties.
         """
         self._logger.debug("initialize with props: " + str(self.props))
-        self.devs = [self._parse_section(d, self.props[d]) for d in self.props.keys()]
+        if self.props:
+            self.devs = [self._parse_section(d, self.props[d]) for d in self.props.keys()]
+        else:
+            raise NoPropsException("have you created any fixture files?")
 
     def _parse_section(self, name, section):
         self._logger.debug("parse_section({},{},{})".format(
