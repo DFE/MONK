@@ -27,6 +27,7 @@ Example::
     [...]
 """
 
+import io
 import os
 import sys
 import re
@@ -36,6 +37,7 @@ import time
 import pexpect
 from pexpect import pxssh
 from pexpect import fdpexpect
+import pyte
 
 ############
 #
@@ -111,6 +113,8 @@ class ConnectionBase(object):
         except AttributeError as e:
             self.log("have no pexpect object yet")
             self._exp = self._get_exp()
+            self._sendline("stty -echo")
+            self._expect(self.prompt)
             return self._exp
 
     def _expect(self, pattern, timeout=-1, searchwindowsize=-1):
@@ -158,7 +162,6 @@ class ConnectionBase(object):
         self.log("expect prompt")
         self._sendline("")
         self._expect(self.prompt, timeout=timeout or self.default_timeout)
-
 
     def wait_for_prompt(self, timeout=-1):
         """
@@ -238,13 +241,12 @@ class ConnectionBase(object):
         if not out:
             self.log("out was empty and therefore couldn't be prepped.")
             return None, out
-        #remove shell line breaks
-        prepped_out = out.replace(" \r", "")
-        prepped_out = prepped_out.replace("\r\r\n", "")
-        #remove the \r from \r\n
-        prepped_out = prepped_out.replace("\r","")
-        # remove cmd line
-        prepped_out = prepped_out.replace(cmd_expect + "\n", "")
+        # replace everything else
+        stream = pyte.Stream()
+        capture = Capture()
+        stream.attach(capture, only=["draw", "linefeed"])
+        stream.feed(out)
+        prepped_out = str(capture)
         if do_retcode:
             try:
                 match = re.search("\n?<retcode>(\d+)</retcode>.*\n", prepped_out)
@@ -362,7 +364,7 @@ class SshConn(ConnectionBase):
         while time.time() < end_time:
             self.log("try creating pxssh object")
             try:
-                s = pxssh.pxssh()
+                s = pxssh.pxssh(echo=False)
                 s.force_password = self.force_password
                 s.login(
                         server=self.host,
@@ -376,7 +378,7 @@ class SshConn(ConnectionBase):
                 time.sleep(3)
         raise CantCreateConn("tried for '{}' seconds".format(self.first_prompt_timeout))
 
-    def expect_prompt(self, timeout):
+    def expect_prompt(self, timeout=None):
         self.log("ssh expect prompt")
         self._sendline("")
         self.exp.prompt(timeout or self.default_timeout or -1)
@@ -389,3 +391,18 @@ class SshConn(ConnectionBase):
             self.log("while logging out caught the following exception, can often be ignored")
             self._logger.exception(e)
         super(SshConn, self).close()
+
+class Capture(object):
+
+    def __init__(self, handle=None):
+        self.handle = handle or io.StringIO()
+
+    def draw(self, ch, **flags):
+        self.handle.write(unicode(ch))
+
+    def linefeed(self):
+        self.handle.write(u"\n")
+
+    def __str__(self):
+        self.handle.seek(0)
+        return self.handle.read()
