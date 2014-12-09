@@ -196,16 +196,17 @@ class ConnectionBase(object):
         self._sendline(prepped_msg)
         try:
             self._expect(expect or self.prompt, timeout=timeout or self.default_timeout)
-            self._logger.debug("SUCCESS: cmd({}) result='{}' expect-match='{}'".format(
-                str(msg)[:15].encode("string_escape") + ("[...]" if len(str(msg)) > 15 else ""),
-                str(self.exp.before)[:50].encode("string-escape") + ("[...]" if len(str(self.exp.before)) > 50 else ""),
-                str(self.exp.after)[:50].encode("string-escape") + ("[...]" if len(str(self.exp.after)) > 50 else ""),
-            ))
         except (pexpect.EOF, pexpect.TIMEOUT) as e:
             self.log("caught EOF/TIMEOUT on last expect; closing connections")
             self.close()
             raise e
-        return self._prep_cmdoutput(self.exp.before, prepped_msg, do_retcode)
+        out = self._prep_cmdoutput(self.exp.before, prepped_msg, do_retcode)
+        self._logger.debug("SUCCESS: cmd({}) result='{}' expect-match='{}'".format(
+            str(msg)[:15].encode("unicode_escape") + ("[...]" if len(str(msg)) > 15 else ""),
+            str(out[1])[:50].encode("unicode-escape") + ("[...]" if len(str(self.exp.before)) > 50 else ""),
+            str(self.exp.after)[:50].encode("unicode-escape") + ("[...]" if len(str(self.exp.after)) > 50 else ""),
+        ))
+        return out
 
     def _prep_cmdmessage(self, msg, do_retcode=True):
         """ prepares a command message before it is delivered to pexpect
