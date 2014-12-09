@@ -26,6 +26,7 @@ Example::
     ssh.cmd("ls -al")
     [...]
 """
+from __future__ import unicode_literals
 
 import io
 import os
@@ -121,7 +122,7 @@ class ConnectionBase(object):
         """ a wrapper for :pexpect:meth:`spawn.expect`
         """
         self.log("expect({},{},{})".format(
-            str(pattern).encode('string-escape'),
+            str(pattern).encode('unicode-escape'),
             timeout,
             searchwindowsize,
         ))
@@ -214,7 +215,7 @@ class ConnectionBase(object):
         It might add retreiving a returncode and strips unnecessary whitespace.
         """
         self.log("prep_msg({},{})".format(
-            str(msg).encode("string-escape"),
+            str(msg).encode("unicode-escape"),
             do_retcode,
         ))
         # If the connection is a shell, you might want a returncode.
@@ -225,7 +226,7 @@ class ConnectionBase(object):
         prepped = "\n".join(line.strip() for line in msg.split("\n") if line.strip())
         out = prepped+get_retcode
         self.log("prepped:'{}'".format(
-            out.encode("string-escape"),
+            out.encode("unicode-escape"),
         ))
         return out
 
@@ -236,7 +237,7 @@ class ConnectionBase(object):
         returncode if one is requested.
         """
         self.log("prep_out({},{})".format(
-            str(out).encode("string-escape"),
+            str(out).encode("unicode-escape"),
             do_retcode,
         ))
         if not out:
@@ -252,7 +253,7 @@ class ConnectionBase(object):
             try:
                 match = re.search("\n?<retcode>(\d+)</retcode>.*\n", prepped_out)
                 self.log("found retcode string '{}'".format(
-                    str(match.group(0)).encode("string-escape"),
+                    str(match.group(0)).encode("unicode-escape"),
                 ))
                 retcode = int(match.group(1))
                 prepped_out = prepped_out.replace(match.group(0), "")
@@ -262,7 +263,7 @@ class ConnectionBase(object):
                 self._logger.exception(e)
                 raise NoRetcodeException("failed to find retcode with '{}'. Formatted output:'{}'".format(
                             e.__class__.__name__,
-                            prepped_out.encode("string-escape"),
+                            prepped_out.encode("unicode-escape"),
                 ))
         else:
             self.log("prepped without retcode")

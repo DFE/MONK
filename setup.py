@@ -10,6 +10,7 @@
 # as published by the Free Software Foundation; either version
 # 2 of the License, or (at your option) any later version.
 #
+from __future__ import unicode_literals
 
 import os
 import sys

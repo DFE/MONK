@@ -69,6 +69,7 @@ corresponding :term:`MONK` object to be created.
 Classes
 -------
 """
+from __future__ import unicode_literals
 
 import os
 import os.path as op
@@ -287,7 +288,7 @@ class Fixture(object):
         for dev in self.devs:
             try:
                 self.log("send cmd '{}' to device '{}'".format(
-                    msg.encode("string-escape"),
+                    msg.encode("unicode-escape"),
                     dev,
                 ))
                 return dev.cmd(
@@ -302,7 +303,7 @@ class Fixture(object):
                     "fixt:'{}',devs:{},could not send cmd '{}'".format(
                         self.name,
                         map(str, self.devs),
-                        msg.encode('string-escape'),
+                        msg.encode('unicode-escape'),
             ))
 
     def cmd_all(self, msg, expect=None, timeout=30, login_timeout=None):
@@ -312,7 +313,7 @@ class Fixture(object):
             self._logger.warning("fixture has no devices for sending commands to")
         for dev in self.devs:
             self.log("send cmd '{}' to device '{}'".format(
-                msg.encode("string-escape"),
+                msg.encode("unicode-escape"),
                 dev,
             ))
             return dev.cmd(

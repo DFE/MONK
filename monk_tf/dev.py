@@ -30,6 +30,7 @@ Example::
     print d.cmd('ls -al')
     [...]
 """
+from __future__ import unicode_literals
 
 import logging
 import time
@@ -114,7 +115,7 @@ class Device(object):
         for connection in self.conns:
             try:
                 self.log("send cmd '{}' via connection '{}'".format(
-                    msg.encode('string-escape'),
+                    msg.encode('unicode-escape'),
                     connection,
                 ))
                 return connection.cmd(
