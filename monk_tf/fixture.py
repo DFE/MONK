@@ -69,7 +69,6 @@ corresponding :term:`MONK` object to be created.
 Classes
 -------
 """
-from __future__ import unicode_literals
 
 import os
 import os.path as op

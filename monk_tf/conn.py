@@ -26,7 +26,6 @@ Example::
     ssh.cmd("ls -al")
     [...]
 """
-from __future__ import unicode_literals
 
 import io
 import os
@@ -48,6 +47,11 @@ import pyte
 
 class ConnectionException(Exception):
     """ Base class for Exceptions from this module
+    """
+    pass
+
+class OutputParseException(ConnectionException):
+    """ is raised when cmd output cannot be parsed to utf8 for further processing
     """
     pass
 
@@ -122,7 +126,7 @@ class ConnectionBase(object):
         """ a wrapper for :pexpect:meth:`spawn.expect`
         """
         self.log("expect({},{},{})".format(
-            str(pattern).encode('unicode-escape'),
+            str(pattern).encode('string-escape'),
             timeout,
             searchwindowsize,
         ))
@@ -203,9 +207,9 @@ class ConnectionBase(object):
             raise e
         out = self._prep_cmdoutput(self.exp.before, prepped_msg, do_retcode)
         self._logger.debug("SUCCESS: cmd({}) result='{}' expect-match='{}'".format(
-            str(msg)[:15].encode("unicode_escape") + ("[...]" if len(str(msg)) > 15 else ""),
-            str(out[1])[:50].encode("unicode-escape") + ("[...]" if len(str(self.exp.before)) > 50 else ""),
-            str(self.exp.after)[:50].encode("unicode-escape") + ("[...]" if len(str(self.exp.after)) > 50 else ""),
+            str(msg)[:15].encode("string_escape") + ("[...]" if len(str(msg)) > 15 else ""),
+            str(out[1])[:50].encode("string-escape") + ("[...]" if len(str(self.exp.before)) > 50 else ""),
+            str(self.exp.after)[:50].encode("string-escape") + ("[...]" if len(str(self.exp.after)) > 50 else ""),
         ))
         return out
 
@@ -215,7 +219,7 @@ class ConnectionBase(object):
         It might add retreiving a returncode and strips unnecessary whitespace.
         """
         self.log("prep_msg({},{})".format(
-            str(msg).encode("unicode-escape"),
+            str(msg).encode("string-escape"),
             do_retcode,
         ))
         # If the connection is a shell, you might want a returncode.
@@ -226,7 +230,7 @@ class ConnectionBase(object):
         prepped = "\n".join(line.strip() for line in msg.split("\n") if line.strip())
         out = prepped+get_retcode
         self.log("prepped:'{}'".format(
-            out.encode("unicode-escape"),
+            out.encode("string-escape"),
         ))
         return out
 
@@ -237,7 +241,7 @@ class ConnectionBase(object):
         returncode if one is requested.
         """
         self.log("prep_out({},{})".format(
-            str(out).encode("unicode-escape"),
+            str(out).encode("string-escape"),
             do_retcode,
         ))
         if not out:
@@ -247,13 +251,17 @@ class ConnectionBase(object):
         stream = pyte.Stream()
         capture = Capture()
         stream.attach(capture, only=["draw", "linefeed"])
-        stream.feed(out)
+        try:
+            stream.feed(out.decode("utf-8"))
+        except UnicodeError as e:
+            raise OutputParseException(
+                "failed to parse output to utf8, necessary for special character handler. Error: " + str(e))
         prepped_out = str(capture)
         if do_retcode:
             try:
                 match = re.search("\n?<retcode>(\d+)</retcode>.*\n", prepped_out)
                 self.log("found retcode string '{}'".format(
-                    str(match.group(0)).encode("unicode-escape"),
+                    str(match.group(0)).encode("string-escape"),
                 ))
                 retcode = int(match.group(1))
                 prepped_out = prepped_out.replace(match.group(0), "")
@@ -263,7 +271,7 @@ class ConnectionBase(object):
                 self._logger.exception(e)
                 raise NoRetcodeException("failed to find retcode with '{}'. Formatted output:'{}'".format(
                             e.__class__.__name__,
-                            prepped_out.encode("unicode-escape"),
+                            prepped_out.encode("string-escape"),
                 ))
         else:
             self.log("prepped without retcode")
@@ -407,4 +415,4 @@ class Capture(object):
 
     def __str__(self):
         self.handle.seek(0)
-        return self.handle.read()
+        return self.handle.read().encode("utf-8")
