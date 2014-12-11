@@ -230,7 +230,9 @@ class ConnectionBase(object):
         prepped = "\n".join(line.strip() for line in msg.split("\n") if line.strip())
         out = prepped+get_retcode
         self.log("prepped:'{}'".format(
-            out.encode("string-escape"),
+            str(out
+            .decode("utf-8"))
+            .encode("string-escape"),
         ))
         return out
 
