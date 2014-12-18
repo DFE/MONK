@@ -245,7 +245,7 @@ class Fixture(object):
         """
         self._logger.debug("initialize with props: " + str(self.props))
         if self.props:
-            self.devs = [self._parse_section(d, self.props[d]) for d in self.props.keys()]
+            self.devs = [self._parse_section(d, self.props[d]) for d in self.props.viewkeys()]
         else:
             raise NoPropsException("have you created any fixture files?")
 
@@ -253,7 +253,7 @@ class Fixture(object):
         self._logger.debug("parse_section({},{},{})".format(
             str(name),
             type(section).__name__,
-            section.keys()
+            list(section.keys())
         ))
         sectype = self.classes[section.pop("type")]
         if "conns" in section:
