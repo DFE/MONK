@@ -48,23 +48,23 @@ logger = logging.getLogger(__name__)
 #
 ############
 
-class DeviceException(Exception):
+class ADeviceException(Exception):
     """ Base class for exceptions of the device layer.
     """
     pass
 
-class CantHandleException(DeviceException):
+class CantHandleException(ADeviceException):
     """ is raised when a request cannot be handled by the connections of a
     :py:class:`~monk_tf.dev.Device`.
     """
     pass
 
-class UpdateFailedException(DeviceException):
+class UpdateFailedException(ADeviceException):
     """ is raised if an update didn't get finished or was rolled back.
     """
     pass
 
-class WrongNameException(DeviceException):
+class WrongNameException(ADeviceException):
     """ is raised when no connection with a given name could be found.
     """
     pass

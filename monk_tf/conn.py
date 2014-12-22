@@ -45,17 +45,17 @@ import pyte
 #
 ############
 
-class ConnectionException(Exception):
+class AConnectionException(Exception):
     """ Base class for Exceptions from this module
     """
     pass
 
-class OutputParseException(ConnectionException):
+class OutputParseException(AConnectionException):
     """ is raised when cmd output cannot be parsed to utf8 for further processing
     """
     pass
 
-class BccException(ConnectionException):
+class BccException(AConnectionException):
     """ is raised to explain some BCC behaviour
     """
     pass
@@ -66,12 +66,12 @@ class NoBCCException(BccException):
     """
     pass
 
-class CantCreateConn(ConnectionException):
+class CantCreateConn(AConnectionException):
     """ is raised when even several attempt were not able to create a connection.
     """
     pass
 
-class NoRetcodeException(ConnectionException):
+class NoRetcodeException(AConnectionException):
     """ is raised when the output doesn't contain a retcode for unknown reasons.
     """
     pass

@@ -255,6 +255,8 @@ class Fixture(object):
             type(section).__name__,
             list(section.keys())
         ))
+        # TODO section parsing should be wrapped in handlers
+        #      so that they can be extended without overwrites
         sectype = self.classes[section.pop("type")]
         if "conns" in section:
             cs = section.pop("conns")
