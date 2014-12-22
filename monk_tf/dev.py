@@ -88,12 +88,18 @@ class Device(object):
 
         :param name: Device name for logging purposes.
         """
-        self._logger = logging.getLogger("Device")
+        self._logger = logging.getLogger(kwargs.pop("name", self.__class__.__name__))
         self.conns = kwargs.pop("conns", list(args))
         self._conns_dict = {}
-        self.name = kwargs.pop("name", self.__class__.__name__)
         self.prompt = PromptReplacement()
-        self._logger = logging.getLogger(self.name)
+
+    @property
+    def name(self):
+        return self._logger.name
+
+    @name.setter
+    def name(self, new_name):
+        self._logger.name = new_name
 
     def cmd(self, msg, expect=None, timeout=30, login_timeout=None, do_retcode=True):
         """ Send a :term:`shell command` to the :term:`target device`.

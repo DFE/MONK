@@ -194,8 +194,10 @@ class Fixture(object):
         :param filename: the name of the file which contains the configuration.
         """
         self.call_location = op.dirname(op.abspath(call_location))
-        self.name = name or self.__class__.__name__
-        self._logger = logging.getLogger("{}:{}".format(__name__, self.name))
+        self._logger = logging.getLogger("{}:{}".format(
+            __name__,
+            name or self.__class__.__name__,
+        ))
         self.devs = []
         self._devs_dict = {}
         self.classes = classes or self._DEFAULT_CLASSES
@@ -212,6 +214,14 @@ class Fixture(object):
             fixture_file = op.join(p, self.filename)
             if op.exists(fixture_file):
                 self.read(fixture_file)
+
+    @property
+    def name(self):
+        return self._logger.name
+
+    @name.setter
+    def name(self, new_name):
+        self._logger.name = new_name
 
     def _parent_dirs(self, path):
         """ generate parent directories for path

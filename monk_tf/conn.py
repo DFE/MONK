@@ -36,6 +36,7 @@ import time
 
 import pexpect
 from pexpect import pxssh
+from pexpect import spawn
 from pexpect import fdpexpect
 import pyte
 
@@ -95,14 +96,19 @@ class ConnectionBase(object):
 
 
 
-    def __init__(self, default_timeout=None, first_prompt_timeout=None):
-        if hasattr(self, "name") and self.name:
-            self._logger = logging.getLogger(self.name)
-        else:
-            self._logger = logging.getLogger(type(self).__name__)
+    def __init__(self, name, default_timeout=None, first_prompt_timeout=None):
+        self._logger = logging.getLogger(name or self.__class__.__name__)
         self.default_timeout = default_timeout or 30
         self.first_prompt_timeout = int(first_prompt_timeout) if first_prompt_timeout else 120
         self.log("hi.")
+
+    @property
+    def name(self):
+        return self._logger.name
+
+    @name.setter
+    def name(self, new_name):
+        self._logger.name = new_name
 
     def log(self, msg):
         self._logger.debug(msg)
@@ -334,6 +340,22 @@ class SerialConn(ConnectionBase):
     def _login(self, user=None, pw=None):
         self._logger.debug("serial._login({},{})".format(user, pw))
 
+class pxsshWorkaround(pxssh.pxssh):
+    """ just to add that echo=False """
+
+    def __init__(self, timeout=30, maxread=2000,
+        searchwindowsize=None,logfile=None, cwd=None, env=None, echo=True):
+        spawn.__init__(self, None, timeout=timeout, maxread=maxread,
+                searchwindowsize=searchwindowsize, logfile=logfile, cwd=cwd,
+                env=env, echo=echo)
+        self.name = '<pxssh>'
+        self.UNIQUE_PROMPT = "\[PEXPECT\][\$\#] "
+        self.PROMPT = self.UNIQUE_PROMPT
+        self.PROMPT_SET_SH = "PS1='[PEXPECT]\$ '"
+        self.PROMPT_SET_CSH = "set prompt='[PEXPECT]\$ '"
+        self.SSH_OPTS = ("-o'RSAAuthentication=no'"
+                + " -o 'PubkeyAuthentication=no'")
+
 class SshConn(ConnectionBase):
     """ implements an ssh connection.
     """
@@ -346,13 +368,16 @@ class SshConn(ConnectionBase):
             login_timeout=10,
         ):
         """
-        :param name: the name of the connection
         :param host: the URL to the device
         :param user: the user name for the login
         :param pw: the password for the login
         :param prompt: the default prompt to check for
         """
-        self.name = name
+        super(SshConn, self).__init__(
+                name=name,
+                default_timeout=default_timeout,
+                first_prompt_timeout=first_prompt_timeout,
+        )
         self.host= host
         self.user = user
         self.pw = pw
@@ -360,10 +385,6 @@ class SshConn(ConnectionBase):
         self.login_timeout = int(login_timeout)
         if prompt:
             self._logger.warning("ssh connection ignores attribute prompt, because it sets its own prompt")
-        super(SshConn, self).__init__(
-                default_timeout=default_timeout,
-                first_prompt_timeout=first_prompt_timeout,
-        )
 
     @property
     def prompt(self):
@@ -376,7 +397,7 @@ class SshConn(ConnectionBase):
         while time.time() < end_time:
             self.log("try creating pxssh object")
             try:
-                s = pxssh.pxssh(echo=False)
+                s = pxsshWorkaround(echo=False)
                 s.force_password = self.force_password
                 s.login(
                         server=self.host,
