@@ -255,7 +255,7 @@ class ConnectionBase(object):
         if not out:
             self.log("out was empty and therefore couldn't be prepped.")
             return None, out
-        # replace everything else
+        # replace Terminal command chars
         stream = pyte.Stream()
         capture = Capture()
         stream.attach(capture, only=["draw", "linefeed"])
