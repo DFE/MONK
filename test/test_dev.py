@@ -29,19 +29,7 @@ def test_send_cmd():
     # prepare
     test_input = "just some text"
     expected_out = test_input
-    sut = dev.Device(conn.EchoConnection())
-    # execute
-    out = sut.cmd(test_input)
-    # assert
-    nt.eq_(expected_out, out)
-
-def test_second_conn():
-    """ dev: let the first connection fail
-    """
-    # prepare
-    test_input = "another text with defective connection"
-    expected_out = test_input
-    sut = dev.Device(conn.DefectiveConnection(), conn.EchoConnection())
+    sut = dev.Device(EchoConn())
     # execute
     out = sut.cmd(test_input)
     # assert
@@ -54,7 +42,15 @@ def test_no_conn():
     # prepare
     test_input = "no connection will succeed here"
     expected_out = test_input
-    sut = dev.Device(conn.DefectiveConnection(), conn.DefectiveConnection())
+    sut = dev.Device(DefectiveConn(), DefectiveConn())
     # execute
     out = sut.cmd(test_input)
     # catch exception
+
+class EchoConn(object):
+    def cmd(*args, **kwargs):
+        return kwargs.pop("msg", "NOTHING")
+
+class DefectiveConn(object):
+    def cmd(*args, **kwargs):
+        raise Exception("can't handle that")
