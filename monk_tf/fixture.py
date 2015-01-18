@@ -114,6 +114,11 @@ class CantParseException(AFixtureException):
     """
     pass
 
+class NoPropsException(AFixtureException):
+    """ is raised when
+    """
+    pass
+
 class NoDeviceException(AFixtureException):
     """ is raised when a :py:clas:`~monk_tf.fixture.Fixture` requires a device but has none.
     """
@@ -171,7 +176,7 @@ class Fixture(object):
     _DEFAULT_DEBUG_SOURCE = "MONK_DEBUG_SOURCE"
 
     def __init__(self, call_location, name=None, classes=None,
-            lookfordbgsrc=True, filename="fixture.cfg", ):
+            lookfordbgsrc=True, filename="fixture.cfg", auto_search=True):
         """
 
         :param call_location: the __file__ from where this is called.
@@ -192,6 +197,9 @@ class Fixture(object):
                               looked for.
 
         :param filename: the name of the file which contains the configuration.
+
+        :param auto_search: if true, it will automatically search and load
+                            fixture files.
         """
         self.call_location = op.dirname(op.abspath(call_location))
         self._logger = logging.getLogger("{}:{}".format(
@@ -203,17 +211,22 @@ class Fixture(object):
         self.classes = classes or self._DEFAULT_CLASSES
         self.props = config.ConfigObj()
         self.filename = filename
+        self.auto_search = auto_search
         # look if the user has a default config in his home dir
-        home_fixture = op.expanduser(op.join("~", self.filename))
-        if op.exists(home_fixture):
-            self.read(home_fixture)
-        # starting from root load all fixtures from parent directories
-        self.log("location:{}".format(self.call_location))
-        self.log("parent_dirs:" + str(list(self._parent_dirs(self.call_location))))
-        for p in reversed(list(self._parent_dirs(self.call_location))):
-            fixture_file = op.join(p, self.filename)
-            if op.exists(fixture_file):
-                self.read(fixture_file)
+        if auto_search:
+            self.log("autosearching for fixture files...")
+            home_fixture = op.expanduser(op.join("~", self.filename))
+            if op.exists(home_fixture):
+                self.read(home_fixture)
+            # starting from root load all fixtures from parent directories
+            self.log("location:{}".format(self.call_location))
+            self.log("parent_dirs:" + str(list(self._parent_dirs(self.call_location))))
+            for p in reversed(list(self._parent_dirs(self.call_location))):
+                fixture_file = op.join(p, self.filename)
+                if op.exists(fixture_file):
+                    self.read(fixture_file)
+        else:
+            self.log("auto search deactivated, loaded without looking for fixture files")
 
     @property
     def name(self):
@@ -279,6 +292,7 @@ class Fixture(object):
             bs = section.pop("bctrl")
             section["bcc"] = self._parse_section("bctrl", bs)
         section["name"] = name
+        self.log("load section:" + str(sectype) + "," + str(section))
         return sectype(**section)
 
     def cmd_first(self, msg, expect=None, timeout=30, login_timeout=None):
