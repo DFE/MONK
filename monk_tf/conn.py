@@ -16,9 +16,9 @@ Example::
 
     import monk_tf.conn as mc
     # create a serial connection
-    serial=mc.SerialConn(port="/dev/ttyUSB3", user="tester", pw="test")
+    serial=mc.SerialConn(name="ser1", port="/dev/ttyUSB3", user="tester", pw="test")
     # create a ssh connection
-    ssh=mc.SshConn(host="192.168.2.123", user="tester", pw="test")
+    ssh=mc.SshConn(name="ssh1", host="192.168.2.123", user="tester", pw="test")
     # send a command
     print serial.cmd("ls -al")
     [...]
@@ -77,6 +77,11 @@ class NoRetcodeException(AConnectionException):
     """
     pass
 
+class TimeoutException(AConnectionException):
+    """ is raised if retrying something was not successful until its timeout
+    """
+    pass
+
 #############
 #
 # Connections
@@ -88,8 +93,8 @@ class ConnectionBase(object):
 
     Don't instantiate this class directly.
 
-    This class implements the behaviour of cmd() interactions, and it makes
-    sure that it doesn't login a user that is already logged in.
+    This class implements the behaviour of cmd() interactions, makes sure you
+    get logged in etc.
 
     Extending this class requires to implement _get_exp() and _login().
     """
@@ -97,6 +102,15 @@ class ConnectionBase(object):
 
 
     def __init__(self, name, default_timeout=None, first_prompt_timeout=None):
+        """
+        :param name: the name of this connection and its corresponding logger
+
+        :param default_timeout: how long the connection waits for an expected output
+
+        :param first_prompt_timeout: how long a relogin is tried until the
+                                     connection is considered dead.
+
+        """
         self._logger = logging.getLogger(name or self.__class__.__name__)
         self.default_timeout = default_timeout or 30
         self.first_prompt_timeout = int(first_prompt_timeout) if first_prompt_timeout else 120
@@ -104,19 +118,25 @@ class ConnectionBase(object):
 
     @property
     def name(self):
+        """ the name of this connection and its corresponding logger
+        """
         return self._logger.name
 
     @name.setter
     def name(self, new_name):
+        """ setting the name will also reset the logger's name
+        """
         self._logger.name = new_name
 
     def log(self, msg):
+        """ wrapper for simpler debug logging
+        """
         self._logger.debug(msg)
 
     @property
     def exp(self):
         """ the pexpect object - Don't bother with this if you don't know what
-                                 it means.
+                                 it means already. Really!
         """
         self.log("retrieve pexpect object")
         try:
@@ -170,12 +190,18 @@ class ConnectionBase(object):
             raise e
 
     def expect_prompt(self, timeout=None):
+        """ enter + look in the output for what is currently set as self.prompt
+        """
         self.log("expect prompt")
         self._sendline("")
         self._expect(self.prompt, timeout=timeout or self.default_timeout)
 
     def wait_for_prompt(self, timeout=-1):
-        """
+        """ this method continuously retries to get a working connection
+
+        (by means of self.expect_prompt()) and raises an exception otherwise
+
+        :param timeout: how long we retry
         """
         self.log("wait_for_prompt({})".format(
             timeout,
@@ -192,9 +218,20 @@ class ConnectionBase(object):
                 self.close()
                 self.log("sleep before retry")
                 time.sleep(3)
+        raise TimeoutException(
+                "was not able to find a prompt after {} seconds".format(timeout))
 
-    def cmd(self, msg, timeout=-1, expect=None, do_retcode=True):
+    def cmd(self, msg, timeout=None, expect=None, do_retcode=True):
         """ send a shell command and retreive its output.
+
+        :param msg: the shell command
+
+        :param timeout: how long we wait for expect; if None is set to self.default_timeout
+
+        :param expect: a list of things to expect, e.g. output strings
+
+        :param do_retcode: boolean which says whether or not a returncode
+                           should be retreived.
         """
         self._logger.debug("START cmd({},{},{},{})".format(
             msg,
@@ -223,6 +260,9 @@ class ConnectionBase(object):
         """ prepares a command message before it is delivered to pexpect
 
         It might add retreiving a returncode and strips unnecessary whitespace.
+
+        :param msg: the command message to prepare
+        :param do_retcode: if the request for the retcode should be appended
         """
         self.log("prep_msg({},{})".format(
             str(msg).encode("string-escape"),
@@ -247,6 +287,10 @@ class ConnectionBase(object):
 
         Removing all the unnecessary "\r" characters and separates the
         returncode if one is requested.
+
+        :param out: the output string which should be prepped
+        :param cmd_expect: the command string which should be filtered out
+        :param do_retcode: if there's a retcode to find or not
         """
         self.log("prep_out({},{})".format(
             str(out).encode("string-escape"),
@@ -286,6 +330,8 @@ class ConnectionBase(object):
             return None, prepped_out
 
     def close(self):
+        """ close the connection and get rid of the inner objects
+        """
         self.log("close connection")
         try:
             self._exp.close()
@@ -296,9 +342,13 @@ class ConnectionBase(object):
             pass
 
     def __del__(self):
+        """ will make sure to close and log it's destruction
+        """
         self.log("getting deleted")
-        self.close()
-        self.log("bye.")
+        try:
+            self.close()
+        finally:
+            self.log("bye.")
 
 
 class SerialConn(ConnectionBase):
@@ -426,6 +476,11 @@ class SshConn(ConnectionBase):
         super(SshConn, self).close()
 
 class Capture(object):
+    """ a helper class
+
+    that supports :class:`ConnectionBase` in handling
+    Terminal special chars.
+    """
 
     def __init__(self, handle=None):
         self.handle = handle or io.StringIO()
