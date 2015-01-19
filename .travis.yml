@@ -20,7 +20,4 @@ install:
  - "python setup.py develop"
 
 script:
- - "python setup.py nosetests"
-
-before_install:
- - "sudo apt-get install python2.7-dev libssh2-1-dev"
+ - "nosetests"

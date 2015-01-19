@@ -6,7 +6,9 @@ argparse==1.2.1
 configobj==5.0.5
 docutils==0.12
 nose==1.3.3
+nosexcover==1.0.10
 pexpect==3.3
+pyte==0.4.8
 six==1.7.3
 wsgiref==0.1.2
 requests==2.3.0

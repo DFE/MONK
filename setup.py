@@ -46,6 +46,7 @@ setup(
     install_requires = [
         "pexpect >= 3.3",
         "requests >= 2.2.1",
+        "pyte >= 0.4.8",
         "configobj >=4.7.2",
     ],provides = [
         "{} ({})".format(monk_tf.__title__, monk_tf.__version__)

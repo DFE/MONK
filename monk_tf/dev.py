@@ -48,19 +48,24 @@ logger = logging.getLogger(__name__)
 #
 ############
 
-class DeviceException(Exception):
+class ADeviceException(Exception):
     """ Base class for exceptions of the device layer.
     """
     pass
 
-class CantHandleException(DeviceException):
+class CantHandleException(ADeviceException):
     """ is raised when a request cannot be handled by the connections of a
     :py:class:`~monk_tf.dev.Device`.
     """
     pass
 
-class UpdateFailedException(DeviceException):
+class UpdateFailedException(ADeviceException):
     """ is raised if an update didn't get finished or was rolled back.
+    """
+    pass
+
+class WrongNameException(ADeviceException):
+    """ is raised when no connection with a given name could be found.
     """
     pass
 
@@ -83,14 +88,18 @@ class Device(object):
 
         :param name: Device name for logging purposes.
         """
-        self._logger = logging.getLogger("Device")
+        self._logger = logging.getLogger(kwargs.pop("name", self.__class__.__name__))
         self.conns = kwargs.pop("conns", list(args))
-        self.name = kwargs.pop("name", self.__class__.__name__)
-        self.bcc = kwargs.pop("bcc", None)
-        self._logger = logging.getLogger("{}:{}".format(
-            __name__,
-            self.name
-        ))
+        self._conns_dict = {}
+        self.prompt = PromptReplacement()
+
+    @property
+    def name(self):
+        return self._logger.name
+
+    @name.setter
+    def name(self, new_name):
+        self._logger.name = new_name
 
     def cmd(self, msg, expect=None, timeout=30, login_timeout=None, do_retcode=True):
         """ Send a :term:`shell command` to the :term:`target device`.
@@ -111,14 +120,13 @@ class Device(object):
         for connection in self.conns:
             try:
                 self.log("send cmd '{}' via connection '{}'".format(
-                    msg.encode('string-escape'),
+                    msg.encode('unicode-escape'),
                     connection,
                 ))
                 return connection.cmd(
                         msg=msg,
-                        expect=expect,
+                        expect=PromptReplacement.replace(connection, expect),
                         timeout=timeout,
-                        login_timeout=login_timeout,
                         do_retcode=do_retcode,
                 )
             except Exception as e:
@@ -129,6 +137,24 @@ class Device(object):
                     map(str, self.conns),
                     msg,
         ))
+
+    def get_conn(self, which):
+        self.log("get_conn({})".format(which))
+        try:
+            return self.conns[which]
+        except TypeError:
+            try:
+                return self._conns_dict[which]
+            except KeyError:
+                names = []
+                for conn in self.conns:
+                    if conn.name == which:
+                        self.log("cache conn in dict:" + which)
+                        self._conns_dict[which] = conn
+                        return conn
+                    else:
+                        names.append(conn.name)
+                raise WrongNameException("Couldn't retreive connection with name '{}'. Available names are: {}".format(which, names))
 
     def log(self, msg):
         """ sends a debug-level message to the logger
@@ -142,7 +168,6 @@ class Device(object):
         self.log("close_all()")
         for c in self.conns:
             c.close()
-        self.bcc.close()
 
     def __str__(self):
         return "{}({}):name={}".format(
@@ -155,33 +180,27 @@ class Hydra(Device):
     """ is the device type of DResearch Fahrzeugelektronik GmbH.
     """
 
-    def update(self, link=None):
+    def update(self, link=None, force=None):
         """ update the device to current build from Jenkins.
         """
         self._logger.info("Attempt update to " + str(link or self._update_link))
         if not self.do_update:
             self.log("don't update due to MONK configuration")
             return
-        if not self.is_updated:
+        connection_closed = (pexpect.EOF, pexpect.TIMEOUT)
+        if not self.is_updated or force:
             _, out = self.cmd("do-update -c && get-update {} && do-update".format(
                     link if link else self._update_link,
-                ), expect="([lL]ogin: )|([cC]onnection\sto\s[^\s]*\sclosed\.)",
+                ), expect=("[lL]ogin: ",) +  connection_closed,
                 timeout=600,
                 do_retcode=False,
             )
-            if "closed" in self.conns[0].exp.after:
+            if self.conns[0].exp.after in connection_closed:
                 self.log("reset connection after reboot")
                 del self.conns[0]._exp
             self.log("wait till device recovered from updating")
             time.sleep(240)
             self.log("continue")
-            if not self.is_updated:
-                error= "build:{};fw:{};out:{}".format(
-                        self.latest_build,
-                        self.current_fw_version,
-                        out[:100],
-                )
-                raise UpdateFailedException(error)
         else:
             self._logger.info("Already updated.")
 
@@ -211,7 +230,7 @@ class Hydra(Device):
     def has_newest_firmware(self):
         """ check whether the installed firmware is the newest on jenkins
         """
-        return self.latest_build in self.current_fw_version
+        return str(self.latest_build) in str(self.current_fw_version)
 
     @property
     def is_updated(self):
@@ -232,13 +251,29 @@ class Hydra(Device):
         self.cmd("rm /etc/drconfig/hydraip.json.good")
         self.cmd(
             msg="rm -rf /var/lib/connman/* && hip-activate-config --reset && sync && halt -p",
-            timeout=150,
-            expect="([lL]ogin:)|([cC]onnection\sto\s[^\s]*\sclosed\.)|(Timeout.*\.)|(INFO - LAN)",
-            login_timeout=20,
+            expect=[self.prompt, pexpect.EOF, pexpect.TIMEOUT],
+            do_retcode=False,
         )
-        if "login" not in self.conns[0].exp.after.lower():
-            self.log("reset connection after config reset")
-            del self.conns[0]._exp
-        self.log("wait till device recovered from config reset")
-        time.sleep(120)
-        self.log("continue")
+
+#########
+#
+# Helpers
+#
+#########
+
+class PromptReplacement(object):
+    """ should be replaced by each connection's own prompt.
+    """
+    @classmethod
+    def replace(cls, c, expect):
+        """ this is an awful workaround...
+        """
+        if not expect:
+            return expect
+        if isinstance(expect, str):
+            return expect
+        if isinstance(expect, Exception):
+            return expect
+        if not isinstance(expect, list):
+            expect = list(expect)
+        return [c.prompt if isinstance(e, PromptReplacement) else e for e in expect]
