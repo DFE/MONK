@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/DFE/MONK.svg
+    :target: https://travis-ci.org/DFE/MONK
+
 Intro
 =====
 
