@@ -19,7 +19,7 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   ../../README
+   readme
    monk_tf
    glossary
 
