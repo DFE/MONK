@@ -4,7 +4,7 @@
 Intro
 =====
 
-Using MONk you can write tests like you would write unit tests, just that they
+Using MONK you can write tests like you would write unit tests, just that they
 are able to interact with your embedded system.
 
 Let's look at an example. In the following example we have an embedded system
