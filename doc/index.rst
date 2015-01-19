@@ -9,7 +9,7 @@ Welcome to MONK Testframework's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-    ../../README
+    readme
 
