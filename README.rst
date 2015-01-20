@@ -10,6 +10,11 @@
     :target: https://www.codacy.com/public/erikbernoth/MONK
     :alt: Codacy Quality
 
+.. image:: https://coveralls.io/repos/DFE/MONK/badge.svg
+    :target: https://coveralls.io/r/DFE/MONK
+    :alt: Coveralls Quality
+
+
 Intro
 =====
 
