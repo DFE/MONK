@@ -1,13 +1,10 @@
 monk_tf package
 ===============
 
-Submodules
-----------
+monk_tf.fixture module
+----------------------
 
-monk_tf.conn module
--------------------
-
-.. automodule:: monk_tf.conn
+.. automodule:: monk_tf.fixture
     :members:
     :undoc-members:
     :show-inheritance:
@@ -20,19 +17,10 @@ monk_tf.dev module
     :undoc-members:
     :show-inheritance:
 
-monk_tf.fixture module
-----------------------
+monk_tf.conn module
+-------------------
 
-.. automodule:: monk_tf.fixture
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: monk_tf
+.. automodule:: monk_tf.conn
     :members:
     :undoc-members:
     :show-inheritance:
