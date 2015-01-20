@@ -12,4 +12,5 @@ Contents:
     :maxdepth: 2
 
     readme
+    monk_tf
 
