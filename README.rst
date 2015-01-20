@@ -1,5 +1,10 @@
 .. image:: https://travis-ci.org/DFE/MONK.svg
     :target: https://travis-ci.org/DFE/MONK
+    :alt: Build Status
+
+.. image:: https://readthedocs.org/projects/monk-tf/badge/?version=latest
+    :target: https://readthedocs.org/projects/monk-tf/?badge=latest
+    :alt: Documentation Status
 
 Intro
 =====
