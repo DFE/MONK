@@ -15,27 +15,27 @@
     :alt: Coveralls Quality
 
 .. image:: https://pypip.in/license/monk_tf/badge.svg
-    :target: https://pypip.in/monk_tf
+    :target: https://pypi.python.org/pypi/monk_tf
     :alt: License
 
 .. image:: https://pypip.in/download/monk_tf/badge.svg
-    :target: https://pypip.in/monk_tf
+    :target: https://pypi.python.org/pypi/monk_tf
     :alt: Downloads
 
 .. image:: https://pypip.in/version/monk_tf/badge.svg
-    :target: https://pypip.in/monk_tf
+    :target: https://pypi.python.org/pypi/monk_tf
     :alt: Latest Version
 
 .. image:: https://pypip.in/py_versions/monk_tf/badge.svg
-    :target: https://pypip.in/monk_tf
+    :target: https://pypi.python.org/pypi/monk_tf
     :alt: Supported Python Versions
 
 .. image:: https://pypip.in/status/monk_tf/badge.svg
-    :target: https://pypip.in/monk_tf
+    :target: https://pypi.python.org/pypi/monk_tf
     :alt: Current Devel Status
 
 .. image:: https://pypip.in/format/monk_tf/badge.svg
-    :target: https://pypip.in/monk_tf
+    :target: https://pypi.python.org/pypi/monk_tf
     :alt: Support Package Format
 
 
