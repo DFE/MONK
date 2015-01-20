@@ -38,7 +38,7 @@ import json
 import requests
 import pexpect
 
-import conn
+import monk_tf.conn
 
 logger = logging.getLogger(__name__)
 
