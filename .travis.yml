@@ -18,6 +18,8 @@ python:
 install:
  - "pip install -r requirements.txt"
  - "python setup.py develop"
+ - "pip install coveralls"
 
 script:
  - "nosetests"
+after_success: coveralls
