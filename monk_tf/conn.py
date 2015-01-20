@@ -212,7 +212,7 @@ class ConnectionBase(object):
             try:
                 self.expect_prompt(timeout)
                 self._logger.debug("ready")
-                break
+                return
             except (pexpect.EOF, pexpect.TIMEOUT) as e:
                 self.log("could not retreive prompt")
                 self.close()

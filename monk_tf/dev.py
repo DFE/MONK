@@ -27,7 +27,8 @@ Example::
         mc.SerialConn('/dev/ttyUSB2', 'root', 'muchmoresecret'),
     )
     # send a command (the same way as with connections)
-    print d.cmd('ls -al')
+    return_code, output = d.cmd('ls -al')
+    print output
     [...]
 """
 
