@@ -74,4 +74,4 @@ checks whether the received IP address that the tester would expect. No need to
 worry about connection handling, login and session handling.
 
 For more information see the
-`API Docs <http://dfe.github.io/MONK/monk_tf.html>`_.
+`API Docs <http://monk-tf.readthedocs.org/>`_.
