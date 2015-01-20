@@ -6,6 +6,10 @@
     :target: https://readthedocs.org/projects/monk-tf/?badge=latest
     :alt: Documentation Status
 
+.. image:: https://www.codacy.com/project/badge/f54aa09a5caa49549d9946f6f062b0de
+    :target: https://www.codacy.com/public/erikbernoth/MONK
+    :alt: Codacy Quality
+
 Intro
 =====
 
