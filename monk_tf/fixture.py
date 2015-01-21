@@ -150,7 +150,6 @@ class Fixture(object):
 
     _DEFAULT_CLASSES = {
         "Device" : dev.Device,
-        "HydraDevice" : dev.Hydra,
         "SerialConnection" : conn.SerialConn,
         "SshConnection" : conn.SshConn,
     }
