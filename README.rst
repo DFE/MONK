@@ -49,7 +49,9 @@ Let's look at an example. In the following example we have an embedded system
 with a serial terminal and a network interface. We want to write a test, which
 checks whether the network interface receives correct information via dhcp.
 
-The test case written with nosetests::
+The test case written with nosetests:
+
+.. code-block:: python
 
     import nose.tools as nt
 
