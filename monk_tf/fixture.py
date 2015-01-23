@@ -259,7 +259,7 @@ class Fixture(object):
         self._logger.debug("parse_section({},{},{})".format(
             str(name),
             type(section).__name__,
-            list(section.keys())
+            list(section.keys()),
         ))
         # TODO section parsing should be wrapped in handlers
         #      so that they can be extended without overwrites
@@ -270,10 +270,13 @@ class Fixture(object):
         if "bcc" in section:
             self.log("DEPRECATED: Use bctrl instead of bcc")
             bs = section.pop("bcc")
-            section["bcc"] = self._parse_section("bcc", bs)
+            section["bctrl"] = self._parse_section("bctrl", bs)
         if "bctrl" in section:
             bs = section.pop("bctrl")
-            section["bcc"] = self._parse_section("bctrl", bs)
+            section["bctrl"] = self._parse_section("bctrl", bs)
+        if "apis" in section:
+            bs = section.pop("apis")
+            section["apis"] = self._parse_section("apis", bs)
         section["name"] = name
         self.log("load section:" + str(sectype) + "," + str(section))
         return sectype(**section)
