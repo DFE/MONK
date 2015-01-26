@@ -263,7 +263,11 @@ class Fixture(object):
         ))
         # TODO section parsing should be wrapped in handlers
         #      so that they can be extended without overwrites
-        sectype = self.classes[section.pop("type")]
+        try:
+            sectype = self.classes[section.pop("type")]
+        except KeyError as e:
+            self.log("section {} has no type, therefore it is assumed to only contain data, no further parsing will be applied".format(name))
+            return section
         if "conns" in section:
             cs = section.pop("conns")
             section["conns"] = [self._parse_section(s, cs[s]) for s in cs]

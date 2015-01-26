@@ -22,7 +22,7 @@ except ImportError as error:
     from distutils.core import setup
 
 if sys.argv[-1] == 'publish':
-    sys.argv = [sys.argv[0], 'sdist', 'upload']
+    sys.argv = [sys.argv[0], 'sdist', 'bdist_wheel', 'upload']
 
 
 def read(name):
