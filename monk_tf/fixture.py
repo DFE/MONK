@@ -281,6 +281,9 @@ class Fixture(object):
         if "api" in section:
             bs = section.pop("api")
             section["api"] = self._parse_section("api", bs)
+        if "auth" in section:
+            bs = section.pop("auth")
+            section["auth"] = self._parse_section("auth", bs)
         section["name"] = name
         self.log("load section:" + str(sectype) + "," + str(section))
         return sectype(**section)
