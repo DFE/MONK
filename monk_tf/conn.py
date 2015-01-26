@@ -126,7 +126,10 @@ class ConnectionBase(object):
     def name(self, new_name):
         """ setting the name will also reset the logger's name
         """
-        self._logger.name = new_name
+        try:
+            self._logger.name = new_name
+        except AttributeError as e:
+            self._logger = logging.getLogger(new_name)
 
     def log(self, msg):
         """ wrapper for simpler debug logging
