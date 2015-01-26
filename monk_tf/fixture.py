@@ -278,9 +278,9 @@ class Fixture(object):
         if "bctrl" in section:
             bs = section.pop("bctrl")
             section["bctrl"] = self._parse_section("bctrl", bs)
-        if "apis" in section:
-            bs = section.pop("apis")
-            section["apis"] = self._parse_section("apis", bs)
+        if "api" in section:
+            bs = section.pop("api")
+            section["api"] = self._parse_section("api", bs)
         section["name"] = name
         self.log("load section:" + str(sectype) + "," + str(section))
         return sectype(**section)
