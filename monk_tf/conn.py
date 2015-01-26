@@ -370,15 +370,15 @@ class SerialConn(ConnectionBase):
         :param pw: the password for the login
         :param prompt: the default prompt to check for
         """
-        self.name = name
+        super(SerialConn, self).__init__(
+                name = name,
+                default_timeout=default_timeout,
+                first_prompt_timeout=first_prompt_timeout,
+        )
         self.port = port
         self.user = user
         self.pw = pw
         self.prompt = prompt
-        super(SerialConn, self).__init__(
-                default_timeout=default_timeout,
-                first_prompt_timeout=first_prompt_timeout,
-        )
 
     def _get_exp(self):
         spawn = fdpexpect.fdspawn(os.open(self.port, os.O_RDWR|os.O_NONBLOCK|os.O_NOCTTY))
