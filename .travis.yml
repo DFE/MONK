@@ -18,9 +18,8 @@ python:
 install:
  - "pip install -r requirements.txt"
  - "python setup.py develop"
+ - "pip install coveralls"
 
 script:
- - "python setup.py nosetests"
-
-before_install:
- - "sudo apt-get install python2.7-dev libssh2-1-dev"
+ - "nosetests"
+after_success: coveralls

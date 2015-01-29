@@ -22,7 +22,7 @@ except ImportError as error:
     from distutils.core import setup
 
 if sys.argv[-1] == 'publish':
-    sys.argv = [sys.argv[0], 'sdist', 'upload']
+    sys.argv = [sys.argv[0], 'sdist', 'bdist_wheel', 'upload']
 
 
 def read(name):
@@ -53,7 +53,7 @@ setup(
     ],
     test_suite = "nose.collector",
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Environment :: Other Environment",
         "Intended Audience :: Developers",
         "Intended Audience :: Education",

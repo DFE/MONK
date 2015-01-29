@@ -10,6 +10,8 @@
 # 3 of the License, or (at your option) any later version.
 #
 
+import collections
+
 from nose import tools as nt
 from monk_tf import conn
 
@@ -26,30 +28,25 @@ def test_send_echo():
     """ conn: send echo 123 and receive 123
     """
     # setup
-    sut = MockConn(name='', out="123", retcode="<retcode>0</retcode>")
-    expected_retcode = 0
-    expected_out = "123"
-    # execute
-    retcode, out = sut.cmd("echo 123")
-    # verify
-    nt.eq_(retcode, expected_retcode)
-    nt.eq_(out, expected_out)
-    raise Exception(sut._calls)
-
-def test_ignore_retcode():
-    """ conn: disable retcode via argument
-    """
-    # setup
-    sut = MockConn('')
+    sut = MockConn(name='', out="123")
     expected_retcode = 0
     expected_out = "123"
     # execute
     retcode, out = sut.cmd("echo 123", do_retcode=False)
     # verify
-    nt.eq_(retcode, expected_retcode)
     nt.eq_(out, expected_out)
 
-# did it close properly?
+@nt.raises(AttributeError)
+def test_close_successfully():
+    """ conn: after closing there's no connection any more
+    """
+    # setup
+    sut = MockConn(name='', out="123")
+    # execute
+    sut.close()
+    # verify
+    sut._exp
+
 # does it recover?
 
 class MockConn(conn.ConnectionBase):
@@ -57,27 +54,27 @@ class MockConn(conn.ConnectionBase):
     def __init__(self, *args, **kwargs):
         self._exp = Exp()
         self._exp.before = kwargs.pop("out", None)
-        self.retcode = kwargs.pop("retcode", "")
-        self._exp.after = self.retcode
+        self._exp.after = ""
         super(MockConn, self).__init__(*args, **kwargs)
-        self._calls = {}
-        self.prompt = "asdf"
+        self._calls = collections.defaultdict(list)
+        self.prompt = self._exp.before
 
-    def _call_method(self, name, args):
-        self._calls[name] = args
+    def wait_for_prompt(*args, **kwargs):
+        pass
 
     def _expect(self, pattern, timeout=-1, searchwindowsize=-1):
-        self._call_method("_expect", (pattern, timeout, searchwindowsize))
+        self._calls["_expect"].append((pattern, timeout, searchwindowsize))
 
     def _send(self, pattern, timeout=-1, searchwindowsize=-1):
-        self._call_method("_send", (pattern, timeout, searchwindowsize))
+        self._calls["_send"].append((pattern, timeout, searchwindowsize))
 
     def _sendline(self, pattern, timeout=-1, searchwindowsize=-1):
-        self._call_method("_sendline", (pattern, timeout, searchwindowsize))
+        self._calls["_sendline"].append((pattern, timeout, searchwindowsize))
 
     @property
     def exp(self):
         return self._exp
 
 class Exp(object):
-    pass
+    def close(self):
+        pass
