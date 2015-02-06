@@ -145,6 +145,19 @@ class Device(object):
                     msg,
         ))
 
+    def cp(self, src_path, trgt_path):
+        """ send files via scp to target device
+
+        :param src_path: the path to the file on the host machine
+        :param trgt_path: the path of the file on the target machine
+        """
+        self.log("send file from {} to {} on the target device".format(
+            src_path,
+            trgt_path,
+        ))
+        self.get_conn("ssh1").cp(src_path, trgt_path)
+        self.log("sending file succeeded")
+
     def get_conn(self, which):
         """ retreive a connection by its name
 
