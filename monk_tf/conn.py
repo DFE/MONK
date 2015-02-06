@@ -470,6 +470,27 @@ class SshConn(ConnectionBase):
         self.log("retreive ssh PROMPT")
         return self.exp.PROMPT
 
+    def cp(self, src_path, trgt_path):
+        """ send files via scp to target device
+
+        :param src_path: the path to the file on the host machine
+        :param trgt_path: the path of the file on the target machine
+        """
+        self.log("send file from {} to {} on the target device".format(
+            src_path,
+            trgt_path,
+        ))
+        spawn = pexpect.spawn("scp {} {}@{}:{}".format(
+            src_path,
+            self.user,
+            self.target,
+            trgt_path,
+        ))
+        spawn.expect("assword: ")
+        spawn.sendline(self.pw)
+        spawn.expect(pexpect.EOF)
+        self.log("sending file succeeded")
+
     def _get_exp(self):
         self.log("create pxssh object")
         end_time = time.time() + self.first_prompt_timeout
