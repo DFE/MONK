@@ -101,9 +101,16 @@ class ConnectionBase(object):
 
 
 
-    def __init__(self, name, default_timeout=None, first_prompt_timeout=None):
+    def __init__(self, name, target, user, pw,
+            default_timeout=None, first_prompt_timeout=None):
         """
         :param name: the name of this connection and its corresponding logger
+
+        :param target: the host or device file that is used for connecting
+
+        :param user: the user name
+
+        :param pw: the password to auth the user
 
         :param default_timeout: how long the connection waits for an expected output
 
@@ -111,7 +118,10 @@ class ConnectionBase(object):
                                      connection is considered dead.
 
         """
-        self._logger = logging.getLogger(name or self.__class__.__name__)
+        self.name = name
+        self.target = target
+        self.user = user
+        self.pw = pw
         self.default_timeout = default_timeout or 30
         self.first_prompt_timeout = int(first_prompt_timeout) if first_prompt_timeout else 120
         self.log("hi.")
@@ -372,13 +382,21 @@ class SerialConn(ConnectionBase):
         """
         super(SerialConn, self).__init__(
                 name = name,
+                target = port,
+                user = user,
+                pw = pw,
                 default_timeout=default_timeout,
                 first_prompt_timeout=first_prompt_timeout,
         )
-        self.port = port
-        self.user = user
-        self.pw = pw
         self.prompt = prompt
+
+    @property
+    def port(self):
+        return self.target
+
+    @port.setter
+    def port(self, new):
+        self.target = new
 
     def _get_exp(self):
         spawn = fdpexpect.fdspawn(os.open(self.port, os.O_RDWR|os.O_NONBLOCK|os.O_NOCTTY))
@@ -428,16 +446,24 @@ class SshConn(ConnectionBase):
         """
         super(SshConn, self).__init__(
                 name=name,
+                target=host,
+                user=user,
+                pw=pw,
                 default_timeout=default_timeout,
                 first_prompt_timeout=first_prompt_timeout,
         )
-        self.host= host
-        self.user = user
-        self.pw = pw
         self.force_password = force_password
         self.login_timeout = int(login_timeout)
         if prompt:
             self._logger.warning("ssh connection ignores attribute prompt, because it sets its own prompt")
+
+    @property
+    def host(self):
+        return self.target
+
+    @host.setter
+    def host(self, new):
+        self.target = new
 
     @property
     def prompt(self):
