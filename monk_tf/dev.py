@@ -41,7 +41,7 @@ import json
 import requests
 import pexpect
 
-import conn
+import monk_tf.conn
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +127,7 @@ class Device(object):
         for connection in self.conns:
             try:
                 self.log("send cmd '{}' via connection '{}'".format(
-                    msg.encode('unicode-escape'),
+                    msg,
                     connection,
                 ))
                 return connection.cmd(
@@ -141,7 +141,7 @@ class Device(object):
         raise CantHandleException(
                 "dev:'{}',conns:'{}':could not send cmd '{}'".format(
                     self.name,
-                    map(str, self.conns),
+                    list(map(str, self.conns)),
                     msg,
         ))
 

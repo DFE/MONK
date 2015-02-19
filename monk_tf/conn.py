@@ -130,15 +130,16 @@ class ConnectionBase(object):
     def name(self):
         """ the name of this connection and its corresponding logger
         """
-        return self._logger.name
+        try:
+            return self._logger.name
+        except AttributeError:
+            self.name = self.__class__.__name__
 
     @name.setter
     def name(self, new_name):
-        """ setting the name will also reset the logger's name
-        """
         try:
             self._logger.name = new_name
-        except AttributeError as e:
+        except AttributeError:
             self._logger = logging.getLogger(new_name)
 
     def log(self, msg):
@@ -165,7 +166,7 @@ class ConnectionBase(object):
         """ a wrapper for :pexpect:meth:`spawn.expect`
         """
         self.log("expect({},{},{})".format(
-            str(pattern).encode('string-escape'),
+            str(pattern),
             timeout,
             searchwindowsize,
         ))
@@ -261,11 +262,15 @@ class ConnectionBase(object):
             self.log("caught EOF/TIMEOUT on last expect; closing connections")
             self.close()
             raise e
-        out = self._prep_cmdoutput(self.exp.before, prepped_msg, do_retcode)
+        out = self._prep_cmdoutput(
+                out=self.exp.before.decode(),
+                cmd_expect=prepped_msg,
+                do_retcode=do_retcode,
+        )
         self._logger.debug("SUCCESS: cmd({}) result='{}' expect-match='{}'".format(
-            str(msg)[:15].encode("string_escape") + ("[...]" if len(str(msg)) > 15 else ""),
-            str(out[1])[:50].encode("string-escape") + ("[...]" if len(str(self.exp.before)) > 50 else ""),
-            str(self.exp.after)[:50].encode("string-escape") + ("[...]" if len(str(self.exp.after)) > 50 else ""),
+            str(msg)[:15] + ("[...]" if len(str(msg)) > 15 else ""),
+            str(out[1])[:50] + ("[...]" if len(str(self.exp.before)) > 50 else ""),
+            str(self.exp.after)[:50] + ("[...]" if len(str(self.exp.after)) > 50 else ""),
         ))
         return out
 
@@ -278,7 +283,7 @@ class ConnectionBase(object):
         :param do_retcode: if the request for the retcode should be appended
         """
         self.log("prep_msg({},{})".format(
-            str(msg).encode("string-escape"),
+            msg,
             do_retcode,
         ))
         # If the connection is a shell, you might want a returncode.
@@ -289,9 +294,7 @@ class ConnectionBase(object):
         prepped = "\n".join(line.strip() for line in msg.split("\n") if line.strip())
         out = prepped+get_retcode
         self.log("prepped:'{}'".format(
-            str(out
-            .decode("utf-8"))
-            .encode("string-escape"),
+            out,
         ))
         return out
 
@@ -306,7 +309,7 @@ class ConnectionBase(object):
         :param do_retcode: if there's a retcode to find or not
         """
         self.log("prep_out({},{})".format(
-            str(out).encode("string-escape"),
+            out,
             do_retcode,
         ))
         if not out:
@@ -317,7 +320,7 @@ class ConnectionBase(object):
         capture = Capture()
         stream.attach(capture, only=["draw", "linefeed"])
         try:
-            stream.feed(out.decode("utf-8"))
+            stream.feed(out)
         except UnicodeError as e:
             raise OutputParseException(
                 "failed to parse output to utf8, necessary for special character handler. Error: " + str(e))
@@ -326,7 +329,7 @@ class ConnectionBase(object):
             try:
                 match = re.search("\n?<retcode>(\d+)</retcode>.*\n", prepped_out)
                 self.log("found retcode string '{}'".format(
-                    str(match.group(0)).encode("string-escape"),
+                    match.group(0),
                 ))
                 retcode = int(match.group(1))
                 prepped_out = prepped_out.replace(match.group(0), "")
@@ -336,7 +339,7 @@ class ConnectionBase(object):
                 self._logger.exception(e)
                 raise NoRetcodeException("failed to find retcode with '{}'. Formatted output:'{}'".format(
                             e.__class__.__name__,
-                            prepped_out.encode("string-escape"),
+                            prepped_out,
                 ))
         else:
             self.log("prepped without retcode")
@@ -520,7 +523,7 @@ class SshConn(ConnectionBase):
         self.log("force pxssh object to logout")
         try:
             self._exp.logout()
-        except Exception as e:
+        except (AttributeError, Exception) as e:
             self.log("while logging out caught the following exception, can often be ignored")
             self._logger.exception(e)
         super(SshConn, self).close()
@@ -536,11 +539,11 @@ class Capture(object):
         self.handle = handle or io.StringIO()
 
     def draw(self, ch, **flags):
-        self.handle.write(unicode(ch))
+        self.handle.write(ch)
 
     def linefeed(self):
-        self.handle.write(u"\n")
+        self.handle.write("\n")
 
     def __str__(self):
         self.handle.seek(0)
-        return self.handle.read().encode("utf-8")
+        return self.handle.read()

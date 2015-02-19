@@ -83,8 +83,8 @@ import collections
 
 import configobj as config
 
-import conn
-import dev
+import monk_tf.conn as conn
+import monk_tf.dev as dev
 
 logger = logging.getLogger(__name__)
 
@@ -251,7 +251,7 @@ class Fixture(object):
         """
         self._logger.debug("initialize with props: " + str(self.props))
         if self.props:
-            self.devs = [self._parse_section(d, self.props[d]) for d in self.props.viewkeys()]
+            self.devs = [self._parse_section(d, self.props[d]) for d in self.props]
         else:
             raise NoPropsException("have you created any fixture files?")
 

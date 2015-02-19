@@ -47,8 +47,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'MONK Testframework'
-copyright = u'2015, DResearch Fahrzeugelektronik GmbH'
+project = 'MONK Testframework'
+copyright = '2015, DResearch Fahrzeugelektronik GmbH'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -200,8 +200,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'MONKTestframework.tex', u'MONK Testframework Documentation',
-   u'DResearch Fahrzeugelektronik GmbH', 'manual'),
+  ('index', 'MONKTestframework.tex', 'MONK Testframework Documentation',
+   'DResearch Fahrzeugelektronik GmbH', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -230,8 +230,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'monktestframework', u'MONK Testframework Documentation',
-     [u'DResearch Fahrzeugelektronik GmbH'], 1)
+    ('index', 'monktestframework', 'MONK Testframework Documentation',
+     ['DResearch Fahrzeugelektronik GmbH'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -244,8 +244,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'MONKTestframework', u'MONK Testframework Documentation',
-   u'DResearch Fahrzeugelektronik GmbH', 'MONKTestframework', 'One line description of project.',
+  ('index', 'MONKTestframework', 'MONK Testframework Documentation',
+   'DResearch Fahrzeugelektronik GmbH', 'MONKTestframework', 'One line description of project.',
    'Miscellaneous'),
 ]
 
