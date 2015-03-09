@@ -318,7 +318,7 @@ class ConnectionBase(object):
         # replace Terminal command chars
         stream = pyte.Stream()
         capture = Capture()
-        stream.attach(capture, only=["draw", "linefeed"])
+        stream.attach(capture, only=["draw", "linefeed", "tab"])
         try:
             stream.feed(out)
         except UnicodeError as e:
@@ -543,6 +543,9 @@ class Capture(object):
 
     def linefeed(self):
         self.handle.write("\n")
+
+    def tab(self):
+        self.handle.write("\t")
 
     def __str__(self):
         self.handle.seek(0)
