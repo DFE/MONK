@@ -267,10 +267,10 @@ class ConnectionBase(object):
                 cmd_expect=prepped_msg,
                 do_retcode=do_retcode,
         )
-        self._logger.debug("SUCCESS: cmd({}) result='{}' expect-match='{}'".format(
-            str(msg)[:15] + ("[...]" if len(str(msg)) > 15 else ""),
-            str(out[1])[:50] + ("[...]" if len(str(self.exp.before)) > 50 else ""),
-            str(self.exp.after)[:50] + ("[...]" if len(str(self.exp.after)) > 50 else ""),
+        self._logger.info("SUCCESSFULLY SENT CMD: cmd('{}') result='{}' expect-match='{}'".format(
+            str(msg),
+            str(out[1]),
+            str(self.exp.after).replace("b'","").replace("'",""),
         ))
         return out
 
@@ -350,8 +350,9 @@ class ConnectionBase(object):
         """
         self.log("close connection")
         try:
-            self._exp.close()
-            del self._exp
+            if hasattr(self, "_exp") and self._exp:
+                self._exp.close()
+                del self._exp
             self.log("successfully closed connection")
         except AttributeError:
             self.log("connection already closed")
