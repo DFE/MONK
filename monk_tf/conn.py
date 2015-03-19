@@ -523,8 +523,9 @@ class SshConn(ConnectionBase):
     def close(self):
         self.log("force pxssh object to logout")
         try:
-            self._exp.logout()
-        except (AttributeError, Exception) as e:
+            if hasattr(self, "_exp"):
+                self._exp.logout()
+        except (Exception) as e:
             self.log("while logging out caught the following exception, can often be ignored")
             self._logger.exception(e)
         super(SshConn, self).close()
