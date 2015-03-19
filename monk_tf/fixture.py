@@ -207,7 +207,9 @@ class Fixture(object):
                 if op.exists(fixture_file):
                     self.read(fixture_file)
         else:
-            self.log("auto search deactivated, loaded without looking for fixture files")
+            self.log("auto search deactivated, try to load {}".format(filename))
+            if op.exists(filename):
+                self.read(filename)
 
     @property
     def name(self):
