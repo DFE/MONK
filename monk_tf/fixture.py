@@ -185,12 +185,12 @@ class LogManager(object):
             hobj.setFormatter(logging.Formatter(
                 fmt=handler["format"],
             ))
-            self.log("add handler to root logger")
             # replace possible target strings, like the name of the testcase
             target = self.config_subs(handler["target"])
-            self.log("add handler '{}' to logger '{}'".format(
+            self.log("add handler '{}' to logger '{}' (unformatted target '{}')".format(
                 hname,
                 target,
+                handler["target"],
             ))
             logging.getLogger(target).addHandler(hobj)
         self.log("done with all log handlers")
@@ -212,7 +212,8 @@ class LogManager(object):
             name = caller[3]
             if name.startswith(grab_txt):
                 return name
-        return ""
+        self.log("haven't found a test name, but I also don't want the root logger")
+        return grab_txt
 
 class Fixture(object):
     """ Creates :term:`MONK` objects based on dictionary like objects.
