@@ -76,10 +76,15 @@ Classes
 """
 
 import os
+from os import environ
 import os.path as op
 import sys
 import logging
 import collections
+import time
+import inspect
+import io
+import traceback
 
 import configobj as config
 
@@ -134,11 +139,80 @@ class WrongNameException(AFixtureException):
     """
     pass
 
+class UnknownTypeException(AFixtureException):
+    """ Handler Type was not recognized
+    """
+    pass
+
+
 ##############################################################
 #
 # Fixture Classes - creates MONK objects based on dictionaries
 #
 ##############################################################
+
+class LogManager(object):
+    """ managing configuration and setup of logging mechanics
+
+    Might strongly interact with your nose config or similar.
+    """
+
+    _LOGLEVELS = {
+        "CRITICAL": logging.CRITICAL,
+        "ERROR": logging.ERROR,
+        "WARNING": logging.WARNING,
+        "INFO": logging.INFO,
+        "DEBUG": logging.DEBUG,
+        "NOTSET": logging.NOTSET,
+    }
+    def __init__(self, config):
+        self.log("load LogManager with config:" + str(config))
+        for hname, handler in config.items():
+            self.log("create:{}:{}".format(hname, handler))
+            hobj=None
+            if handler["type"] == "StreamHandler":
+                stream = sys.stdout if handler["sink"] == "stdout" else sys.stderr
+                self.log("stream:" + str(sys.stdout))
+                hobj = logging.StreamHandler(stream)
+            elif handler["type"] == "FileHandler":
+                self.log("file:" + str(handler["sink"]))
+                hobj = logging.FileHandler(self.config_subs(handler["sink"]))
+            else:
+                raise UnknownTypeException("handler of type {} unfamiliar, spelling error?".format(handler["type"]))
+            self.log("loglevel:{}".format(self._LOGLEVELS[handler["level"]]))
+            hobj.setLevel(self._LOGLEVELS[handler["level"]])
+            self.log("format:{}".format(handler["format"]))
+            hobj.setFormatter(logging.Formatter(
+                fmt=handler["format"],
+            ))
+            self.log("add handler to root logger")
+            # replace possible target strings, like the name of the testcase
+            target = self.config_subs(handler["target"])
+            self.log("add handler '{}' to logger '{}'".format(
+                hname,
+                target,
+            ))
+            logging.getLogger(target).addHandler(hobj)
+        self.log("done with all log handlers")
+
+    def config_subs(self, txt, subs=None):
+        """ replace the strings in the config that we have reasonable values for
+        """
+        return txt % {
+                "testcase" : self.find_testname(),
+                "rootlogger" : "",
+                "suitename" : environ.get("SUITE", "suite"),
+        }
+
+    def log(self, msg):
+        logging.getLogger(self.__class__.__name__).debug(msg)
+
+    def find_testname(self, grab_txt = "test_"):
+        for caller in inspect.stack():
+            name = caller[3]
+            if name.startswith(grab_txt):
+                return name
+        return ""
 
 class Fixture(object):
     """ Creates :term:`MONK` objects based on dictionary like objects.
@@ -152,6 +226,7 @@ class Fixture(object):
         "Device" : dev.Device,
         "SerialConnection" : conn.SerialConn,
         "SshConnection" : conn.SshConn,
+        "logging" : LogManager,
     }
 
     _DEFAULT_DEBUG_SOURCE = "MONK_DEBUG_SOURCE"
@@ -219,7 +294,7 @@ class Fixture(object):
 
     @name.setter
     def name(self, new_name):
-        self._logger.name = new_name
+        self._logger = logging.getLogger(new_name)
 
     def _parent_dirs(self, path):
         """ generate parent directories for path
@@ -244,7 +319,7 @@ class Fixture(object):
         """
         self._logger.debug("read: " + str(source))
         self.tear_down()
-        self.props.merge(config.ConfigObj(source))
+        self.props.merge(config.ConfigObj(source, interpolation=False))
         self._initialize()
         return self
 
@@ -254,6 +329,8 @@ class Fixture(object):
         self._logger.debug("initialize with props: " + str(self.props))
         if self.props:
             self.devs = [self._parse_section(d, self.props[d]) for d in self.props]
+            # TODO workaround because logging stuff produces None element(s)
+            self.devs = [d for d in self.devs if d]
         else:
             raise NoPropsException("have you created any fixture files?")
 
@@ -263,13 +340,21 @@ class Fixture(object):
             type(section).__name__,
             list(section.keys()),
         ))
+        # TODO special cases suck, improve!
+        if name == "logging":
+            self.logmanager = self.classes["logging"](section)
+            return
         # TODO section parsing should be wrapped in handlers
         #      so that they can be extended without overwrites
         try:
             sectype = self.classes[section.pop("type")]
         except KeyError as e:
-            self.log("section {} has no type, therefore it is assumed to only contain data, no further parsing will be applied".format(name))
-            return section
+            self.log("section has no type, trying the name")
+            try:
+                sectype = self.classes[name]
+            except KeyError as e:
+                self.log("section {} has no type, therefore it is assumed to only contain data, no further parsing will be applied".format(name))
+                return section
         if "conns" in section:
             cs = section.pop("conns")
             section["conns"] = [self._parse_section(s, cs[s]) for s in cs]
@@ -331,9 +416,21 @@ class Fixture(object):
         )
 
     def __enter__(self):
-        self.log("__enter__")
-        return [self] + list(self.devs)
+        self.log("__enter__ " + self.find_testname())
+        self.testlogger = logging.getLogger(self.find_testname())
+        return [self] + list(self.devs) + [self.testlogger]
 
-    def __exit__(self, exception_type, exception_val, trace):
-        self.log("__exit__")
+    def __exit__(self, exception_type, exception_val, tb):
+        self.log("__exit__ " + self.find_testname())
+        if exception_type:
+            buff = io.StringIO()
+            traceback.print_tb(tb, file=buff)
+            self.testlogger.warning("\n{}:{}:\n{}".format(exception_type.__name__, exception_val, buff.getvalue()))
         self.tear_down()
+
+    def find_testname(self, grab_txt = "test_"):
+        for caller in inspect.stack():
+            name = caller[3]
+            if name.startswith(grab_txt):
+                return name
+        return ""
