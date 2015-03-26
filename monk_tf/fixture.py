@@ -418,8 +418,11 @@ class Fixture(object):
 
     def __enter__(self):
         self.log("__enter__ " + self.find_testname())
-        self.testlogger = logging.getLogger(self.find_testname())
+        self.create_testlogger()
         return [self] + list(self.devs) + [self.testlogger]
+
+    def create_testlogger(self):
+        self.testlogger = logging.getLogger(self.find_testname())
 
     def __exit__(self, exception_type, exception_val, tb):
         self.log("__exit__ " + self.find_testname())
