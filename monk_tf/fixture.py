@@ -429,7 +429,6 @@ class Fixture(object):
 
     def __enter__(self):
         self.log("__enter__ ")
-        self.testlogger = logging.getLogger(self.find_testname())
         return [self] + list(self.devs) + [self.testlogger]
 
 
