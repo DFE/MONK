@@ -165,6 +165,11 @@ class LogManager(object):
         "DEBUG": logging.DEBUG,
         "NOTSET": logging.NOTSET,
     }
+
+    # this list is hierarchical, if the first prefix succeeds the others aren't
+    # tried
+    _LOGFINDERS = ["test_", "setup"]
+
     def __init__(self, config):
         self.log("load LogManager with config:" + str(config))
         for hname, handler in config.items():
@@ -207,11 +212,16 @@ class LogManager(object):
     def log(self, msg):
         logging.getLogger(self.__class__.__name__).debug(msg)
 
-    def find_testname(self, grab_txt = "test_"):
-        for caller in inspect.stack():
-            name = caller[3]
-            if name.startswith(grab_txt):
-                return name
+    def testlogger(self):
+        return logging.getLogger(self.find_testname())
+
+    def find_testname(self, grab_txts=None):
+        grab_txts = grab_txts or self._LOGFINDERS
+        for txt in grab_txts:
+            for caller in inspect.stack():
+                name = caller[3]
+                if name.startswith(txt):
+                    return name
         self.log("haven't found a test name, but I also don't want the root logger")
         return grab_txt
 
@@ -344,6 +354,7 @@ class Fixture(object):
         # TODO special cases suck, improve!
         if name == "logging":
             self.logmanager = self.classes["logging"](section)
+            self.testlogger = self.logmanager.testlogger()
             return
         # TODO section parsing should be wrapped in handlers
         #      so that they can be extended without overwrites
@@ -417,24 +428,15 @@ class Fixture(object):
         )
 
     def __enter__(self):
-        self.log("__enter__ " + self.find_testname())
-        self.create_testlogger()
+        self.log("__enter__ ")
+        self.testlogger = logging.getLogger(self.find_testname())
         return [self] + list(self.devs) + [self.testlogger]
 
-    def create_testlogger(self):
-        self.testlogger = logging.getLogger(self.find_testname())
 
     def __exit__(self, exception_type, exception_val, tb):
-        self.log("__exit__ " + self.find_testname())
+        self.log("__exit__ ")
         if exception_type:
             buff = io.StringIO()
             traceback.print_tb(tb, file=buff)
             self.testlogger.warning("\n{}:{}:\n{}".format(exception_type.__name__, exception_val, buff.getvalue()))
         self.tear_down()
-
-    def find_testname(self, grab_txt = "test_"):
-        for caller in inspect.stack():
-            name = caller[3]
-            if name.startswith(grab_txt):
-                return name
-        return ""
