@@ -147,6 +147,11 @@ class ConnectionBase(object):
         """
         self._logger.debug(msg)
 
+    def testlog(self, msg):
+        """ wrapper for simpler testcase specific logging
+        """
+        self._logger.warning(msg)
+
     @property
     def exp(self):
         """ the pexpect object - Don't bother with this if you don't know what

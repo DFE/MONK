@@ -212,6 +212,9 @@ class LogManager(object):
     def log(self, msg):
         logging.getLogger(self.__class__.__name__).debug(msg)
 
+    def testlog(self, msg):
+        logging.getLogger(self.__class__.__name__).warning(msg)
+
     def testlogger(self):
         return logging.getLogger(self.find_testname())
 

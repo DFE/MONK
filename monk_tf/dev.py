@@ -189,6 +189,14 @@ class Device(object):
         """
         self._logger.debug(msg)
 
+    def testlog(self, msg):
+        """ sends a warning-level message to the logger
+
+        This method is used mostly in the test cases, that a smaller version
+        of it is quite comfortable.
+        """
+        self._logger.warning(msg)
+
     def close_all(self):
         """ loop through all connections calling :py:meth:`~monk_tf.conn.ConnectionBase.close`.
         """
