@@ -159,7 +159,8 @@ class ConnectionBase(object):
         """
         self.log("retrieve pexpect object")
         try:
-            return self._exp
+            if hasattr(self, "_exp"):
+                return self._exp
         except AttributeError as e:
             self.log("have no pexpect object yet")
             self._exp = self._get_exp()
