@@ -163,8 +163,8 @@ class ConnectionBase(object):
         except AttributeError as e:
             self.log("have no pexpect object yet")
             self._exp = self._get_exp()
-            self._sendline("stty -echo")
-            self._expect(self.prompt)
+            self._exp.sendline("stty -echo")
+            self._exp.expect(self.prompt)
             return self._exp
 
     def _expect(self, pattern, timeout=-1, searchwindowsize=-1):
