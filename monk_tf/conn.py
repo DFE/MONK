@@ -176,7 +176,8 @@ class ConnectionBase(object):
             searchwindowsize,
         ))
         try:
-            self.exp.expect(pattern, timeout, searchwindowsize)
+            out = self.exp.expect(pattern, timeout, searchwindowsize)
+            self.log("_EXP OUTPUT: '{}'".format(out))
             self.log("expect succeeded.")
         except Exception as e:
             self.log("expect failed with '{}'".format(
@@ -231,6 +232,7 @@ class ConnectionBase(object):
             try:
                 self.expect_prompt(timeout)
                 self._logger.debug("ready")
+                self._exp.after = b''
                 return
             except (pexpect.EOF, pexpect.TIMEOUT) as e:
                 self.log("could not retreive prompt")
@@ -533,6 +535,7 @@ class SshConn(ConnectionBase):
         except (Exception) as e:
             self.log("while logging out caught the following exception, can often be ignored")
             self._logger.exception(e)
+            del self._exp
         super(SshConn, self).close()
 
 class Capture(object):

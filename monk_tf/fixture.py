@@ -278,6 +278,7 @@ class Fixture(object):
         ))
         self.devs = []
         self._devs_dict = {}
+        self.ignore_exceptions = []
         self.classes = classes or self._DEFAULT_CLASSES
         self.props = config.ConfigObj()
         self.filename = filename
@@ -437,7 +438,7 @@ class Fixture(object):
 
     def __exit__(self, exception_type, exception_val, tb):
         self.log("__exit__ ")
-        if exception_type:
+        if exception_type and exception_type not in self.ignore_exceptions:
             buff = io.StringIO()
             traceback.print_tb(tb, file=buff)
             self.testlogger.warning("\n{}:{}:\n{}".format(exception_type.__name__, exception_val, buff.getvalue()))
