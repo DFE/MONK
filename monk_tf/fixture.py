@@ -271,7 +271,8 @@ class Fixture(object):
         :param auto_search: if true, it will automatically search and load
                             fixture files.
         """
-        self.call_location = op.dirname(op.abspath(call_location))
+        self.call_location = call_location
+        self.call_path = op.dirname(op.abspath(self.call_location))
         self._logger = logging.getLogger("{}:{}".format(
             __name__,
             name or self.__class__.__name__,
@@ -290,9 +291,9 @@ class Fixture(object):
             if op.exists(home_fixture):
                 self.read(home_fixture)
             # starting from root load all fixtures from parent directories
-            self.log("location:{}".format(self.call_location))
-            self.log("parent_dirs:" + str(list(self._parent_dirs(self.call_location))))
-            for p in reversed(list(self._parent_dirs(self.call_location))):
+            self.log("location:{}".format(self.call_path))
+            self.log("parent_dirs:" + str(list(self._parent_dirs(self.call_path))))
+            for p in reversed(list(self._parent_dirs(self.call_path))):
                 fixture_file = op.join(p, self.filename)
                 if op.exists(fixture_file):
                     self.read(fixture_file)
