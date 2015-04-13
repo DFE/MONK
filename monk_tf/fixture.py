@@ -198,16 +198,20 @@ class LogManager(object):
                 handler["target"],
             ))
             logging.getLogger(target).addHandler(hobj)
+            logging.getLogger(target).setLevel(
+                    self._LOGLEVELS[handler["level"]])
         self.log("done with all log handlers")
 
     def config_subs(self, txt, subs=None):
         """ replace the strings in the config that we have reasonable values for
         """
-        return txt % {
+        substitutes = subs or {
                 "testcase" : self.find_testname(),
                 "rootlogger" : "",
                 "suitename" : environ.get("SUITE", "suite"),
+                "datetime" : datetime.datetime.now().strftime("%y%m%d-%H%M%S"),
         }
+        return txt % substitutes
 
     def log(self, msg):
         logging.getLogger(self.__class__.__name__).debug(msg)
@@ -226,7 +230,7 @@ class LogManager(object):
                 if name.startswith(txt):
                     return name
         self.log("haven't found a test name, but I also don't want the root logger")
-        return grab_txt
+        return grab_txts[0]
 
 class Fixture(object):
     """ Creates :term:`MONK` objects based on dictionary like objects.
