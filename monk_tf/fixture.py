@@ -175,8 +175,14 @@ class LogManager(object):
         self.log("load LogManager with config:" + str(config))
         for hname, handler in config.items():
             self.log("create:{}:{}".format(hname, handler))
+            # replace possible target strings, like the name of the testcase
+            target = self.config_subs(handler["target"])
             hobj=None
             if handler["type"] == "StreamHandler":
+                # workaround for strange nose handlers
+                for h in logging.getLogger(target).handlers:
+                    if isinstance(h, logging.StreamHandler):
+                        logging.getLogger(target).removeHandler(h)
                 stream = sys.stdout if handler["sink"] == "stdout" else sys.stderr
                 self.log("stream:" + str(sys.stdout))
                 hobj = logging.StreamHandler(stream)
@@ -191,9 +197,7 @@ class LogManager(object):
             hobj.setFormatter(logging.Formatter(
                 fmt=handler["format"],
             ))
-            # replace possible target strings, like the name of the testcase
-            target = self.config_subs(handler["target"])
-            self.log("add handler '{}' to logger '{}' (unformatted target '{}')".format(
+            self.log("add handler '{}' (obj:{}) to logger '{}' (unformatted target '{}')".format(
                 hname,
                 target,
                 handler["target"],
@@ -251,30 +255,17 @@ class Fixture(object):
     _DEFAULT_DEBUG_SOURCE = "MONK_DEBUG_SOURCE"
 
     def __init__(self, call_location, name=None, classes=None,
-            lookfordbgsrc=True, filename="fixture.cfg", auto_search=True):
+            fixture_locations=None):
         """
 
         :param call_location: the __file__ from where this is called.
-
-        :param name: The name of this object.
-
-        :param parsers: An :python:term:`iterable` of
-                        :py:class:`~monk_tf.fixture.AParser` classes to be used
-                        for parsing a given
-                        :py:attr:`~monk_tf.fixture.Fixture.source`.
 
         :param classes: A :py:class:`dict` of classes to class names. Used for
                         parsing the type attribute in
                         :term:`fixture files<fixture file>`.
 
-        :param lookfordbgsrc: If True an environment variable is looked for to
-                              read a local debug config. If False it won't be
-                              looked for.
 
-        :param filename: the name of the file which contains the configuration.
-
-        :param auto_search: if true, it will automatically search and load
-                            fixture files.
+        :param fixture_locations: where to look for fixture files
         """
         self.call_location = call_location
         self.call_path = op.dirname(op.abspath(self.call_location))
@@ -289,23 +280,22 @@ class Fixture(object):
         self.props = config.ConfigObj()
         self.filename = filename
         self.auto_search = auto_search
-        # look if the user has a default config in his home dir
-        if auto_search:
-            self.log("autosearching for fixture files...")
-            home_fixture = op.expanduser(op.join("~", self.filename))
-            if op.exists(home_fixture):
-                self.read(home_fixture)
-            # starting from root load all fixtures from parent directories
-            self.log("location:{}".format(self.call_path))
-            self.log("parent_dirs:" + str(list(self._parent_dirs(self.call_path))))
-            for p in reversed(list(self._parent_dirs(self.call_path))):
-                fixture_file = op.join(p, self.filename)
-                if op.exists(fixture_file):
-                    self.read(fixture_file)
-        else:
-            self.log("auto search deactivated, try to load {}".format(filename))
-            if op.exists(filename):
-                self.read(filename)
+        self.fixture_locations = fixture_locations or self.default_fixturelocations()
+        for fixture_location in self.fixture_locations:
+            if op.isfile(fixture_location):
+                self.read(fixture_location)
+            else:
+                self.log("{} is not a file! Don't read anything.".format(
+                    fixture_location))
+
+    def default_fixturelocations(self):
+        # this is preferred over a list/dict, because some paths need to be set
+        # dynamically!
+        locs = [
+                self.call_path + "/../fixture.cfg",
+        ]
+        self.log("read default fixturelocations: {}".format(self, locs))
+        return locs
 
     @property
     def name(self):
