@@ -285,12 +285,7 @@ class Fixture(object):
         self.classes = classes or self._DEFAULT_CLASSES
         self.props = config.ConfigObj()
         self.fixture_locations = fixture_locations or self.default_fixturelocations()
-        for fixture_location in self.fixture_locations:
-            if op.isfile(fixture_location):
-                self.read(fixture_location)
-            else:
-                self.log("{} is not a file! Don't read anything.".format(
-                    fixture_location))
+        self.read(loc for loc in self.fixture_locations if op.isfile(loc))
 
     def default_fixturelocations(self):
         # this is preferred over a list/dict, because some paths need to be set
@@ -323,18 +318,21 @@ class Fixture(object):
                 path = mem
 
 
-    def read(self, source):
+    def read(self, sources):
         """ Read more data, either as a file name or as a parser.
 
-        :param source: the data source; either a file name or a
-                       :py:class:`~monk_tf.fixture.AParser` child class
-                       instance.
+        :param sources: a iterable of data sources; each is either a file name
+                        or a :py:class:`~monk_tf.fixture.AParser` child class
+                        instance.
 
         :return: self
         """
-        self._logger.debug("read: " + str(source))
+        self.log("read: " + str(sources))
+        self.log("make sure that you are teared down completely before getting started")
         self.tear_down()
-        self.props.merge(config.ConfigObj(source, interpolation=False))
+        for source in sources:
+            self.log("merge source: '{}'".format(source))
+            self.props.merge(config.ConfigObj(source, interpolation=False))
         self._initialize()
         return self
 
