@@ -199,6 +199,7 @@ class LogManager(object):
             ))
             self.log("add handler '{}' (obj:{}) to logger '{}' (unformatted target '{}')".format(
                 hname,
+                hobj,
                 target,
                 handler["target"],
             ))
@@ -222,10 +223,15 @@ class LogManager(object):
         logging.getLogger(self.__class__.__name__).debug(msg)
 
     def testlog(self, msg):
-        logging.getLogger(self.__class__.__name__).warning(msg)
+        self.testlog.warning(msg)
 
+    @property
     def testlogger(self):
-        return logging.getLogger(self.find_testname())
+        try:
+            return self._testlogger
+        except:
+            self._testlogger = logging.getLogger(self.find_testname())
+            return self._testlogger
 
     def find_testname(self, grab_txts=None):
         grab_txts = grab_txts or self._LOGFINDERS
@@ -278,8 +284,6 @@ class Fixture(object):
         self.ignore_exceptions = []
         self.classes = classes or self._DEFAULT_CLASSES
         self.props = config.ConfigObj()
-        self.filename = filename
-        self.auto_search = auto_search
         self.fixture_locations = fixture_locations or self.default_fixturelocations()
         for fixture_location in self.fixture_locations:
             if op.isfile(fixture_location):
@@ -354,7 +358,6 @@ class Fixture(object):
         # TODO special cases suck, improve!
         if name == "logging":
             self.logmanager = self.classes["logging"](section)
-            self.testlogger = self.logmanager.testlogger()
             return
         # TODO section parsing should be wrapped in handlers
         #      so that they can be extended without overwrites
@@ -387,6 +390,14 @@ class Fixture(object):
         self.log("load section:" + str(sectype) + "," + str(section))
         return sectype(**section)
 
+    @property
+    def testlogger(self):
+        if hasattr(self, "logmanager"):
+            return self.logmanager.testlogger
+        else:
+            self.log("couldn't find logmanager, use my own")
+            return self._logger
+
     def get_dev(self, which):
         """ if there are many devices, retreive one by name
         """
@@ -409,6 +420,9 @@ class Fixture(object):
         """ helper for the fixture object's logger to send debug messages
         """
         self._logger.debug(msg)
+
+    def testlog(self, msg):
+        self.testlogger.warning(msg)
 
     def tear_down(self):
         """ Can be used for explicit destruction of managed objects.
