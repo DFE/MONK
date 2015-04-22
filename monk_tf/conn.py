@@ -40,13 +40,15 @@ from pexpect import spawn
 from pexpect import fdpexpect
 import pyte
 
+import monk_tf.general_purpose as gp
+
 ############
 #
 # Exceptions
 #
 ############
 
-class AConnectionException(Exception):
+class AConnectionException(gp.MonkException):
     """ Base class for Exceptions from this module
     """
     pass
@@ -88,7 +90,7 @@ class TimeoutException(AConnectionException):
 #
 #############
 
-class ConnectionBase(object):
+class ConnectionBase(gp.MonkObject):
     """ is the base class for all connections.
 
     Don't instantiate this class directly.
@@ -118,39 +120,16 @@ class ConnectionBase(object):
                                      connection is considered dead.
 
         """
-        self.name = name
+        super(ConnectionBase, self).__init__(
+                name=name,
+                module=__name__,
+        )
         self.target = target
         self.user = user
         self.pw = pw
         self.default_timeout = default_timeout or 30
         self.first_prompt_timeout = int(first_prompt_timeout) if first_prompt_timeout else 120
-        self.log("hi.")
 
-    @property
-    def name(self):
-        """ the name of this connection and its corresponding logger
-        """
-        try:
-            return self._logger.name
-        except AttributeError:
-            self.name = self.__class__.__name__
-
-    @name.setter
-    def name(self, new_name):
-        try:
-            self._logger.name = new_name
-        except AttributeError:
-            self._logger = logging.getLogger(new_name)
-
-    def log(self, msg):
-        """ wrapper for simpler debug logging
-        """
-        self._logger.debug(msg)
-
-    def testlog(self, msg):
-        """ wrapper for simpler testcase specific logging
-        """
-        self._logger.warning(msg)
 
     @property
     def exp(self):
