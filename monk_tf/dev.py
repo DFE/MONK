@@ -90,7 +90,7 @@ class Device(gp.MonkObject):
                 name=kwargs.pop("name",None),
                 module=__name__,
         )
-        self.use_conns = [cname.strip() for cname in kwargs.pop("use_conns", "").split(",") if cname]
+        self.use_conns = [cname.strip() for cname in kwargs.pop("use_conns", "") if cname]
         self.conns = kwargs.pop("conns", {})
         self.prompt = PromptReplacement()
 
