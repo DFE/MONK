@@ -356,7 +356,7 @@ class Fixture(gp.MonkObject):
         """ update the externally manageable data of this fixture object
         """
         self.testlogger = kwargs.pop("logging", self._logger)
-        self.use_devs = [devname.strip() for devname in kwargs.pop("use_devs", "").split(",") if devname]
+        self.use_devs = [devname.strip() for devname in kwargs.pop("use_devs", []) if devname]
         if not self.use_devs:
             raise NoDevsChosenException("You need to set a use_devs property to your config file which contains a list of comma separated device names that are defined in your [[conns]] block")
         self.devs = {n:d for n,d in kwargs.items()}
