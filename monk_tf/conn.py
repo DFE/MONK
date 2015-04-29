@@ -258,6 +258,9 @@ class ConnectionBase(gp.MonkObject):
             str(out[1]),
             str(self.exp.after).replace("b'","").replace("'",""),
         ))
+        if self.exp.after in (pexpect.TIMEOUT, pexpect.EOF):
+            self.log("connection is down, let's close it")
+            self.close()
         return out
 
     def _prep_cmdmessage(self, msg, do_retcode=True):

@@ -16,6 +16,7 @@ This module contains the base classes and possibly other useful stuff
 """
 
 import logging
+import inspect
 
 class MonkException(Exception):
     """ base class for all monk_tf exceptions
@@ -32,6 +33,7 @@ class MonkObject(object):
         # must be set first, because it is used later on
         self.module = module
         self.name = name
+        self.testlogger = logging.getLogger(find_testname())
         self.log("hi.")
 
     @property
@@ -58,9 +60,21 @@ class MonkObject(object):
         self._logger.debug(msg)
 
     def testlog(self, msg):
-        """ sends a warning-level message to the logger
+        """ sends a info-level message to the logger
 
         This method is used mostly in the test cases, that a smaller version
         of it is quite comfortable.
         """
-        self._logger.warning(msg)
+        self.testlogger.info(msg)
+
+_LOGFINDERS = ["test_", "setup"]
+
+# note that this is a function not a method
+def find_testname(grab_txts=None):
+    grab_txts = grab_txts or _LOGFINDERS
+    for txt in grab_txts:
+        for caller in inspect.stack():
+            name = caller[3]
+            if name.startswith(txt):
+                return name
+    return grab_txts[0]

@@ -82,7 +82,6 @@ import sys
 import logging
 import collections
 import time
-import inspect
 import io
 import traceback
 import datetime
@@ -178,9 +177,6 @@ class LogManager(gp.MonkObject):
         )
         self.log("load LogManager with config:" + str(config))
 
-    def testlog(self, msg):
-        self.testlog.warning(msg)
-
 class LogHandler(gp.MonkObject):
 
     _LOGLEVELS = {
@@ -204,9 +200,10 @@ class LogHandler(gp.MonkObject):
 
     def register(self):
         self.pre_register()
-        self.log("loglevel:{}".format(self.level))
+        self.log("set loglevel (to handler and logger):{}".format(self.level))
         self.handler.setLevel(self._LOGLEVELS[self.level])
-        self.log("format:{}".format(self.format))
+        logging.getLogger(self.target).setLevel(self._LOGLEVELS[self.level])
+        self.log("set format:{}".format(self.format))
         self.handler.setFormatter(logging.Formatter(
             fmt=self.format,
         ))
@@ -214,18 +211,18 @@ class LogHandler(gp.MonkObject):
             self.target,
         ))
         logging.getLogger(self.target).addHandler(self.handler)
-        logging.getLogger(self.target).setLevel(self._LOGLEVELS[self.level])
         self.post_register()
 
     def config_subs(self, txt, subs=None):
         """ replace the strings in the config that we have reasonable values for
         """
         substitutes = subs or {
-                "testcase" : find_testname(),
+                "testcase" : gp.find_testname(),
                 "rootlogger" : "",
                 "suitename" : environ.get("SUITE", "suite"),
                 "datetime" : datetime.datetime.now().strftime("%y%m%d-%H%M%S"),
         }
+        self.log("replaced subs:{}".format(substitutes))
         return txt % substitutes
 
     def pre_register(self):
@@ -233,6 +230,18 @@ class LogHandler(gp.MonkObject):
 
     def post_register(self):
         pass
+
+    def __str__(self):
+        return "{}{}".format(
+            self.__class__.__name__,
+            {
+                "sink" : self.sink,
+                "target" : self.target,
+                "format" : self.format,
+                "level" : self.level,
+                "allHandlersOfMyTarget" : ["me" if h==self.handler else h for h in logging.getLogger(self.target).handlers],
+            },
+        )
 
 
 class StreamHandler(LogHandler):
@@ -285,6 +294,8 @@ class Fixture(gp.MonkObject):
 
     @property
     def firstdev(self):
+        self.log("rertreive firstdev()")
+        self.log("devs:{}:use_dev:{}".format(self.devs, self.use_devs))
         return self.devs.get(self.use_devs[0])
 
     @property
@@ -356,7 +367,8 @@ class Fixture(gp.MonkObject):
         """ update the externally manageable data of this fixture object
         """
         self.testlogger = kwargs.pop("logging", self._logger)
-        self.use_devs = [devname.strip() for devname in kwargs.pop("use_devs", []) if devname]
+        use_devs = kwargs.pop("use_devs", [])
+        self.use_devs = [use_devs] if isinstance(use_devs, str) else [devname.strip() for devname in use_devs if devname]
         if not self.use_devs:
             raise NoDevsChosenException("You need to set a use_devs property to your config file which contains a list of comma separated device names that are defined in your [[conns]] block")
         self.devs = {n:d for n,d in kwargs.items()}
@@ -420,9 +432,9 @@ class Fixture(gp.MonkObject):
         return {k:v for k,v in section.items()}
 
     def parse_logging(self, name, sectype, section):
+        self.log("register all handlers")
         for handler in section.values():
             handler.register()
-        self.testlogger = logging.getLogger(find_testname())
         return self.testlogger
 
     def parse_streamhandler(self, name, sectype, section):
@@ -432,9 +444,6 @@ class Fixture(gp.MonkObject):
     def parse_filehandler(self, name, sectype, section):
         section["name"] = name
         return FileHandler(**section)
-
-    def testlog(self, msg):
-        self.testlogger.warning(msg)
 
     def tear_down(self):
         """ Can be used for explicit destruction of managed objects.
@@ -461,17 +470,5 @@ class Fixture(gp.MonkObject):
         if exception_type and exception_type not in self.ignore_exceptions:
             buff = io.StringIO()
             traceback.print_tb(tb, file=buff)
-            self.testlogger.warning("\n{}:{}:\n{}".format(exception_type.__name__, exception_val, buff.getvalue()))
+            self.testlog("\n{}:{}:\n{}".format(exception_type.__name__, exception_val, buff.getvalue()))
         self.tear_down()
-
-_LOGFINDERS = ["test_", "setup"]
-
-# note that this is a function not a method
-def find_testname(grab_txts=None):
-    grab_txts = grab_txts or _LOGFINDERS
-    for txt in grab_txts:
-        for caller in inspect.stack():
-            name = caller[3]
-            if name.startswith(txt):
-                return name
-    return grab_txts[0]
