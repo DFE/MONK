@@ -135,6 +135,28 @@ class Device(gp.MonkObject):
                 do_retcode=do_retcode,
         )
 
+    def eval_cmd(self, msg, timeout=None, expect=None, do_retcode=True):
+        """ apply the same method from the first connection
+        """
+        self.log("eval_cmd({})".format({
+            "msg" : msg,
+            "timeout" : timeout,
+            "expect" : expect,
+            "do_retcode" : do_retcode,
+        }))
+        return self.firstconn.eval_cmd(msg, timeout, expect, do_retcode)
+
+    def wait_for(self, msg, retries=3, sleep=5, timeout=10):
+        """ apply the same method from the first connection
+        """
+        self.log("wait_for({})".format({
+            "msg" : msg,
+            "retries" : retries,
+            "sleep" : sleep,
+            "timeout" : timeout,
+        }))
+        return self.firstconn.wait_for(msg, retries, sleep, timeout)
+
     def cp(self, src_path, trgt_path):
         """ send files via scp to target device
 

@@ -84,6 +84,16 @@ class TimeoutException(AConnectionException):
     """
     pass
 
+class CmdFailedException(AConnectionException):
+    """ is raised in an eval_cmd() request if the returncode was != 0. The returncode can be parsed from the Exception's message.
+    """
+    pass
+
+class RetriesExceededException(AConnectionException):
+    """ when trying something repeatedly didn't succeed but a more specific reason is not available
+    """
+    pass
+
 #############
 #
 # Connections
@@ -280,6 +290,8 @@ class ConnectionBase(gp.MonkObject):
         # returncode. Therefore make a decision here.
         get_retcode = '; echo "<retcode>$?</retcode>"' if do_retcode else ""
         # strip each line for unnecessary whitespace and delete empty lines
+        if not isinstance(msg, str):
+            raise Exception("what's msg: '{}'".format(msg))
         prepped = "\n".join(line.strip() for line in msg.split("\n") if line.strip())
         out = prepped+get_retcode
         self.log("prepped:'{}'".format(
@@ -333,6 +345,58 @@ class ConnectionBase(gp.MonkObject):
         else:
             self.log("prepped without retcode")
             return None, prepped_out
+
+    def eval_cmd(self, msg, timeout=None, expect=None, do_retcode=True):
+        """ evaluate cmd's returncode and therefore don't return it
+        """
+        self.log("eval_cmd({})".format({
+            "msg" : msg,
+            "timeout" : timeout,
+            "expect" : expect,
+            "do_retcode" : do_retcode,
+        }))
+        rc, out = self.cmd(msg, timeout, expect)
+        if rc not in (0, None):
+            raise CmdFailedException("rc:{};".format(rc))
+        return out
+
+    def wait_for(self, msg, retries=3, sleep=5, timeout=20):
+        """ repeatedly send shell command until output is found
+
+        :param msg: the shell command that should be executed
+        :param retries(3): how often should we try it. should be at least 1, otherwise the loop is not executed.
+        :param sleep(5): the time to wait between requests
+        :param timeout(20): the timeout used for every cmd() request
+        """
+        self.log("wait_for({})".format({
+            "msg" : msg,
+            "retries" : retries,
+            "sleep" : sleep,
+            "timeout" : timeout,
+        }))
+        last_rc, out = None, None
+        for i in range(retries):
+            self.log("wait for successful cmd('{}'), retries {}".format(
+                msg,
+                i,
+            ))
+            try:
+                out = self.eval_cmd(msg, timeout)
+                return out
+            except (CmdFailedException, pexpect.TIMEOUT, pexpect.EOF) as e:
+                self.log("failed with output '{}', waiting for {} seconds".format(
+                    out,
+                    sleep,
+                ))
+                time.sleep(sleep)
+                last_rc = str(e)
+        raise RetriesExceededException({
+            "msg" : str(msg),
+            "retries" : str(retries),
+            "last returncode" : str(last_rc),
+            "last out" : str(out),
+            "sleep" : str(sleep),
+        })
 
     def close(self):
         """ close the connection and get rid of the inner objects
