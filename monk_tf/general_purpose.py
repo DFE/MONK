@@ -44,6 +44,17 @@ class MonkObject(object):
             self.name = None
             return self._logger.name
 
+    @property
+    def logger(self):
+        try:
+            return self._logger
+        except AttributeError as e:
+            self._logger = logging.getLogger("{}.{}".format(
+                self.module,
+                name or self.__class__.__name__,
+            ))
+            return self._logger
+
     @name.setter
     def name(self, name):
         self._logger = logging.getLogger("{}.{}".format(

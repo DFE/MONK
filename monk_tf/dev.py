@@ -123,7 +123,7 @@ class Device(gp.MonkObject):
             msg, expect, timeout, login_timeout, do_retcode))
         if not self.conns:
             self._logger.warning("device has no connections to use for interaction")
-        connection = conn or self.conns[self.use_conns[0]]
+        connection = conn or self.firstconn
         self.log("send cmd '{}' via connection '{}'".format(
             msg,
             connection,
@@ -141,10 +141,16 @@ class Device(gp.MonkObject):
         self.log("eval_cmd({})".format({
             "msg" : msg,
             "timeout" : timeout,
-            "expect" : expect,
+            "expect" : str(expect),
             "do_retcode" : do_retcode,
         }))
-        return self.firstconn.eval_cmd(msg, timeout, expect, do_retcode)
+        connection = self.firstconn
+        return connection.eval_cmd(
+                msg=msg,
+                timeout=timeout,
+                expect=PromptReplacement.replace(connection, expect),
+                do_retcode=do_retcode
+        )
 
     def wait_for(self, msg, retries=3, sleep=5, timeout=10):
         """ apply the same method from the first connection
@@ -203,6 +209,5 @@ class PromptReplacement(object):
             return expect
         if isinstance(expect, Exception):
             return expect
-        if not isinstance(expect, list):
-            expect = list(expect)
-        return [c.prompt if isinstance(e, PromptReplacement) else e for e in expect]
+        result = [c.prompt if isinstance(e, cls) else e for e in expect]
+        return result
