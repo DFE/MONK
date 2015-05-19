@@ -85,6 +85,7 @@ import time
 import io
 import traceback
 import datetime
+import json
 
 import configobj as config
 
@@ -355,7 +356,7 @@ class Fixture(gp.MonkObject):
     def _initialize(self):
         """ Create :term:`MONK` objects based on self's properties.
         """
-        self._logger.debug("initialize with props: " + str(self.props))
+        self._logger.debug("initialize with props: " + str(json.dumps(self.props, indent=4)))
         if not self.props:
             raise NoPropsException("have you created and added any fixture files?")
         parsed = {}
@@ -470,5 +471,10 @@ class Fixture(gp.MonkObject):
         if exception_type and exception_type not in self.ignore_exceptions:
             buff = io.StringIO()
             traceback.print_tb(tb, file=buff)
-            self.testlog("\n{}:{}:\n{}".format(exception_type.__name__, exception_val, buff.getvalue()))
+            self.testlog("\n\n{}:{}:{}:\n{}".format(
+                gp.find_testname(),
+                exception_type.__name__,
+                exception_val,
+                buff.getvalue(),
+            ))
         self.tear_down()

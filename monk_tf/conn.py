@@ -33,6 +33,7 @@ import sys
 import re
 import logging
 import time
+import json
 
 import pexpect
 from pexpect import pxssh
@@ -349,12 +350,12 @@ class ConnectionBase(gp.MonkObject):
     def eval_cmd(self, msg, timeout=None, expect=None, do_retcode=True):
         """ evaluate cmd's returncode and therefore don't return it
         """
-        self.log("eval_cmd({})".format({
-            "msg" : msg,
+        self.log("eval_cmd({})".format(json.dumps({
+            "msg" : str(msg),
             "timeout" : timeout,
-            "expect" : expect,
-            "do_retcode" : do_retcode,
-        }))
+            "expect" : str(expect),
+            "do_retcode" : str(do_retcode),
+        }, indent=4)))
         rc, out = self.cmd(msg, timeout, expect)
         if rc not in (0, None):
             raise CmdFailedException("rc:{};".format(rc))
@@ -368,12 +369,12 @@ class ConnectionBase(gp.MonkObject):
         :param sleep(5): the time to wait between requests
         :param timeout(20): the timeout used for every cmd() request
         """
-        self.log("wait_for({})".format({
+        self.log("wait_for({})".format(json.dumps({
             "msg" : msg,
             "retries" : retries,
             "sleep" : sleep,
             "timeout" : timeout,
-        }))
+        }, indent=4)))
         last_rc, out = None, None
         for i in range(retries):
             self.log("wait for successful cmd('{}'), retries {}".format(
@@ -390,13 +391,13 @@ class ConnectionBase(gp.MonkObject):
                 ))
                 time.sleep(sleep)
                 last_rc = str(e)
-        raise RetriesExceededException({
+        raise RetriesExceededException(json.dumps({
             "msg" : str(msg),
             "retries" : str(retries),
             "last returncode" : str(last_rc),
             "last out" : str(out),
             "sleep" : str(sleep),
-        })
+        }, indent=4))
 
     def close(self):
         """ close the connection and get rid of the inner objects
