@@ -330,12 +330,12 @@ class ConnectionBase(gp.MonkObject):
         prepped_out = str(capture)
         if do_retcode:
             try:
-                match = re.search("\n?<retcode>(\d+)</retcode>.*\n", prepped_out)
+                match = re.search("\n?<retcode>(\d+)</retcode>.*$", prepped_out)
                 self.log("found retcode string '{}'".format(
                     match.group(0),
                 ))
                 retcode = int(match.group(1))
-                prepped_out = prepped_out.replace(match.group(0), "")
+                prepped_out = prepped_out.replace(match.group(0), "").strip()
                 self.log("prepped with retcode")
                 return retcode, prepped_out
             except (AttributeError, IndexError) as e:
@@ -447,7 +447,12 @@ class SerialConn(ConnectionBase):
                 default_timeout=default_timeout,
                 first_prompt_timeout=first_prompt_timeout,
         )
-        self.prompt = prompt
+        self._prompt = prompt
+
+    @property
+    def prompt(self):
+        self.log("I got called correctly")
+        return self._prompt
 
     @property
     def port(self):
@@ -458,14 +463,36 @@ class SerialConn(ConnectionBase):
         self.target = new
 
     def _get_exp(self):
-        spawn = fdpexpect.fdspawn(os.open(self.port, os.O_RDWR|os.O_NONBLOCK|os.O_NOCTTY))
-        self._sendline()
-        self._expect("(?i)login: ")
-        self._sendline(user or self.user)
-        self._expect("(?i)password: ")
-        self._sendline(pw or self.pw)
-        self._expect(self.prompt)
-        return spawn
+        self.log("create fdspawn object")
+        end_time = time.time() + self.first_prompt_timeout
+        while time.time() < end_time:
+            self.log("try creating fdspawn object")
+            try:
+                spawn = fdpexpect.fdspawn(os.open(self.port, os.O_RDWR|os.O_NONBLOCK|os.O_NOCTTY))
+                self.log("sendline")
+                spawn.sendline()
+                self.log("expect prompt or login string")
+                result = spawn.expect([self.prompt, "(?i)login: "])
+                self.log("got ({}) with capture: '{}'".format(
+                    result,
+                    str(spawn.after),
+                ))
+                if result == 1:
+                    self.fail = True
+                    self.log("because not logged in yet, do that")
+                    spawn.sendline(self.user)
+                    self.log("expect password")
+                    spawn.expect("(?i)password: ")
+                    self.log("send pw")
+                    spawn.sendline(self.pw)
+                    self.log("expect prompt")
+                    spawn.expect(self.prompt)
+                return spawn
+            except (pexpect.EOF, pexpect.TIMEOUT) as e:
+                self.log("wait a little before retry creating pxssh object")
+                time.sleep(3)
+        raise CantCreateConn("tried to reach {} for '{}' seconds".format(
+            self.target, self.first_prompt_timeout))
 
     def _login(self, user=None, pw=None):
         self.logger.debug("serial._login({},{})".format(user, pw))
