@@ -178,23 +178,23 @@ class ConnectionBase(gp.MonkObject):
     def _send(self, s):
         """ a wrapper for :pexpect:meth:`spawn.send`
         """
-        self._logger.debug("send({})".format(s))
+        self.log("send({})".format(s))
         try:
             self.exp.send(s)
-            self._logger.debug("send succeeded.")
+            self.log("send succeeded.")
         except Exception as e:
-            self._logger.debug("send failed.")
+            self.log("send failed.")
             raise e
 
     def _sendline(self, s=""):
         """ a wrapper for :pexpect:meth:`spawn.sendline`
         """
-        self._logger.debug("sendline({})".format(s))
+        self.log("sendline({})".format(s))
         try:
             self.exp.sendline(s)
-            self._logger.debug("sendline succeeded.")
+            self.log("sendline succeeded.")
         except Exception as e:
-            self._logger.debug("sendline failed.(has pexpect? {})".format(
+            self.log("sendline failed.(has pexpect? {})".format(
                         "yes" if self.exp else "no",
             ))
             raise e
@@ -221,7 +221,7 @@ class ConnectionBase(gp.MonkObject):
             self.log("try prompt")
             try:
                 self.expect_prompt(timeout)
-                self._logger.debug("ready")
+                self.log("ready")
                 self._exp.after = b''
                 return
             except (pexpect.EOF, pexpect.TIMEOUT) as e:
@@ -244,12 +244,12 @@ class ConnectionBase(gp.MonkObject):
         :param do_retcode: boolean which says whether or not a returncode
                            should be retreived.
         """
-        self._logger.debug("START cmd({},{},{},{})".format(
-            msg,
-            expect,
-            timeout or self.default_timeout,
-            do_retcode,
-        ))
+        self.log("START cmd({})".format(json.dumps({
+            "msg" : msg,
+            "expect" : str(expect),
+            "timeout" : timeout or self.default_timeout,
+            "do_retcode" : do_retcode,
+        }, indent=4)))
         self.wait_for_prompt(self.first_prompt_timeout)
         prepped_msg = self._prep_cmdmessage(msg, do_retcode)
         self._sendline(prepped_msg)
@@ -259,20 +259,21 @@ class ConnectionBase(gp.MonkObject):
             self.log("caught EOF/TIMEOUT on last expect; closing connections")
             self.close()
             raise e
-        out = self._prep_cmdoutput(
+        rc, out = self._prep_cmdoutput(
                 out=self.exp.before.decode(),
                 cmd_expect=prepped_msg,
                 do_retcode=do_retcode,
         )
-        self._logger.info("SUCCESSFULLY SENT CMD: cmd('{}') result='{}' expect-match='{}'".format(
+        self.logger.info("SUCCESSFULLY SENT CMD: cmd('{}') rc='{}' result='{}' expect-match='{}'".format(
             str(msg),
-            str(out[1]),
+            str(rc),
+            str(out),
             str(self.exp.after).replace("b'","").replace("'",""),
         ))
         if self.exp.after in (pexpect.TIMEOUT, pexpect.EOF):
             self.log("connection is down, let's close it")
             self.close()
-        return out
+        return rc, out
 
     def _prep_cmdmessage(self, msg, do_retcode=True):
         """ prepares a command message before it is delivered to pexpect
@@ -338,7 +339,7 @@ class ConnectionBase(gp.MonkObject):
                 self.log("prepped with retcode")
                 return retcode, prepped_out
             except (AttributeError, IndexError) as e:
-                self._logger.exception(e)
+                self.logger.exception(e)
                 raise NoRetcodeException("failed to find retcode with '{}'. Formatted output:'{}'".format(
                             e.__class__.__name__,
                             prepped_out,
@@ -467,7 +468,7 @@ class SerialConn(ConnectionBase):
         return spawn
 
     def _login(self, user=None, pw=None):
-        self._logger.debug("serial._login({},{})".format(user, pw))
+        self.logger.debug("serial._login({},{})".format(user, pw))
 
 class pxsshWorkaround(pxssh.pxssh):
     """ just to add that echo=False """
@@ -513,7 +514,7 @@ class SshConn(ConnectionBase):
         self.force_password = force_password
         self.login_timeout = int(login_timeout)
         if prompt:
-            self._logger.warning("ssh connection ignores attribute prompt, because it sets its own prompt")
+            self.logger.warning("ssh connection ignores attribute prompt, because it sets its own prompt")
 
     @property
     def host(self):
@@ -558,10 +559,10 @@ class SshConn(ConnectionBase):
                 s = pxsshWorkaround(echo=False)
                 s.force_password = self.force_password
                 s.login(
-                        server=self.host,
-                        username=self.user,
-                        password=self.pw,
-                        login_timeout=self.login_timeout,
+                    server=self.host,
+                    username=self.user,
+                    password=self.pw,
+                    login_timeout=self.login_timeout,
                 )
                 return s
             except (pxssh.ExceptionPxssh, pexpect.EOF, pexpect.TIMEOUT) as e:
@@ -582,7 +583,7 @@ class SshConn(ConnectionBase):
                 self._exp.logout()
         except (Exception) as e:
             self.log("while logging out caught the following exception, can often be ignored")
-            self._logger.exception(e)
+            self.logger.exception(e)
             del self._exp
         super(SshConn, self).close()
 
