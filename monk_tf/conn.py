@@ -70,7 +70,7 @@ class NoBCCException(BccException):
     """
     pass
 
-class CantCreateConn(AConnectionException):
+class CantCreateConnException(AConnectionException):
     """ is raised when even several attempt were not able to create a connection.
     """
     pass
@@ -556,7 +556,7 @@ class SshConn(ConnectionBase):
         self.log("retreive ssh PROMPT")
         return self.exp.PROMPT
 
-    def cp(self, src_path, trgt_path):
+    def cp(self, src_path, trgt_path, retry=5, sleep=5, timeout=10):
         """ send files via scp to target device
 
         :param src_path: the path to the file on the host machine
@@ -566,16 +566,27 @@ class SshConn(ConnectionBase):
             src_path,
             trgt_path,
         ))
-        spawn = pexpect.spawn("scp {} {}@{}:{}".format(
-            src_path,
-            self.user,
-            self.target,
-            trgt_path,
-        ))
-        spawn.expect("assword: ")
-        spawn.sendline(self.pw)
-        spawn.expect(pexpect.EOF)
-        self.log("sending file succeeded")
+        for i in range(1, retry+1):
+            spawn = pexpect.spawnu("scp {} {}@{}:{}".format(
+                src_path,
+                self.user,
+                self.target,
+                trgt_path,
+            ))
+            spawn.expect("assword: ")
+            spawn.sendline(self.pw)
+            spawn.expect(pexpect.EOF, timeout=timeout)
+            spawn.close()
+            if spawn.exitstatus == 0 and self.signalstatus == None:
+                self.log("sending file succeeded")
+                return
+            else:
+                self.log("sending file failed (exit:{};signal:{};waitpidcode:{}), retry ".format(
+                    spawn.exitstatus,
+                    spawn.signalstatus,
+                    spawn.status,
+                    i,
+                ))
 
     def _get_exp(self):
         self.log("create pxssh object")

@@ -93,6 +93,7 @@ class Device(gp.MonkObject):
         use_conns = kwargs.pop("use_conns", [])
         self.use_conns = [use_conns] if isinstance(use_conns, str) else [cname.strip() for cname in use_conns if cname]
         self.conns = kwargs.pop("conns", {})
+        self.fallback_conn = kwargs.pop("fallback_conn", self.conns["serial1"] if "serial1" in self.conns else None)
         self.prompt = PromptReplacement()
 
     @property
@@ -100,7 +101,7 @@ class Device(gp.MonkObject):
         return self.conns.get(self.use_conns[0])
 
     def cmd(self, msg, expect=None, timeout=30, login_timeout=None,
-            do_retcode=True, conn=None):
+            do_retcode=True, fallback_conn=None, conn=None):
         """ Send a :term:`shell command` to the :term:`target device`.
 
         :param msg: the :term:`shell command`.
@@ -113,6 +114,9 @@ class Device(gp.MonkObject):
                         :py:exception:`pexpect.Timeout` Exception.
 
         :param do_retcode: should this command retreive a returncode
+
+        :param fallback_conn: use this connection to reboot 
+                     command.
 
         :param conn: the name of the connection that should be used for this
                      command.
@@ -128,12 +132,28 @@ class Device(gp.MonkObject):
             msg,
             connection,
         ))
-        return connection.cmd(
-                msg=msg,
-                expect=PromptReplacement.replace(connection, expect),
-                timeout=timeout,
-                do_retcode=do_retcode,
-        )
+        try:
+            return connection.cmd(
+                    msg=msg,
+                    expect=PromptReplacement.replace(connection, expect),
+                    timeout=timeout,
+                    do_retcode=do_retcode,
+            )
+        except mc.CantCreateConnException as e:
+            fb = fallback_conn or self.fallback_conn
+            if not fb:
+                self.log("couldn't find a fallback connection, sorry")
+                raise e
+            fb.cmd("reboot")
+            time.sleep(20)
+            return connection.cmd(
+                    msg=msg,
+                    expect=PromptReplacement.replace(connection, expect),
+                    timeout=timeout,
+                    do_retcode=do_retcode,
+            )
+            
+
 
     def eval_cmd(self, msg, timeout=None, expect=None, do_retcode=True):
         """ apply the same method from the first connection
