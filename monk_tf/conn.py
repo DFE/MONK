@@ -577,7 +577,7 @@ class SshConn(ConnectionBase):
             spawn.sendline(self.pw)
             spawn.expect(pexpect.EOF, timeout=timeout)
             spawn.close()
-            if spawn.exitstatus == 0 and self.signalstatus == None:
+            if spawn.exitstatus == 0 and spawn.signalstatus == None:
                 self.log("sending file succeeded")
                 return
             else:
