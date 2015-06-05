@@ -43,6 +43,7 @@ import pexpect
 
 import monk_tf.general_purpose as gp
 import monk_tf.conn
+import monk_tf.conn as mc
 
 logger = logging.getLogger(__name__)
 
