@@ -606,7 +606,7 @@ class SshConn(ConnectionBase):
             except (pxssh.ExceptionPxssh, pexpect.EOF, pexpect.TIMEOUT) as e:
                 self.log("wait a little before retry creating pxssh object")
                 time.sleep(3)
-        raise CantCreateConn("tried to reach {} for '{}' seconds".format(
+        raise CantCreateConnException("tried to reach {} for '{}' seconds".format(
             self.target, self.first_prompt_timeout))
 
     def expect_prompt(self, timeout=None):
