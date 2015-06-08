@@ -133,27 +133,12 @@ class Device(gp.MonkObject):
             msg,
             connection,
         ))
-        try:
-            return connection.cmd(
-                    msg=msg,
-                    expect=PromptReplacement.replace(connection, expect),
-                    timeout=timeout,
-                    do_retcode=do_retcode,
-            )
-        except mc.CantCreateConnException as e:
-            fb = fallback_conn or self.fallback_conn
-            if not fb:
-                self.log("couldn't find a fallback connection, sorry")
-                raise e
-            fb.cmd("reboot")
-            time.sleep(20)
-            return connection.cmd(
-                    msg=msg,
-                    expect=PromptReplacement.replace(connection, expect),
-                    timeout=timeout,
-                    do_retcode=do_retcode,
-            )
-            
+        return connection.cmd(
+                msg=msg,
+                expect=PromptReplacement.replace(connection, expect),
+                timeout=timeout,
+                do_retcode=do_retcode,
+        )
 
 
     def eval_cmd(self, msg, timeout=None, expect=None, do_retcode=True):
