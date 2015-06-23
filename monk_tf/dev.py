@@ -2,7 +2,7 @@
 #
 # MONK automated test framework
 #
-# Copyright (C) 2013 DResearch Fahrzeugelektronik GmbH
+# Copyright (C) 2013, 2014, 2015 DResearch Fahrzeugelektronik GmbH
 # Written and maintained by MONK Developers <project-monk@dresearch-fe.de>
 #
 # This program is free software; you can redistribute it and/or
@@ -41,7 +41,9 @@ import json
 import requests
 import pexpect
 
+import monk_tf.general_purpose as gp
 import monk_tf.conn
+import monk_tf.conn as mc
 
 logger = logging.getLogger(__name__)
 
@@ -51,14 +53,8 @@ logger = logging.getLogger(__name__)
 #
 ############
 
-class ADeviceException(Exception):
+class ADeviceException(gp.MonkException):
     """ Base class for exceptions of the device layer.
-    """
-    pass
-
-class CantHandleException(ADeviceException):
-    """ is raised when a request cannot be handled by the connections of a
-    :py:class:`~monk_tf.dev.Device`.
     """
     pass
 
@@ -79,7 +75,7 @@ class WrongNameException(ADeviceException):
 #
 ##############################
 
-class Device(object):
+class Device(gp.MonkObject):
     """ is the API abstraction of a :term:`target device`.
     """
 
@@ -91,20 +87,22 @@ class Device(object):
 
         :param name: Device name for logging purposes.
         """
-        self._logger = logging.getLogger(kwargs.pop("name", self.__class__.__name__))
-        self.conns = kwargs.pop("conns", list(args))
-        self._conns_dict = {}
+        super(Device, self).__init__(
+                name=kwargs.pop("name",None),
+                module=__name__,
+        )
+        use_conns = kwargs.pop("use_conns", [])
+        self.use_conns = [use_conns] if isinstance(use_conns, str) else [cname.strip() for cname in use_conns if cname]
+        self.conns = kwargs.pop("conns", {})
+        self.fallback_conn = kwargs.pop("fallback_conn", self.conns["serial1"] if "serial1" in self.conns else None)
         self.prompt = PromptReplacement()
 
     @property
-    def name(self):
-        return self._logger.name
+    def firstconn(self):
+        return self.conns.get(self.use_conns[0])
 
-    @name.setter
-    def name(self, new_name):
-        self._logger.name = new_name
-
-    def cmd(self, msg, expect=None, timeout=30, login_timeout=None, do_retcode=True):
+    def cmd(self, msg, expect=None, timeout=30, login_timeout=None,
+            do_retcode=True, fallback_conn=None, conn=None):
         """ Send a :term:`shell command` to the :term:`target device`.
 
         :param msg: the :term:`shell command`.
@@ -118,32 +116,58 @@ class Device(object):
 
         :param do_retcode: should this command retreive a returncode
 
+        :param fallback_conn: use this connection to reboot 
+                     command.
+
+        :param conn: the name of the connection that should be used for this
+                     command.
+
         :return: :term:`returncode`, :term:`standard output` of the shell command
         """
         self.log("cmd({},{},{},{},{})".format(
             msg, expect, timeout, login_timeout, do_retcode))
         if not self.conns:
             self._logger.warning("device has no connections to use for interaction")
-        for connection in self.conns:
-            try:
-                self.log("send cmd '{}' via connection '{}'".format(
-                    msg,
-                    connection,
-                ))
-                return connection.cmd(
-                        msg=msg,
-                        expect=PromptReplacement.replace(connection, expect),
-                        timeout=timeout,
-                        do_retcode=do_retcode,
-                )
-            except Exception as e:
-                self._logger.exception(e)
-        raise CantHandleException(
-                "dev:'{}',conns:'{}':could not send cmd '{}'".format(
-                    self.name,
-                    list(map(str, self.conns)),
-                    msg,
+        connection = conn or self.firstconn
+        self.log("send cmd '{}' via connection '{}'".format(
+            msg,
+            connection,
         ))
+        return connection.cmd(
+                msg=msg,
+                expect=PromptReplacement.replace(connection, expect),
+                timeout=timeout,
+                do_retcode=do_retcode,
+        )
+
+
+    def eval_cmd(self, msg, timeout=None, expect=None, do_retcode=True):
+        """ apply the same method from the first connection
+        """
+        self.log("eval_cmd({})".format({
+            "msg" : msg,
+            "timeout" : timeout,
+            "expect" : str(expect),
+            "do_retcode" : do_retcode,
+        }))
+        connection = self.firstconn
+        return connection.eval_cmd(
+                msg=msg,
+                timeout=timeout,
+                expect=PromptReplacement.replace(connection, expect),
+                do_retcode=do_retcode
+        )
+
+    def wait_for(self, msg, retries=3, sleep=5, timeout=10):
+        """ apply the same method from the first connection
+        """
+        self.log("wait_for({})".format({
+            "msg" : msg,
+            "retries" : retries,
+            "sleep" : sleep,
+            "timeout" : timeout,
+        }))
+        return self.firstconn.wait_for(msg, retries, sleep, timeout)
 
     def cp(self, src_path, trgt_path):
         """ send files via scp to target device
@@ -155,53 +179,14 @@ class Device(object):
             src_path,
             trgt_path,
         ))
-        self.get_conn("ssh1").cp(src_path, trgt_path)
+        self.conns.get("ssh1").cp(src_path, trgt_path)
         self.log("sending file succeeded")
-
-    def get_conn(self, which):
-        """ retreive a connection by its name
-
-        :param which: the name of the connection
-        :return: the connection object that was requested
-        """
-        self.log("get_conn({})".format(which))
-        try:
-            return self.conns[which]
-        except TypeError:
-            try:
-                return self._conns_dict[which]
-            except KeyError:
-                names = []
-                for conn in self.conns:
-                    if conn.name == which:
-                        self.log("cache conn in dict:" + which)
-                        self._conns_dict[which] = conn
-                        return conn
-                    else:
-                        names.append(conn.name)
-                raise WrongNameException("Couldn't retreive connection with name '{}'. Available names are: {}".format(which, names))
-
-    def log(self, msg):
-        """ sends a debug-level message to the logger
-
-        This method is used so often, that a smaller version of it is quite
-        comfortable.
-        """
-        self._logger.debug(msg)
-
-    def testlog(self, msg):
-        """ sends a warning-level message to the logger
-
-        This method is used mostly in the test cases, that a smaller version
-        of it is quite comfortable.
-        """
-        self._logger.warning(msg)
 
     def close_all(self):
         """ loop through all connections calling :py:meth:`~monk_tf.conn.ConnectionBase.close`.
         """
         self.log("close_all()")
-        for c in self.conns:
+        for c in self.conns.values():
             c.close()
 
     def __str__(self):
@@ -210,6 +195,7 @@ class Device(object):
                 [str(c) for c in self.conns],
                 self.name,
         )
+
 #########
 #
 # Helpers
@@ -229,6 +215,5 @@ class PromptReplacement(object):
             return expect
         if isinstance(expect, Exception):
             return expect
-        if not isinstance(expect, list):
-            expect = list(expect)
-        return [c.prompt if isinstance(e, PromptReplacement) else e for e in expect]
+        result = [c.prompt if isinstance(e, cls) else e for e in expect]
+        return result

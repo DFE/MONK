@@ -82,15 +82,16 @@ import sys
 import logging
 import collections
 import time
-import inspect
 import io
 import traceback
 import datetime
+import json
 
 import configobj as config
 
-import monk_tf.conn as conn
-import monk_tf.dev as dev
+import monk_tf.general_purpose as gp
+import monk_tf.conn as mc
+import monk_tf.dev as md
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +101,7 @@ logger = logging.getLogger(__name__)
 #
 ############
 
-class AFixtureException(Exception):
+class AFixtureException(gp.MonkException):
     """ Base class for exceptions of the fixture layer.
 
     If you want to make sure that you catch all exceptions that are related
@@ -110,8 +111,20 @@ class AFixtureException(Exception):
     """
     pass
 
-class CantHandleException(AFixtureException):
-    """ if none of the devices is able to handle a cmd_any() call
+class NoDevsChosenException(AFixtureException):
+    """ If the use_devs attribute is not set this is raised
+    """
+    pass
+
+class NoSectypeException(AFixtureException):
+    """ If no name can be derived from parsing a section
+    """
+    pass
+
+class NoDevicesDefinedException(AFixtureException):
+    """ is raised when we found out that there are no devices.
+
+    Currently it makes no sense to use a fixture without devices.
     """
     pass
 
@@ -152,11 +165,20 @@ class UnknownTypeException(AFixtureException):
 #
 ##############################################################
 
-class LogManager(object):
+class LogManager(gp.MonkObject):
     """ managing configuration and setup of logging mechanics
 
     Might strongly interact with your nose config or similar.
     """
+
+    def __init__(self, **config):
+        super(LogManager, self).__init__(
+                name=config.pop("name",None),
+                module=__name__,
+        )
+        self.log("load LogManager with config:" + str(config))
+
+class LogHandler(gp.MonkObject):
 
     _LOGLEVELS = {
         "CRITICAL": logging.CRITICAL,
@@ -167,83 +189,79 @@ class LogManager(object):
         "NOTSET": logging.NOTSET,
     }
 
-    # this list is hierarchical, if the first prefix succeeds the others aren't
-    # tried
-    _LOGFINDERS = ["test_", "setup"]
+    def __init__(self, name, sink, target, format, level):
+        super(LogHandler, self).__init__(
+                name=name,
+                module=__name__,
+        )
+        self.sink = sink
+        self.target = self.config_subs(target)
+        self.format = format
+        self.level = level
 
-    def __init__(self, config):
-        self.log("load LogManager with config:" + str(config))
-        for hname, handler in config.items():
-            self.log("create:{}:{}".format(hname, handler))
-            # replace possible target strings, like the name of the testcase
-            target = self.config_subs(handler["target"])
-            hobj=None
-            if handler["type"] == "StreamHandler":
-                # workaround for strange nose handlers
-                for h in logging.getLogger(target).handlers:
-                    if isinstance(h, logging.StreamHandler):
-                        logging.getLogger(target).removeHandler(h)
-                stream = sys.stdout if handler["sink"] == "stdout" else sys.stderr
-                self.log("stream:" + str(sys.stdout))
-                hobj = logging.StreamHandler(stream)
-            elif handler["type"] == "FileHandler":
-                self.log("file:" + str(handler["sink"]))
-                hobj = logging.FileHandler(self.config_subs(handler["sink"]))
-            else:
-                raise UnknownTypeException("handler of type {} unfamiliar, spelling error?".format(handler["type"]))
-            self.log("loglevel:{}".format(self._LOGLEVELS[handler["level"]]))
-            hobj.setLevel(self._LOGLEVELS[handler["level"]])
-            self.log("format:{}".format(handler["format"]))
-            hobj.setFormatter(logging.Formatter(
-                fmt=handler["format"],
-            ))
-            self.log("add handler '{}' (obj:{}) to logger '{}' (unformatted target '{}')".format(
-                hname,
-                hobj,
-                target,
-                handler["target"],
-            ))
-            logging.getLogger(target).addHandler(hobj)
-            logging.getLogger(target).setLevel(
-                    self._LOGLEVELS[handler["level"]])
-        self.log("done with all log handlers")
+    def register(self):
+        self.pre_register()
+        self.log("set loglevel (to handler and logger):{}".format(self.level))
+        self.handler.setLevel(self._LOGLEVELS[self.level])
+        logging.getLogger(self.target).setLevel(self._LOGLEVELS[self.level])
+        self.log("set format:{}".format(self.format))
+        self.handler.setFormatter(logging.Formatter(
+            fmt=self.format,
+        ))
+        self.log("register at logger '{}'".format(
+            self.target,
+        ))
+        logging.getLogger(self.target).addHandler(self.handler)
+        self.post_register()
 
     def config_subs(self, txt, subs=None):
         """ replace the strings in the config that we have reasonable values for
         """
         substitutes = subs or {
-                "testcase" : self.find_testname(),
+                "testcase" : gp.find_testname(),
                 "rootlogger" : "",
                 "suitename" : environ.get("SUITE", "suite"),
                 "datetime" : datetime.datetime.now().strftime("%y%m%d-%H%M%S"),
         }
+        self.log("replaced subs:{}".format(substitutes))
         return txt % substitutes
 
-    def log(self, msg):
-        logging.getLogger(self.__class__.__name__).debug(msg)
+    def pre_register(self):
+        pass
 
-    def testlog(self, msg):
-        self.testlog.warning(msg)
+    def post_register(self):
+        pass
 
-    @property
-    def testlogger(self):
-        try:
-            return self._testlogger
-        except:
-            self._testlogger = logging.getLogger(self.find_testname())
-            return self._testlogger
+    def __str__(self):
+        return "{}{}".format(
+            self.__class__.__name__,
+            {
+                "sink" : self.sink,
+                "target" : self.target,
+                "format" : self.format,
+                "level" : self.level,
+                "allHandlersOfMyTarget" : ["me" if h==self.handler else h for h in logging.getLogger(self.target).handlers],
+            },
+        )
 
-    def find_testname(self, grab_txts=None):
-        grab_txts = grab_txts or self._LOGFINDERS
-        for txt in grab_txts:
-            for caller in inspect.stack():
-                name = caller[3]
-                if name.startswith(txt):
-                    return name
-        self.log("haven't found a test name, but I also don't want the root logger")
-        return grab_txts[0]
 
-class Fixture(object):
+class StreamHandler(LogHandler):
+    def pre_register(self):
+        # workaround for strange nose handlers
+        for h in logging.getLogger(self.target).handlers:
+            if isinstance(h, logging.StreamHandler):
+                logging.getLogger(self.target).removeHandler(h)
+        stream = sys.stdout if self.sink == "stdout" else sys.stderr
+        self.log("stream:" + str(sys.stdout))
+        self.handler = logging.StreamHandler(stream)
+
+class FileHandler(LogHandler):
+    def pre_register(self):
+        self.handler = logging.FileHandler(self.config_subs(self.sink))
+
+
+
+class Fixture(gp.MonkObject):
     """ Creates :term:`MONK` objects based on dictionary like objects.
 
     Use this class if you want to seperate the details of your MONK objects
@@ -251,72 +269,71 @@ class Fixture(object):
     described above.
     """
 
-    _DEFAULT_CLASSES = {
-        "Device" : dev.Device,
-        "SerialConnection" : conn.SerialConn,
-        "SshConnection" : conn.SshConn,
-        "logging" : LogManager,
-    }
 
-    _DEFAULT_DEBUG_SOURCE = "MONK_DEBUG_SOURCE"
-
-    def __init__(self, call_location, name=None, classes=None,
-            fixture_locations=None):
+    def __init__(self, call_location, name=None,
+            fixture_locations=None, parsers=None):
         """
-
         :param call_location: the __file__ from where this is called.
 
-        :param classes: A :py:class:`dict` of classes to class names. Used for
-                        parsing the type attribute in
-                        :term:`fixture files<fixture file>`.
-
+        :param parsers: a dictionary of name:parser_function pairs that can
+                        interpret a fixture file section and generate an object
+                        based on that.
 
         :param fixture_locations: where to look for fixture files
         """
+        super(Fixture, self).__init__(
+            name=name,
+            module=__name__,
+        )
         self.call_location = call_location
         self.call_path = op.dirname(op.abspath(self.call_location))
-        self._logger = logging.getLogger("{}:{}".format(
-            __name__,
-            name or self.__class__.__name__,
-        ))
-        self.devs = []
-        self._devs_dict = {}
+        self.devs = {}
         self.ignore_exceptions = []
-        self.classes = classes or self._DEFAULT_CLASSES
         self.props = config.ConfigObj()
         self.fixture_locations = fixture_locations or self.default_fixturelocations()
         self.read(loc for loc in self.fixture_locations if op.isfile(loc))
 
+    @property
+    def firstdev(self):
+        self.log("rertreive firstdev()")
+        self.log("devs:{}:use_dev:{}".format(self.devs, self.use_devs))
+        return self.devs.get(self.use_devs[0])
+
+    @property
+    def parsers(self):
+        try:
+            return self._parsers
+        except AttributeError:
+            # trigger default setting
+            self.parsers = None
+            return self._parsers
+
+
+    def default_parsers(self):
+        return {
+            "Device" : self.parse_device,
+            "conns" : self.parse_conns,
+            "SshConnection" : self.parse_sshconn,
+            "SerialConnection" : self.parse_serialconn,
+            "logging" : self.parse_logging,
+            "StreamHandler" : self.parse_streamhandler,
+            "FileHandler" : self.parse_filehandler,
+        }
+
+    @parsers.setter
+    def parsers(self, parsers):
+        self._parsers = parsers or self.default_parsers()
+
     def default_fixturelocations(self):
-        # this is preferred over a list/dict, because some paths need to be set
-        # dynamically!
+        """ this is preferred over a list/dict
+
+        because some paths need to be set dynamically!
+        """
         locs = [
-                self.call_path + "/../fixture.cfg",
+            self.call_path + "/../fixture.cfg",
         ]
         self.log("read default fixturelocations: {}".format(self, locs))
         return locs
-
-    @property
-    def name(self):
-        """ the fixture object's and the logger's name
-        """
-        return self._logger.name
-
-    @name.setter
-    def name(self, new_name):
-        self._logger = logging.getLogger(new_name)
-
-    def _parent_dirs(self, path):
-        """ generate parent directories for path
-        """
-        while True:
-            yield path
-            mem = op.dirname(path)
-            if path == mem:
-                break
-            else:
-                path = mem
-
 
     def read(self, sources):
         """ Read more data, either as a file name or as a parser.
@@ -328,7 +345,7 @@ class Fixture(object):
         :return: self
         """
         self.log("read: " + str(sources))
-        self.log("make sure that you are teared down completely before getting started")
+        self.log("deactivate everything before updating data")
         self.tear_down()
         for source in sources:
             self.log("merge source: '{}'".format(source))
@@ -339,88 +356,95 @@ class Fixture(object):
     def _initialize(self):
         """ Create :term:`MONK` objects based on self's properties.
         """
-        self._logger.debug("initialize with props: " + str(self.props))
-        if self.props:
-            self.devs = [self._parse_section(d, self.props[d]) for d in self.props]
-            # TODO workaround because logging stuff produces None element(s)
-            self.devs = [d for d in self.devs if d]
-        else:
-            raise NoPropsException("have you created any fixture files?")
+        self._logger.debug("initialize with props: " + str(json.dumps(self.props, indent=4)))
+        if not self.props:
+            raise NoPropsException("have you created and added any fixture files?")
+        parsed = {}
+        for name, value in self.props.items():
+            parsed[name] = self._parse_section(name, value)
+        self.update(**parsed)
+
+    def update(self, **kwargs):
+        """ update the externally manageable data of this fixture object
+        """
+        self.testlogger = kwargs.pop("logging", self._logger)
+        use_devs = kwargs.pop("use_devs", [])
+        self.use_devs = [use_devs] if isinstance(use_devs, str) else [devname.strip() for devname in use_devs if devname]
+        if not self.use_devs:
+            raise NoDevsChosenException("You need to set a use_devs property to your config file which contains a list of comma separated device names that are defined in your [[conns]] block")
+        self.devs = {n:d for n,d in kwargs.items()}
+
+    def _find_sectype(self, name, section):
+        """ try to retrieve the section type, preferably by name
+
+        :param name: the name of the section and a possible source of the type
+
+        :param section: a dictionary, containing all the attributes necessary
+                        to create an object of the sectype. If it contains a
+                        "type" property this can be used to identify the type.
+
+        :return: the section type, as expected as key for fixture.parsers
+        """
+        try:
+            return name if name in self.parsers else section.pop("type")
+        except KeyError:
+            raise NoSectypeException("for section {}:\n{}".format(name, section))
 
     def _parse_section(self, name, section):
-        self._logger.debug("parse_section({},{},{})".format(
-            str(name),
-            type(section).__name__,
-            list(section.keys()),
-        ))
-        # TODO special cases suck, improve!
-        if name == "logging":
-            self.logmanager = self.classes["logging"](section)
-            return
-        # TODO section parsing should be wrapped in handlers
-        #      so that they can be extended without overwrites
+        """ parse a deep dictionary depth first, generate objects bottom up
+
+        :name: the name of the current section
+        :section: the dictionary containing
+
+        :return: the object that is generated by this section
+        """
         try:
-            sectype = self.classes[section.pop("type")]
-        except KeyError as e:
-            self.log("section has no type, trying the name")
-            try:
-                sectype = self.classes[name]
-            except KeyError as e:
-                self.log("section {} has no type, therefore it is assumed to only contain data, no further parsing will be applied".format(name))
-                return section
-        if "conns" in section:
-            cs = section.pop("conns")
-            section["conns"] = [self._parse_section(s, cs[s]) for s in cs]
-        if "bcc" in section:
-            self.log("DEPRECATED: Use bctrl instead of bcc")
-            bs = section.pop("bcc")
-            section["bctrl"] = self._parse_section("bctrl", bs)
-        if "bctrl" in section:
-            bs = section.pop("bctrl")
-            section["bctrl"] = self._parse_section("bctrl", bs)
-        if "api" in section:
-            bs = section.pop("api")
-            section["api"] = self._parse_section("api", bs)
-        if "auth" in section:
-            bs = section.pop("auth")
-            section["auth"] = self._parse_section("auth", bs)
+            self._logger.debug("parse_section({},{},{})".format(
+                str(name),
+                type(section).__name__,
+                list(section.keys()),
+            ))
+        except AttributeError as e:
+            # duck tested that this is not a dcitionary.
+            # Non dictionaries are normal types like str or int.
+            # So they are just returned, because they don't need parsing.
+            return section
+        # sectype often means the resulting object type, e.g. SshConn
+        sectype=self._find_sectype(name, section)
+        # first parse section's properties, then apply them
+        self.log("traverse subsections iteratively")
+        section = {k:self._parse_section(k,v) for k,v in section.items()}
+        self.log("create object for section")
+        return self.parsers[sectype](name, sectype, section)
+
+    def parse_serialconn(self, name, sectype, section):
         section["name"] = name
-        self.log("load section:" + str(sectype) + "," + str(section))
-        return sectype(**section)
+        return mc.SerialConn(**section)
 
-    @property
-    def testlogger(self):
-        if hasattr(self, "logmanager"):
-            return self.logmanager.testlogger
-        else:
-            self.log("couldn't find logmanager, use my own")
-            return self._logger
+    def parse_sshconn(self, name, sectype, section):
+        section["name"] = name
+        return mc.SshConn(**section)
 
-    def get_dev(self, which):
-        """ if there are many devices, retreive one by name
-        """
-        try:
-            return self.devs[which]
-        except TypeError:
-            try:
-                return self._devs_dict[which]
-            except KeyError:
-                names = []
-                for dev in self.devs:
-                    if dev.name == which:
-                        self._devs_dict[which] = dev
-                        return dev
-                    else:
-                        names.append(dev.name)
-                raise WrongNameException("Couldn't retreive connection with name '{}'. Available names are: {}".format(which, names))
+    def parse_device(self, name, sectype, section):
+        section["name"] = name
+        return md.Device(**section)
 
-    def log(self, msg):
-        """ helper for the fixture object's logger to send debug messages
-        """
-        self._logger.debug(msg)
+    def parse_conns(self, name, sectype, section):
+        return {k:v for k,v in section.items()}
 
-    def testlog(self, msg):
-        self.testlogger.warning(msg)
+    def parse_logging(self, name, sectype, section):
+        self.log("register all handlers")
+        for handler in section.values():
+            handler.register()
+        return self.testlogger
+
+    def parse_streamhandler(self, name, sectype, section):
+        section["name"] = name
+        return StreamHandler(**section)
+
+    def parse_filehandler(self, name, sectype, section):
+        section["name"] = name
+        return FileHandler(**section)
 
     def tear_down(self):
         """ Can be used for explicit destruction of managed objects.
@@ -429,25 +453,28 @@ class Fixture(object):
 
         """
         self.log("teardown")
-        for device in self.devs:
+        for name, device in self.devs.items():
             device.close_all()
-        self.devs = []
 
     def __str__(self):
-        return "{cls}.devs:{devs}".format(
-                cls=self.__class__.__name__,
-                devs=[str(d) for d in self.devs],
-        )
+        if hasattr(self, "devs") and self.devs:
+            return str(self.devs)
+        else:
+            return repr(self)
 
     def __enter__(self):
         self.log("__enter__ ")
-        return [self] + list(self.devs) + [self.testlogger]
-
+        return [self, self.firstdev, self.testlogger]
 
     def __exit__(self, exception_type, exception_val, tb):
         self.log("__exit__ ")
         if exception_type and exception_type not in self.ignore_exceptions:
             buff = io.StringIO()
             traceback.print_tb(tb, file=buff)
-            self.testlogger.warning("\n{}:{}:\n{}".format(exception_type.__name__, exception_val, buff.getvalue()))
+            self.testlog("\n\n{}:{}:{}:\n{}".format(
+                gp.find_testname(),
+                exception_type.__name__,
+                exception_val,
+                buff.getvalue(),
+            ))
         self.tear_down()
