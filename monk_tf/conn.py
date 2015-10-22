@@ -178,7 +178,7 @@ class ConnectionBase(gp.MonkObject):
     def _send(self, s):
         """ a wrapper for :pexpect:meth:`spawn.send`
         """
-        self.log("send({})".format(s))
+        self.log("send('{}' to {})".format(s, self.target))
         try:
             self.exp.send(s)
             self.log("send succeeded.")
@@ -189,7 +189,7 @@ class ConnectionBase(gp.MonkObject):
     def _sendline(self, s=""):
         """ a wrapper for :pexpect:meth:`spawn.sendline`
         """
-        self.log("sendline({})".format(s))
+        self.log("sendline('{}' to {})".format(s, self.target))
         try:
             self.exp.sendline(s)
             self.log("sendline succeeded.")
@@ -339,6 +339,7 @@ class ConnectionBase(gp.MonkObject):
                 self.log("prepped with retcode")
                 return retcode, prepped_out
             except (AttributeError, IndexError) as e:
+                self.log(str(self._exp))
                 self.logger.exception(e)
                 raise NoRetcodeException("failed to find retcode with '{}'. Formatted output:'{}'".format(
                             e.__class__.__name__,
