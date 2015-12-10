@@ -432,6 +432,7 @@ class SerialConn(ConnectionBase):
             prompt="\r?\n?[^\n]*#",
             default_timeout=None,
             first_prompt_timeout=None,
+            speed=115200,
         ):
         """
         :param name: the name of the connection
@@ -440,6 +441,7 @@ class SerialConn(ConnectionBase):
         :param pw: the password for the login
         :param prompt: the default prompt to check for
         """
+        self.speed = speed
         super(SerialConn, self).__init__(
                 name = name,
                 target = port,
@@ -448,6 +450,7 @@ class SerialConn(ConnectionBase):
                 default_timeout=default_timeout,
                 first_prompt_timeout=first_prompt_timeout,
         )
+        self.speed = speed
         self._prompt = prompt
 
     @property
@@ -472,22 +475,24 @@ class SerialConn(ConnectionBase):
                 spawn = fdpexpect.fdspawn(os.open(self.port, os.O_RDWR|os.O_NONBLOCK|os.O_NOCTTY))
                 self.log("sendline")
                 spawn.sendline()
-                self.log("expect prompt or login string")
-                result = spawn.expect([self.prompt, "(?i)login: "])
+                #PWR: self.log("expect prompt or login string")
+                self.log("expect prompt '{}' or login string".format(self.prompt))
+                result = spawn.expect(["(?i)"+self.prompt, "(?i)login: ", "(?i)User:"])
                 self.log("got ({}) with capture: '{}'".format(
                     result,
                     str(spawn.after),
                 ))
-                if result == 1:
+                #if result == 1:
+                if result >= 1:  #more than one login pattern
                     self.fail = True
                     self.log("because not logged in yet, do that")
                     spawn.sendline(self.user)
                     self.log("expect password")
-                    spawn.expect("(?i)password: ")
+                    spawn.expect(["(?i)password: ", "Password:"])
                     self.log("send pw")
                     spawn.sendline(self.pw)
                     self.log("expect prompt")
-                    spawn.expect(self.prompt)
+                    spawn.expect("(?i)"+self.prompt)
                 return spawn
             except (pexpect.EOF, pexpect.TIMEOUT) as e:
                 self.log("wait a little before retry creating pxssh object")
