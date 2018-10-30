@@ -38,7 +38,6 @@ import logging
 import time
 import json
 
-import requests
 import pexpect
 
 import monk_tf.general_purpose as gp
